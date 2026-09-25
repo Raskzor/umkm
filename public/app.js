@@ -13,7 +13,49 @@ const roleUsers = {
 
 document.addEventListener('DOMContentLoaded', () => {
   switchRole('UMKM_OWNER_FREE');
+  initProductInputs();
 });
+
+function initProductInputs() {
+  const container = document.getElementById('product-inputs-container');
+  if (!container) return;
+  container.innerHTML = '';
+  addNewProductInput('Minyak Goreng 2L', 'Rp 34.000', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400', 'Kemasan hemat & original');
+  addNewProductInput('Beras Premium 5kg', 'Rp 72.000', 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400', 'Beras putih pulen pilihan');
+}
+
+function addNewProductInput(name = '', price = '', img = '', desc = '') {
+  const container = document.getElementById('product-inputs-container');
+  if (!container) return;
+
+  const itemIndex = container.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'product-input-row';
+  row.style.cssText = 'background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.15); padding: 0.85rem; border-radius: 8px; margin-bottom: 0.75rem;';
+  
+  row.innerHTML = `
+    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.4rem;">
+      <span>Produk #${itemIndex}</span>
+      ${itemIndex > 1 ? `<span style="color: #f87171; cursor: pointer;" onclick="this.parentElement.parentElement.remove()">✕ Hapus</span>` : ''}
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.4rem;">
+      <input type="text" class="form-control prod-name" placeholder="Nama Produk" value="${name}">
+      <input type="text" class="form-control prod-price" placeholder="Harga (Contoh: Rp 25.000)" value="${price}">
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+      <input type="url" class="form-control prod-img" placeholder="URL Foto Produk" value="${img}">
+      <input type="text" class="form-control prod-desc" placeholder="Deskripsi Singkat" value="${desc}">
+    </div>
+  `;
+  container.appendChild(row);
+}
+
+function setBannerPreset(url) {
+  const input = document.getElementById('landing-banner');
+  if (input) input.value = url;
+  const preview = document.getElementById('preview-banner-box');
+  if (preview) preview.style.backgroundImage = `url('${url}')`;
+}
 
 // Role Switcher for Interactive Testing
 async function switchRole(roleKey) {
@@ -65,7 +107,7 @@ function switchTab(tabId, el) {
   const titles = {
     'audit-tab': { title: 'AI Business Health Audit', subtitle: 'Diagnosis otomatis AI kesehatan digital usaha UMKM Anda dalam 5 menit' },
     'gmaps-tab': { title: 'Google Maps & AI Review Engine', subtitle: 'Cetak QR Code Review, balasan otomatis AI, dan kupon loyalitas' },
-    'landing-tab': { title: 'Builder Website Sementara UMKM', subtitle: 'Buat katalog web instan dengan tautan WhatsApp otomatis' },
+    'landing-tab': { title: 'Builder Website Sementara UMKM', subtitle: 'Buat katalog web instan dengan tautan WhatsApp & sosmed otomatis' },
     'services-tab': { title: 'Jasa Pendampingan & Smart Route Dispatch', subtitle: 'Manajemen tiket pengerjaan verifikasi lokasi & rute efisien agen' },
     'learning-tab': { title: 'Video Micro-Course Edukasi', subtitle: 'Modul pelatihan strategi pemasaran digital & Google Maps' }
   };
@@ -135,7 +177,7 @@ async function runAuditEvaluation(payload) {
             <div style="font-size: 0.9rem; font-weight: 600;">${rec.text}</div>
             <div class="course-badge-btn">
               <span>🎓 Pelajari Video & Step-by-Step:</span>
-              <span>${rec.course_title || 'Lihat Panduan'}</span>
+              <span>${rec.course_title || 'Lihat Tutorial'}</span>
             </div>
           </div>
         </div>
@@ -319,15 +361,33 @@ async function handleGenerateCoupon(e) {
   }
 }
 
-// Build Website Sementara
+// Build Website Sementara dengan Multi-Social Links, Banner, & Produk
 async function handleBuildLanding(e) {
   e.preventDefault();
+
+  // Collect Product Items
+  const productRows = document.querySelectorAll('.product-input-row');
+  const items = Array.from(productRows).map(row => ({
+    name: row.querySelector('.prod-name').value || 'Produk Unggulan',
+    price: row.querySelector('.prod-price').value || 'Rp 25.000',
+    image_url: row.querySelector('.prod-img').value || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
+    description: row.querySelector('.prod-desc').value || 'Kualitas terbaik'
+  }));
 
   const payload = {
     business_name: document.getElementById('landing-name').value,
     category: document.getElementById('landing-category').value,
     description: document.getElementById('landing-desc').value,
-    whatsapp_number: document.getElementById('landing-wa').value
+    whatsapp_number: document.getElementById('landing-wa').value,
+    banner_url: document.getElementById('landing-banner').value,
+    social_links: {
+      instagram: document.getElementById('social-ig').value,
+      tiktok: document.getElementById('social-tiktok').value,
+      facebook: document.getElementById('social-fb').value,
+      shopee: document.getElementById('social-shopee').value,
+      tokopedia: document.getElementById('social-tokopedia').value
+    },
+    items
   };
 
   try {
@@ -348,6 +408,28 @@ async function handleBuildLanding(e) {
       document.getElementById('live-biz-name').innerText = payload.business_name;
       document.getElementById('live-cat').innerText = payload.category;
       document.getElementById('live-desc').innerText = payload.description;
+
+      if (payload.banner_url) {
+        document.getElementById('preview-banner-box').style.backgroundImage = `url('${payload.banner_url}')`;
+      }
+
+      // Social Badges Preview
+      const socList = [];
+      if (payload.social_links.instagram) socList.push(`<span style="font-size: 0.75rem; background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 12px; color: #475569;">📸 Instagram</span>`);
+      if (payload.social_links.tiktok) socList.push(`<span style="font-size: 0.75rem; background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 12px; color: #475569;">🎵 TikTok</span>`);
+      if (payload.social_links.facebook) socList.push(`<span style="font-size: 0.75rem; background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 12px; color: #475569;">📘 Facebook</span>`);
+      if (payload.social_links.shopee) socList.push(`<span style="font-size: 0.75rem; background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 12px; color: #475569;">🟠 Shopee</span>`);
+      if (payload.social_links.tokopedia) socList.push(`<span style="font-size: 0.75rem; background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 12px; color: #475569;">🟢 Tokopedia</span>`);
+      document.getElementById('live-social-badges').innerHTML = socList.join('');
+
+      // Products Preview
+      document.getElementById('live-product-preview-list').innerHTML = items.map(it => `
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.4rem 0; border-bottom: 1px dashed #e5e7eb;">
+          <span>${it.name}</span>
+          <span style="font-weight: 700; color: #059669;">${it.price}</span>
+        </div>
+      `).join('');
+
       document.getElementById('wa-order-btn').href = `https://wa.me/62${payload.whatsapp_number.replace(/^0/, '')}?text=Halo%20${encodeURIComponent(payload.business_name)}`;
       
       alert('Website Sementara UMKM berhasil diterbitkan! Klik "Buka Web Publik" untuk melihat hasilnya.');

@@ -5,7 +5,15 @@ const { authenticate } = require('../../shared/utils/rbac');
 
 // Create or Update Landing Page Catalog
 router.post('/create', authenticate, (req, res) => {
-  const { business_name, category, description, whatsapp_number, template_theme, items } = req.body;
+  const {
+    business_name,
+    category,
+    description,
+    whatsapp_number,
+    banner_url,
+    social_links,
+    items
+  } = req.body;
 
   if (!business_name || !whatsapp_number) {
     return res.status(400).json({ success: false, error: 'Nama Usaha & Nomor WhatsApp wajib diisi' });
@@ -19,33 +27,51 @@ router.post('/create', authenticate, (req, res) => {
       id: `bp-${Date.now()}`,
       user_id: req.user.id,
       business_name,
-      category: category || 'General',
-      address_text: 'Belum diatur',
-      latitude: -6.2000,
-      longitude: 106.8166,
-      gmaps_url: '',
+      category: category || 'Umum',
+      address_text: 'Jl. Melati No. 12, Jakarta Selatan',
+      latitude: -6.2088,
+      longitude: 106.8456,
+      gmaps_url: 'https://maps.google.com/?q=' + encodeURIComponent(business_name),
       landing_page_slug: slug,
       updated_at: new Date().toISOString()
     };
     db.businessProfiles.push(business);
   } else {
     business.business_name = business_name;
+    business.category = category || business.category;
     business.landing_page_slug = slug;
     business.updated_at = new Date().toISOString();
   }
 
-  // Store page content
+  // Store rich landing page content
   business.landing_data = {
-    description: description || 'Selamat datang di katalog resmi kami!',
+    description: description || 'Selamat datang di katalog resmi usaha kami!',
     whatsapp_number,
-    template_theme: template_theme || 'MODERN_EMERALD',
-    items: items || [
-      { name: 'Produk / Layanan Unggulan 1', price: 'Rp 25.000', description: 'Kualitas terbaik & siap pesan' },
-      { name: 'Produk / Layanan Unggulan 2', price: 'Rp 50.000', description: 'Paling diminati pelanggan' }
+    banner_url: banner_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800',
+    social_links: social_links || {
+      instagram: '',
+      tiktok: '',
+      facebook: '',
+      shopee: '',
+      tokopedia: ''
+    },
+    items: (items && items.length > 0) ? items : [
+      {
+        name: 'Produk Unggulan 1',
+        price: 'Rp 25.000',
+        description: 'Bahan berkualitas tinggi & siap kirim',
+        image_url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'
+      },
+      {
+        name: 'Produk Unggulan 2',
+        price: 'Rp 50.000',
+        description: 'Paling diminati pelanggan setia',
+        image_url: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400'
+      }
     ]
   };
 
-  const publicUrl = `/public/landing.html?slug=${slug}`;
+  const publicUrl = `/landing.html?slug=${slug}`;
 
   return res.json({
     success: true,
@@ -76,7 +102,8 @@ router.get('/:slug', (req, res) => {
       landing_data: business.landing_data || {
         description: 'Selamat datang di toko kami!',
         whatsapp_number: '081234567890',
-        template_theme: 'MODERN_EMERALD',
+        banner_url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800',
+        social_links: { instagram: '', tiktok: '', facebook: '', shopee: '', tokopedia: '' },
         items: []
       }
     }
