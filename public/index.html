@@ -263,21 +263,21 @@
         </div>
       </section>
 
-      <!-- TAB 3: Website Sementara & Mini Catalog Builder (Simple 3-Step UX for Middle-Low) -->
+      <!-- TAB 3: Website Sementara & Mini Catalog Builder (Simple 3-Step UX for Middle-Low with File Upload) -->
       <section id="landing-tab" class="tab-content">
         <div class="grid-2">
           
           <div class="card">
             <div class="card-title">⚙️ Pembuat Website Sementara & Katalog UMKM</div>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-              Buat website sederhana toko Anda cukup dengan 3 langkah mudah di bawah ini:
+              Buat website sederhana toko Anda cukup dengan 3 langkah mudah & upload foto langsung dari HP/Laptop:
             </p>
 
             <form onsubmit="handleBuildLanding(event)">
               
               <!-- Langkah 1: Data Utama Toko & Upload Banner -->
               <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 12px; margin-bottom: 1.25rem;">
-                <div style="font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">1️⃣ Langkah 1: Data Toko & Foto Banner Utama</div>
+                <div style="font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">1️⃣ Langkah 1: Data Toko & Upload Foto Banner</div>
                 
                 <div class="form-group">
                   <label>Nama Toko / Usaha</label>
@@ -300,12 +300,13 @@
                 </div>
 
                 <div class="form-group">
-                  <label>🖼️ Foto Banner Utama Toko (Pilih Preset atau URL Foto)</label>
-                  <input type="url" id="landing-banner" class="form-control" value="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800">
+                  <label>🖼️ Upload Foto Banner Utama Toko</label>
+                  <input type="file" id="landing-banner-file" accept="image/*" class="form-control" style="margin-bottom: 0.4rem;" onchange="handleBannerFileUpload(this)">
+                  <input type="url" id="landing-banner" class="form-control" value="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800" placeholder="Atau tempelkan URL Foto Banner">
                   <div style="display: flex; gap: 0.4rem; margin-top: 0.4rem; flex-wrap: wrap;">
-                    <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="setBannerPreset('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800')">🏪 Banner Retail</button>
-                    <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="setBannerPreset('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800')">☕ Banner Kafe</button>
-                    <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="setBannerPreset('https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800')">🛍️ Banner Jasa/Toko</button>
+                    <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="setBannerPreset('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800')">🏪 Preset Retail</button>
+                    <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="setBannerPreset('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800')">☕ Preset Kafe</button>
+                    <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="setBannerPreset('https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800')">🛍️ Preset Jasa</button>
                   </div>
                 </div>
               </div>
@@ -336,15 +337,15 @@
                 </div>
               </div>
 
-              <!-- Langkah 3: Katalog Produk Unggulan -->
+              <!-- Langkah 3: Katalog Produk Unggulan & Upload Foto Produk -->
               <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 12px; margin-bottom: 1.25rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                  <div style="font-weight: 700; color: #60a5fa;">3️⃣ Langkah 3: Katalog Produk Toko</div>
+                  <div style="font-weight: 700; color: #60a5fa;">3️⃣ Langkah 3: Katalog Produk & Upload Foto Produk</div>
                   <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="addNewProductInput()">+ Tambah Produk Baru</button>
                 </div>
                 
                 <div id="product-inputs-container">
-                  <!-- Dynamically rendered product form rows -->
+                  <!-- Dynamically rendered product form rows with file uploader -->
                 </div>
               </div>
 

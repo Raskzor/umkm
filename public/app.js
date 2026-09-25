@@ -31,23 +31,56 @@ function addNewProductInput(name = '', price = '', img = '', desc = '') {
   const itemIndex = container.children.length + 1;
   const row = document.createElement('div');
   row.className = 'product-input-row';
-  row.style.cssText = 'background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.15); padding: 0.85rem; border-radius: 8px; margin-bottom: 0.75rem;';
+  row.style.cssText = 'background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.15); padding: 0.85rem; border-radius: 10px; margin-bottom: 0.75rem;';
   
   row.innerHTML = `
-    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.4rem;">
+    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.5rem;">
       <span>Produk #${itemIndex}</span>
-      ${itemIndex > 1 ? `<span style="color: #f87171; cursor: pointer;" onclick="this.parentElement.parentElement.remove()">✕ Hapus</span>` : ''}
+      ${itemIndex > 1 ? `<span style="color: #f87171; cursor: pointer;" onclick="this.parentElement.parentElement.remove()">✕ Hapus Produk</span>` : ''}
     </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.4rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem;">
       <input type="text" class="form-control prod-name" placeholder="Nama Produk" value="${name}">
       <input type="text" class="form-control prod-price" placeholder="Harga (Contoh: Rp 25.000)" value="${price}">
     </div>
+    <div style="margin-bottom: 0.5rem;">
+      <label style="font-size: 0.75rem; color: #94a3b8;">📷 Upload Foto Produk dari HP / Galeri:</label>
+      <input type="file" accept="image/*" class="form-control" style="margin-top: 0.2rem; font-size: 0.8rem;" onchange="handleProductFileUpload(this)">
+    </div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-      <input type="url" class="form-control prod-img" placeholder="URL Foto Produk" value="${img}">
+      <input type="text" class="form-control prod-img" placeholder="URL Foto / Result Data" value="${img}">
       <input type="text" class="form-control prod-desc" placeholder="Deskripsi Singkat" value="${desc}">
     </div>
   `;
   container.appendChild(row);
+}
+
+// Handle Direct File Upload for Banner
+function handleBannerFileUpload(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const dataUrl = e.target.result;
+      document.getElementById('landing-banner').value = dataUrl;
+      const preview = document.getElementById('preview-banner-box');
+      if (preview) preview.style.backgroundImage = `url('${dataUrl}')`;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// Handle Direct File Upload for Product Photo
+function handleProductFileUpload(input) {
+  if (input.files && input.files[0]) {
+    const row = input.closest('.product-input-row');
+    if (!row) return;
+    const urlInput = row.querySelector('.prod-img');
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const dataUrl = e.target.result;
+      if (urlInput) urlInput.value = dataUrl;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
 }
 
 function setBannerPreset(url) {
@@ -107,7 +140,7 @@ function switchTab(tabId, el) {
   const titles = {
     'audit-tab': { title: 'AI Business Health Audit', subtitle: 'Diagnosis otomatis AI kesehatan digital usaha UMKM Anda dalam 5 menit' },
     'gmaps-tab': { title: 'Google Maps & AI Review Engine', subtitle: 'Cetak QR Code Review, balasan otomatis AI, dan kupon loyalitas' },
-    'landing-tab': { title: 'Builder Website Sementara UMKM', subtitle: 'Buat katalog web instan dengan tautan WhatsApp & sosmed otomatis' },
+    'landing-tab': { title: 'Builder Website Sementara UMKM', subtitle: 'Buat katalog web instan dengan tautan WhatsApp & upload foto' },
     'services-tab': { title: 'Jasa Pendampingan & Smart Route Dispatch', subtitle: 'Manajemen tiket pengerjaan verifikasi lokasi & rute efisien agen' },
     'learning-tab': { title: 'Video Micro-Course Edukasi', subtitle: 'Modul pelatihan strategi pemasaran digital & Google Maps' }
   };
@@ -361,7 +394,7 @@ async function handleGenerateCoupon(e) {
   }
 }
 
-// Build Website Sementara dengan Multi-Social Links, Banner, & Produk
+// Build Website Sementara dengan Multi-Social Links, Upload Foto Banner, & Katalog
 async function handleBuildLanding(e) {
   e.preventDefault();
 
