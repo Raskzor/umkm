@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SuperUMKM - Platform Pendampingan Digital UMKM</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div id="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <div class="brand-logo">🚀</div>
+        <div>
+          <div class="brand-title">SuperUMKM</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Consultant Platform</div>
+        </div>
+      </div>
+
+      <!-- Quick Role Switcher for Interactive Testing -->
+      <div class="role-switcher-card">
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">Simulasi Peran (RBAC):</div>
+        <select id="role-select" class="form-control" onchange="switchRole(this.value)">
+          <option value="UMKM_OWNER_FREE">UMKM Owner (Free)</option>
+          <option value="UMKM_OWNER_PREMIUM">UMKM Owner (Premium)</option>
+          <option value="FIELD_AGENT">Konsultan Lapangan (Field Agent)</option>
+          <option value="SUPER_ADMIN">Super Admin Platform</option>
+        </select>
+        <div id="role-badge-display" class="role-badge free">UMKM FREE TIER</div>
+      </div>
+
+      <nav class="menu">
+        <a class="menu-item active" onclick="switchTab('audit-tab', this)">
+          <span>📊</span> Health Check (Audit)
+        </a>
+        <a class="menu-item" onclick="switchTab('gmaps-tab', this)">
+          <span>📍</span> Google Maps & QR Review
+        </a>
+        <a class="menu-item" onclick="switchTab('landing-tab', this)">
+          <span>🌐</span> Mini Catalog Builder
+        </a>
+        <a class="menu-item" onclick="switchTab('services-tab', this)">
+          <span>🛠️</span> Jasa Pendampingan
+        </a>
+        <a class="menu-item" onclick="switchTab('learning-tab', this)">
+          <span>🎓</span> Micro-Course Edukasi
+        </a>
+      </nav>
+
+      <div style="font-size: 0.75rem; color: var(--text-sub); text-align: center;">
+        SuperUMKM Engine v1.0 &copy; 2026
+      </div>
+    </aside>
+
+    <!-- Main Content Body -->
+    <main class="content-area">
+      
+      <!-- Topbar Header -->
+      <header class="topbar">
+        <div class="page-title">
+          <h1 id="active-tab-title">Business Health Audit</h1>
+          <p id="active-tab-subtitle">Diagnosis mandiri kesehatan digital usaha UMKM Anda dalam 5 menit</p>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <div style="text-align: right;">
+            <div style="font-weight: 700;" id="user-display-name">Budi Santoso</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="user-display-phone">081234567890</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- TAB 1: Business Health Audit -->
+      <section id="audit-tab" class="tab-content active">
+        <div class="grid-2">
+          
+          <!-- Audit Questionnaire Form -->
+          <div class="card">
+            <div class="card-title">
+              <span>📋 Form Diagnosis Kesehatan Usaha</span>
+            </div>
+            <form id="audit-form" onsubmit="handleAuditSubmit(event)">
+              <div class="form-group">
+                <label>Nama Usaha / Toko</label>
+                <input type="text" id="audit-biz-name" class="form-control" value="Warung Kelontong Berkah" required>
+              </div>
+
+              <div class="form-group">
+                <label>Apakah Toko Memiliki Profil Google Maps?</label>
+                <select id="audit-gmaps" class="form-control">
+                  <option value="true">Ya, Sudah Terverifikasi</option>
+                  <option value="false">Belum Punya / Belum Diklaim</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Estimasi Rating Google Maps Saat Ini</label>
+                <input type="number" step="0.1" id="audit-rating" class="form-control" value="4.6" min="1" max="5">
+              </div>
+
+              <div class="form-group">
+                <label>Estimasi Jumlah Review Pelanggan</label>
+                <input type="number" id="audit-reviews" class="form-control" value="15" min="0">
+              </div>
+
+              <div class="form-group">
+                <label>Memiliki Landing Page / Mini Catalog Web?</label>
+                <select id="audit-catalog" class="form-control">
+                  <option value="true">Ya, Punya Website / Catalog</option>
+                  <option value="false">Belum Punya</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Memiliki Nomor WhatsApp Business Resmi?</label>
+                <select id="audit-wa" class="form-control">
+                  <option value="true">Ya, Memiliki WA Business</option>
+                  <option value="false">Belum Punya</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <span>⚡</span> Hitung Business Health Score
+              </button>
+            </form>
+          </div>
+
+          <!-- Audit Result Display -->
+          <div>
+            <div class="card score-display-box" style="margin-bottom: 1.5rem;">
+              <div class="score-number" id="score-val">75</div>
+              <div class="score-label">HEALTH SCORE DIGITAL USAMA (0-100)</div>
+              <div id="score-status" style="margin-top: 0.5rem; font-weight: 700; color: var(--accent-emerald);">NEEDS OPTIMIZATION</div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">💡 Rekomendasi Aksi Cepat</div>
+              <div id="recommendations-list">
+                <div class="checklist-item">
+                  <div class="checklist-icon">📌</div>
+                  <div>Cetak Standee QR Review & Taruh di Meja Kasir untuk mengejar target minimal 20 review bintang 5.</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-icon">🌐</div>
+                  <div>Gunakan Mini Catalog Builder untuk mempublikasikan katalog produk siap pesan via WhatsApp.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 2: Google Maps & QR Code Generator -->
+      <section id="gmaps-tab" class="tab-content">
+        <div class="grid-2">
+          
+          <div class="card">
+            <div class="card-title">🎨 Generator QR Code Review Standee</div>
+            <form onsubmit="handleGenerateQR(event)">
+              <div class="form-group">
+                <label>Nama Usaha pada QR Standee</label>
+                <input type="text" id="qr-biz-name" class="form-control" value="Warung Kelontong Berkah">
+              </div>
+
+              <div class="form-group">
+                <label>Tautan Langsung Ulasan Google Maps</label>
+                <input type="url" id="qr-gmaps-url" class="form-control" value="https://maps.google.com/?q=Warung+Berkah" required>
+              </div>
+
+              <div class="form-group">
+                <label>Template Desain Standee (Khusus Premium)</label>
+                <select id="qr-template" class="form-control">
+                  <option value="BASIC_STANDARD">Standard Free (B&W Minimalist)</option>
+                  <option value="MODERN_GOLD">Modern Branded Gold (Premium)</option>
+                  <option value="EMERALD_ACRYLIC">Emerald Acrylic Frame (Premium)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Pesan Ajakan Pelanggan</label>
+                <input type="text" id="qr-custom-text" class="form-control" value="Beri Kami Ulasan Bintang 5 & Dapatkan Diskon!">
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <span>🖼️</span> Generate Preview Standee & PDF
+              </button>
+            </form>
+          </div>
+
+          <!-- Standee Visual Preview -->
+          <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div class="qr-preview-card" id="qr-visual-card">
+              <div style="font-size: 0.8rem; font-weight: 800; color: #3b82f6; text-transform: uppercase;">Google Review Standee</div>
+              <h3 id="preview-biz-name">Warung Kelontong Berkah</h3>
+              <p style="font-size: 0.85rem; color: #4b5563;" id="preview-custom-text">Beri Kami Ulasan Bintang 5 & Dapatkan Diskon!</p>
+              
+              <img id="qr-img-element" src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://maps.google.com" alt="QR Review" class="qr-img">
+              
+              <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">Pindai Kamera Smartphone Anda</div>
+            </div>
+            
+            <button onclick="downloadQRPdf()" class="btn btn-secondary" style="margin-top: 1.5rem; width: 100%;">
+              <span>📄</span> Download Printable PDF Template
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 3: Landing Page & Mini Catalog Builder -->
+      <section id="landing-tab" class="tab-content">
+        <div class="grid-2">
+          
+          <div class="card">
+            <div class="card-title">⚙️ Landing Page & Mini Catalog Builder</div>
+            <form onsubmit="handleBuildLanding(event)">
+              <div class="form-group">
+                <label>Nama Usaha / Brand</label>
+                <input type="text" id="landing-name" class="form-control" value="Warung Kelontong Berkah">
+              </div>
+
+              <div class="form-group">
+                <label>Kategori Usaha</label>
+                <input type="text" id="landing-category" class="form-control" value="Retail & Sembako">
+              </div>
+
+              <div class="form-group">
+                <label>Deskripsi Singkat Usaha</label>
+                <textarea id="landing-desc" class="form-control" rows="3">Menyediakan berbagai kebutuhan pokok harian lengkap, harga murah, dan siap kirim ke rumah Anda.</textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Nomor WhatsApp Pemesanan (Format: 08xx)</label>
+                <input type="text" id="landing-wa" class="form-control" value="081234567890">
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <span>🚀</span> Terbitkan Landing Page & Generate Slug
+              </button>
+            </form>
+          </div>
+
+          <!-- Public Live Preview Box -->
+          <div class="card">
+            <div class="card-title">🌐 Live Preview Katalog Web</div>
+            
+            <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1rem;">
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Tautan Publik Aktif:</div>
+              <div style="font-weight: 700; color: #60a5fa;" id="published-slug-url">https://superumkm.id/warung-berkah</div>
+            </div>
+
+            <div style="background: #ffffff; color: #111827; padding: 1.5rem; border-radius: var(--radius-md);">
+              <h2 id="live-biz-name" style="color: #0f172a; font-family: 'Outfit';">Warung Kelontong Berkah</h2>
+              <span style="display: inline-block; background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;" id="live-cat">Retail & Sembako</span>
+              <p id="live-desc" style="font-size: 0.9rem; color: #374151; margin: 1rem 0;">Menyediakan kebutuhan pokok harian lengkap dan terpercaya.</p>
+              
+              <div style="border-top: 1px solid #e5e7eb; pt: 1rem; margin-top: 1rem;">
+                <div style="font-weight: 700; margin-bottom: 0.5rem;">Daftar Produk:</div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.4rem 0; border-bottom: 1px dashed #e5e7eb;">
+                  <span>Minyak Goreng 2L</span>
+                  <span style="font-weight: 700; color: #059669;">Rp 34.000</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.4rem 0;">
+                  <span>Beras Premium 5kg</span>
+                  <span style="font-weight: 700; color: #059669;">Rp 72.000</span>
+                </div>
+              </div>
+
+              <a id="wa-order-btn" href="https://wa.me/6281234567890?text=Halo%20Warung%20Kelontong%20Berkah,%20saya%20ingin%20pesan" target="_blank" class="btn" style="background: #25d366; color: #ffffff; width: 100%; margin-top: 1.25rem; text-decoration: none;">
+                💬 Pesan Langsung via WhatsApp
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 4: Field Services & Ticketing -->
+      <section id="services-tab" class="tab-content">
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-title">
+            <span>🛠️ Pengajuan Tiket Jasa Pendampingan Lapangan</span>
+            <button class="btn btn-primary" onclick="openOrderModal()">+ Ajukan Tiket Baru</button>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-muted);">
+            Layanan pendampingan langsung oleh Agen Konsultan Wilayah untuk optimasi Google Maps, pengambilan foto geotag, dan pemasangan atribut promosi.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📋 Daftar Tiket & Status Pengerjaan Agen</div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID Task</th>
+                <th>Klien UMKM</th>
+                <th>Layanan</th>
+                <th>Konsultan Wilayah</th>
+                <th>Status Lifecycle</th>
+                <th>Bukti Geotag</th>
+                <th>Aksi Peran</th>
+              </tr>
+            </thead>
+            <tbody id="tasks-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 5: Video Micro-Course -->
+      <section id="learning-tab" class="tab-content">
+        <div class="grid-3" id="courses-grid">
+          <!-- Rendered dynamically based on RBAC Tier -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
