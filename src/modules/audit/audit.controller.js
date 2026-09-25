@@ -29,7 +29,15 @@ router.post('/evaluate', authenticate, (req, res) => {
       text: 'Klaim & verifikasi lokasi usaha Anda di Google Maps untuk meningkatkan visibilitas di area sekitar.',
       target_course_id: 'tut-001',
       course_title: 'Cara Klaim & Verifikasi Google Maps Tempat Usaha',
-      category: 'Google Maps Optimization'
+      category: 'Google Maps Optimization',
+      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      action_tab_id: 'gmaps-tab',
+      action_button_label: '📍 Buka Modul Google Maps & QR Generator',
+      steps: [
+        { num: 1, title: 'Cari Toko Anda di Google Maps', desc: 'Buka aplikasi Google Maps di HP, ketik nama usaha Anda. Jika sudah muncul, pilih "Klaim Bisnis Ini".' },
+        { num: 2, title: 'Verifikasi Nomor & Alamat', desc: 'Pilih metode verifikasi via SMS atau WhatsApp ke nomor telepon toko Anda yang aktif.' },
+        { num: 3, title: 'Lengkapi Foto & Jam Buka', desc: 'Unggah foto plang toko tampak depan dan sesuaikan jam operasional toko dari Senin-Minggu.' }
+      ]
     });
   }
 
@@ -45,7 +53,15 @@ router.post('/evaluate', authenticate, (req, res) => {
       text: 'Tingkatkan rating Google Maps dengan mencetak QR Standee ulasan dan memberikan respons ramah AI.',
       target_course_id: 'tut-002',
       course_title: 'Trik Mendapatkan 100+ Bintang 5 Review Pelanggan',
-      category: 'Review Management'
+      category: 'Review Management',
+      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      action_tab_id: 'gmaps-tab',
+      action_button_label: '🎨 Cetak QR Standee & Auto-Reply AI',
+      steps: [
+        { num: 1, title: 'Generate QR Standee Akrilik', desc: 'Buka menu Google Maps & QR, masukkan link ulasan toko Anda lalu klik "Generate Standee".' },
+        { num: 2, title: 'Letakkan QR di Meja Kasir', desc: 'Cetak dan letakkan Standee QR di kasir. Minta kasir menyapa: "Boleh bantu ulas bintang 5 kak?"' },
+        { num: 3, title: 'Gunakan AI Auto-Reply', desc: 'Aktifkan fitur AI Auto-Responder di SuperUMKM untuk membalas ulasan secara ramah & otomatis.' }
+      ]
     });
   }
 
@@ -58,7 +74,15 @@ router.post('/evaluate', authenticate, (req, res) => {
       text: 'Kejar target minimal 20 review pertama menggunakan Standee Akrilik QR Code di meja kasir.',
       target_course_id: 'tut-002',
       course_title: 'Trik Mendapatkan 100+ Bintang 5 Review Pelanggan',
-      category: 'Review Management'
+      category: 'Review Management',
+      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      action_tab_id: 'gmaps-tab',
+      action_button_label: '🎟️ Buat Kupon Diskon Ulasan Bintang 5',
+      steps: [
+        { num: 1, title: 'Terbitkan Kupon Digital Loyalitas', desc: 'Buka fitur QR Review Coupon Generator, buat promo "Diskon Rp 5.000 / Gratis Es Teh".' },
+        { num: 2, title: 'Sajikan QR Code Ulasan', desc: 'Minta pelanggan memindai QR Code setelah selesai transaksi.' },
+        { num: 3, title: 'Berikan Hadiah Langsung', desc: 'Tunjukkan bukti ulasan bintang 5 ke kasir untuk mengklaim promo diskon.' }
+      ]
     });
   }
 
@@ -72,7 +96,15 @@ router.post('/evaluate', authenticate, (req, res) => {
       text: 'Terbitkan Website Sementara & Mini Catalog instan dalam 3 menit di fitur Builder.',
       target_course_id: 'tut-003',
       course_title: 'Masterclass WhatsApp Automation & Landing Page High Conversion',
-      category: 'Digital Marketing'
+      category: 'Digital Marketing',
+      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      action_tab_id: 'landing-tab',
+      action_button_label: '🌐 Buka Builder Website Sementara',
+      steps: [
+        { num: 1, title: 'Isi Profil & Katalog Usaha', desc: 'Buka menu Builder Website Sementara, masukkan nama toko, deskripsi, dan daftar produk.' },
+        { num: 2, title: 'Tautkan Nomor WhatsApp', desc: 'Masukkan nomor WhatsApp toko agar pelanggan bisa klik tombol beli langsung kirim pesan WA.' },
+        { num: 3, title: 'Terbitkan & Bagikan Link', desc: 'Klik "Terbitkan Website", lalu pasang link publik tersebut di bio Instagram & Google Maps!' }
+      ]
     });
   }
 
@@ -86,7 +118,15 @@ router.post('/evaluate', authenticate, (req, res) => {
       text: 'Aktifkan WhatsApp Business resmi agar pembeli dari katalog web bisa langsung memesan instan.',
       target_course_id: 'tut-003',
       course_title: 'Masterclass WhatsApp Automation & Landing Page High Conversion',
-      category: 'Digital Marketing'
+      category: 'Digital Marketing',
+      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      action_tab_id: 'landing-tab',
+      action_button_label: '💬 Hubungkan WhatsApp Business ke Web',
+      steps: [
+        { num: 1, title: 'Download WA Business', desc: 'Unduh aplikasi WhatsApp Business resmi gratis dari Google Play Store / App Store.' },
+        { num: 2, title: 'Atur Pesan Otomatis (Greeting)', desc: 'Aktifkan Salam Otomatis di menu Fitur Bisnis WhatsApp.' },
+        { num: 3, title: 'Pasang Tautan di Katalog', desc: 'Salin nomor WA Anda ke Builder Website SuperUMKM untuk hook pesan instan.' }
+      ]
     });
   }
 
@@ -99,7 +139,15 @@ router.post('/evaluate', authenticate, (req, res) => {
       text: 'Unggah foto produk & suasana tempat usaha berkualitas tinggi untuk menarik kepercayaan calon pembeli.',
       target_course_id: 'tut-004',
       course_title: 'Strategi Ads Lokal Radius 3KM untuk Kafe & Retail',
-      category: 'Local Advertising'
+      category: 'Local Advertising',
+      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      action_tab_id: 'services-tab',
+      action_button_label: '🛠️ Minta Agen Lapangan Ambil Foto Geotag',
+      steps: [
+        { num: 1, title: 'Pencahayaan Terang', desc: 'Ambil foto produk di tempat terang (cahaya matahari pagi/siang).' },
+        { num: 2, title: 'Foto Suasana Toko', desc: 'Foto bagian depan toko, area kasir, dan suasana saat ramah pembeli.' },
+        { num: 3, title: 'Minta Bantuan Agen Wilayah', desc: 'Jika kesulitan, ajukan tiket jasa pendampingan agar agen datang mengambil foto geotag.' }
+      ]
     });
   }
 
@@ -112,7 +160,15 @@ router.post('/evaluate', authenticate, (req, res) => {
       text: 'Perbarui postingan promo/update terbaru di Google Business Profile setidaknya seminggu sekali.',
       target_course_id: 'tut-004',
       course_title: 'Strategi Ads Lokal Radius 3KM untuk Kafe & Retail',
-      category: 'Local Advertising'
+      category: 'Local Advertising',
+      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      action_tab_id: 'gmaps-tab',
+      action_button_label: '📍 Buka Google Maps Manager',
+      steps: [
+        { num: 1, title: 'Buat Promo Spesial Mingguan', desc: 'Tentukan promo sederhana (misal: "Diskon 10% Setiap Hari Jumat").' },
+        { num: 2, title: 'Post di Google Profile', desc: 'Buka Google Maps -> Tambahkan Pembaruan / Postingan Promo.' },
+        { num: 3, title: 'Update Foto Produk Baru', desc: 'Tambahkan 1-2 foto produk terbaru minggu ini agar lokasi dianggap aktif oleh Google.' }
+      ]
     });
   }
 

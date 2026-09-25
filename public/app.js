@@ -1,6 +1,8 @@
 // SuperUMKM Client Portal & Interactive Engine
 let currentRole = 'UMKM_OWNER_FREE';
 let userToken = '';
+let currentRecommendations = [];
+let activeModalActionTab = 'gmaps-tab';
 
 const roleUsers = {
   UMKM_OWNER_FREE: { id: 'u-free-001', name: 'Budi Santoso', phone: '081234567890', role: 'UMKM_OWNER_FREE', badge: 'free', badgeText: 'UMKM FREE TIER' },
@@ -53,7 +55,12 @@ function switchTab(tabId, el) {
   document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
 
   document.getElementById(tabId).classList.add('active');
-  if (el) el.classList.add('active');
+  if (el) {
+    el.classList.add('active');
+  } else {
+    const matchingMenu = Array.from(document.querySelectorAll('.menu-item')).find(item => item.getAttribute('onclick').includes(tabId));
+    if (matchingMenu) matchingMenu.classList.add('active');
+  }
 
   const titles = {
     'audit-tab': { title: 'AI Business Health Audit', subtitle: 'Diagnosis otomatis AI kesehatan digital usaha UMKM Anda dalam 5 menit' },
@@ -117,16 +124,18 @@ async function runAuditEvaluation(payload) {
       document.getElementById('score-status').innerText = result.data.status_grade;
       document.getElementById('ai-diagnosis-summary').innerText = result.data.ai_diagnosis_summary;
 
+      currentRecommendations = result.data.recommendations || [];
+
       // Render recommendations with interactive click-to-course support
       const recContainer = document.getElementById('recommendations-list');
-      recContainer.innerHTML = result.data.recommendations.map(rec => `
-        <div class="checklist-item interactive" onclick="openCourseDetail('${rec.target_course_id || 'tut-001'}', '${rec.course_title || 'Modul Edukasi UMKM'}', '${rec.text}')">
+      recContainer.innerHTML = currentRecommendations.map((rec, index) => `
+        <div class="checklist-item interactive" onclick="openCourseDetailByIndex(${index})">
           <div class="checklist-icon">💡</div>
           <div style="flex: 1;">
             <div style="font-size: 0.9rem; font-weight: 600;">${rec.text}</div>
             <div class="course-badge-btn">
-              <span>🎓 Pelajari di Micro-Course:</span>
-              <span>${rec.course_title || 'Lihat Tutorial'}</span>
+              <span>🎓 Pelajari Video & Step-by-Step:</span>
+              <span>${rec.course_title || 'Lihat Panduan'}</span>
             </div>
           </div>
         </div>
@@ -138,15 +147,79 @@ async function runAuditEvaluation(payload) {
 }
 
 // Modal Course Detail Viewer
+function openCourseDetailByIndex(index) {
+  const rec = currentRecommendations[index];
+  if (!rec) return;
+
+  document.getElementById('modal-category').innerText = rec.category || 'Digital Growth Strategy';
+  document.getElementById('modal-title').innerText = rec.course_title || 'Panduan Edukasi UMKM';
+  document.getElementById('modal-description').innerText = rec.text || 'Ikuti langkah-langkah di bawah ini.';
+
+  // Video embed
+  const iframe = document.getElementById('modal-video-iframe');
+  iframe.src = (rec.video_url || 'https://www.youtube.com/embed/dQw4w9WgXcQ') + '?autoplay=1';
+
+  // Render Step-by-Step Action Guide Cards
+  const stepsBox = document.getElementById('modal-steps-container');
+  const steps = rec.steps || [
+    { num: 1, title: 'Buka Fitur Terkait', desc: 'Akses menu fitur di platform SuperUMKM.' },
+    { num: 2, title: 'Masukkan Data Toko', desc: 'Isi informasi toko Anda dengan teliti.' },
+    { num: 3, title: 'Simpan & Publikasikan', desc: 'Selesaikan dan terbitkan perubahan Anda.' }
+  ];
+
+  stepsBox.innerHTML = steps.map(step => `
+    <div style="display: flex; gap: 0.85rem; align-items: flex-start; padding: 0.75rem 0.9rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px;">
+      <div style="width: 28px; height: 28px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; color: #ffffff; flex-shrink: 0;">
+        ${step.num}
+      </div>
+      <div>
+        <div style="font-weight: 700; font-size: 0.9rem; color: #ffffff;">${step.title}</div>
+        <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 0.15rem;">${step.desc}</div>
+      </div>
+    </div>
+  `).join('');
+
+  activeModalActionTab = rec.action_tab_id || 'gmaps-tab';
+  document.getElementById('modal-action-btn').innerText = rec.action_button_label || '🚀 Eksekusi Aksi Ini Sekarang';
+
+  document.getElementById('course-modal').classList.add('active');
+}
+
 function openCourseDetail(courseId, title, description) {
+  document.getElementById('modal-category').innerText = 'Micro-Course Edukasi';
   document.getElementById('modal-title').innerText = title;
-  document.getElementById('modal-description').innerText = description || 'Ikuti langkah-langkah praktis dalam video edukasi ini untuk menerapkan rekomendasi aksi pada usaha Anda.';
+  document.getElementById('modal-description').innerText = description || 'Modul pelatihan strategi digital marketing.';
   
-  // Set video URL
   const iframe = document.getElementById('modal-video-iframe');
   iframe.src = 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1';
 
+  const stepsBox = document.getElementById('modal-steps-container');
+  stepsBox.innerHTML = `
+    <div style="display: flex; gap: 0.85rem; align-items: flex-start; padding: 0.75rem 0.9rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px;">
+      <div style="width: 28px; height: 28px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; color: #ffffff;">1</div>
+      <div>
+        <div style="font-weight: 700; font-size: 0.9rem; color: #ffffff;">Tonton Video Sampai Selesai</div>
+        <div style="font-size: 0.82rem; color: #94a3b8;">Simak poin-poin utama materi yang disampaikan dalam durasi 5-10 menit.</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 0.85rem; align-items: flex-start; padding: 0.75rem 0.9rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px;">
+      <div style="width: 28px; height: 28px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; color: #ffffff;">2</div>
+      <div>
+        <div style="font-weight: 700; font-size: 0.9rem; color: #ffffff;">Praktekkan Pada Toko Anda</div>
+        <div style="font-size: 0.82rem; color: #94a3b8;">Gunakan alat bantu generator di SuperUMKM untuk mempermudah pengerjaan.</div>
+      </div>
+    </div>
+  `;
+
+  activeModalActionTab = 'gmaps-tab';
+  document.getElementById('modal-action-btn').innerText = '🚀 Praktekkan Sekarang';
+
   document.getElementById('course-modal').classList.add('active');
+}
+
+function executeModalAction() {
+  closeCourseModal();
+  switchTab(activeModalActionTab);
 }
 
 function closeCourseModal() {

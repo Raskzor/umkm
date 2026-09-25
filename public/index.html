@@ -393,23 +393,38 @@
 
   <!-- Interactive Course Detail Modal -->
   <div id="course-modal" class="modal-overlay">
-    <div class="modal-content">
+    <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
       <button class="close-modal-btn" onclick="closeCourseModal()">✕</button>
+      
       <div style="font-size: 0.75rem; color: #60a5fa; font-weight: 700; text-transform: uppercase; margin-bottom: 0.25rem;" id="modal-category">Google Maps Optimization</div>
       <h2 style="font-family: 'Outfit'; font-size: 1.5rem; margin-bottom: 0.75rem;" id="modal-title">Cara Klaim & Verifikasi Google Maps Tempat Usaha</h2>
       
-      <!-- Mock Video Player Frame -->
-      <div style="width: 100%; height: 260px; background: #000000; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1);">
-        <iframe id="modal-video-iframe" width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Micro Course Video" frameborder="0" allowfullscreen style="border-radius: 12px;"></iframe>
+      <!-- Video Player Frame -->
+      <div style="width: 100%; height: 260px; background: #000000; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; border: 1px solid rgba(255,255,255,0.1);">
+        <iframe id="modal-video-iframe" width="100%" height="100%" src="" title="Micro Course Video" frameborder="0" allowfullscreen style="border-radius: 12px;"></iframe>
       </div>
 
-      <div style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 1.25rem;" id="modal-description">
-        Modul edukasi ini memberikan panduan praktis langkah demi langkah untuk menyelesaikan tantangan usaha Anda. Ikuti petunjuk dalam video untuk mengeksekusi rekomendasi ini.
+      <!-- Description Text -->
+      <div style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 1.5rem; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);" id="modal-description">
+        <!-- Main Description -->
       </div>
 
+      <!-- Step-by-Step Action Guide Box -->
+      <div style="margin-bottom: 1.5rem;">
+        <div style="font-size: 1rem; font-weight: 700; color: #ffffff; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span>📝 Panduan Eksekusi Step-by-Step (Sederhana & Cepat)</span>
+        </div>
+        <div id="modal-steps-container" style="display: flex; flex-direction: column; gap: 0.65rem;">
+          <!-- Dynamically populated step cards -->
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
       <div style="display: flex; gap: 0.75rem;">
-        <button class="btn btn-primary" onclick="closeCourseModal()" style="flex: 1;">✓ Selesai Mempelajari</button>
-        <button class="btn btn-secondary" onclick="switchTab('learning-tab'); closeCourseModal();">🎓 Lihat Semua Course</button>
+        <button id="modal-action-btn" class="btn btn-primary" style="flex: 1;" onclick="executeModalAction()">
+          🚀 Eksekusi Aksi Ini Sekarang
+        </button>
+        <button class="btn btn-secondary" onclick="closeCourseModal()">✓ Selesai Mempelajari</button>
       </div>
     </div>
   </div>
