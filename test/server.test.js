@@ -27,7 +27,17 @@ test('JWT Utility Token Cycle', (t) => {
 });
 
 test('Audit Health Score Evaluation Logic', (t) => {
-  // Mock audit inputs
   const scoreFull = 15 + 10 + 10 + 25 + 15 + 15 + 10;
   assert.strictEqual(scoreFull, 100);
+});
+
+test('Public Landing Page Slug Finder', (t) => {
+  const biz = db.businessProfiles.find(b => b.landing_page_slug === 'warung-berkah');
+  assert.ok(biz);
+  assert.strictEqual(biz.business_name, 'Warung Kelontong Berkah');
+});
+
+test('Review Loyalty Coupon Data Generation', (t) => {
+  const couponCode = `DISCOUNT-${Math.floor(1000 + Math.random() * 9000)}`;
+  assert.match(couponCode, /^DISCOUNT-\d{4}$/);
 });

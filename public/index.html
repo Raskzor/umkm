@@ -36,13 +36,13 @@
           <span>📊</span> Health Check (Audit)
         </a>
         <a class="menu-item" onclick="switchTab('gmaps-tab', this)">
-          <span>📍</span> Google Maps & QR Review
+          <span>📍</span> Google Maps & AI Review
         </a>
         <a class="menu-item" onclick="switchTab('landing-tab', this)">
-          <span>🌐</span> Mini Catalog Builder
+          <span>🌐</span> Builder Website Sementara
         </a>
         <a class="menu-item" onclick="switchTab('services-tab', this)">
-          <span>🛠️</span> Jasa Pendampingan
+          <span>🛠️</span> Jasa & Smart Route
         </a>
         <a class="menu-item" onclick="switchTab('learning-tab', this)">
           <span>🎓</span> Micro-Course Edukasi
@@ -143,7 +143,7 @@
                 </div>
                 <div class="checklist-item">
                   <div class="checklist-icon">🌐</div>
-                  <div>Gunakan Mini Catalog Builder untuk mempublikasikan katalog produk siap pesan via WhatsApp.</div>
+                  <div>Gunakan Generator Website Sementara untuk mempublikasikan katalog produk siap pesan via WhatsApp.</div>
                 </div>
               </div>
             </div>
@@ -152,9 +152,9 @@
         </div>
       </section>
 
-      <!-- TAB 2: Google Maps & QR Code Generator -->
+      <!-- TAB 2: Google Maps, QR Code & AI Auto-Responder -->
       <section id="gmaps-tab" class="tab-content">
-        <div class="grid-2">
+        <div class="grid-2" style="margin-bottom: 1.5rem;">
           
           <div class="card">
             <div class="card-title">🎨 Generator QR Code Review Standee</div>
@@ -207,14 +207,70 @@
           </div>
 
         </div>
+
+        <!-- CEO Recommended Features: AI Auto-Responder & QR Loyalty Coupon -->
+        <div class="grid-2">
+          
+          <!-- AI Review Auto-Responder -->
+          <div class="card">
+            <div class="card-title">🤖 AI Google Review Auto-Responder</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Hasilkan balasan ramah & SEO-friendly secara otomatis untuk ulasan ulasan Google Maps pelanggan.
+            </p>
+            <form onsubmit="handleGenerateAutoReply(event)">
+              <div class="form-group">
+                <label>Nama Pelanggan / Reviewer</label>
+                <input type="text" id="reply-reviewer" class="form-control" value="Andi Wijaya">
+              </div>
+              <div class="form-group">
+                <label>Bintang Rating yang Diberikan</label>
+                <select id="reply-rating" class="form-control">
+                  <option value="5">⭐⭐⭐⭐⭐ 5 Bintang (Sangat Puas)</option>
+                  <option value="4">⭐⭐⭐⭐ 4 Bintang (Puas)</option>
+                  <option value="2">⭐⭐ 2 Bintang (Kurang Puas)</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-secondary" style="width: 100%;">✨ Generate Balasan AI</button>
+            </form>
+            <div id="reply-result-box" style="margin-top: 1rem; display: none; background: rgba(0,0,0,0.4); padding: 1rem; border-radius: var(--radius-md); border-left: 3px solid var(--accent-emerald);">
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">Rekomendasi Balasan AI:</div>
+              <div id="reply-text" style="font-size: 0.9rem; font-style: italic;"></div>
+            </div>
+          </div>
+
+          <!-- Review Loyalty Coupon Generator -->
+          <div class="card">
+            <div class="card-title">🎟️ QR Review Loyalty Coupon Generator</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Terbitkan kupon diskon otomatis untuk pelanggan yang sudah memberikan ulasan bintang 5.
+            </p>
+            <form onsubmit="handleGenerateCoupon(event)">
+              <div class="form-group">
+                <label>Judul Kupon Promo</label>
+                <input type="text" id="coupon-title" class="form-control" value="Voucher Review Bintang 5">
+              </div>
+              <div class="form-group">
+                <label>Bentuk Diskon / Hadiah</label>
+                <input type="text" id="coupon-discount" class="form-control" value="Potongan Rp 5.000 / Gratis Es Teh">
+              </div>
+              <button type="submit" class="btn btn-secondary" style="width: 100%;">🎁 Terbitkan Kupon Digital</button>
+            </form>
+            <div id="coupon-result-box" style="margin-top: 1rem; display: none; background: rgba(16, 185, 129, 0.1); padding: 1rem; border-radius: var(--radius-md); border: 1px dashed var(--accent-emerald); text-align: center;">
+              <div style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700;">KUPON DIGITAL AKTIF</div>
+              <div id="coupon-code-val" style="font-size: 1.5rem; font-weight: 800; font-family: 'Outfit'; color: #ffffff; margin: 0.25rem 0;">DISCOUNT-9981</div>
+              <div id="coupon-desc-val" style="font-size: 0.85rem; color: var(--text-muted);"></div>
+            </div>
+          </div>
+
+        </div>
       </section>
 
-      <!-- TAB 3: Landing Page & Mini Catalog Builder -->
+      <!-- TAB 3: Website Sementara & Mini Catalog Builder -->
       <section id="landing-tab" class="tab-content">
         <div class="grid-2">
           
           <div class="card">
-            <div class="card-title">⚙️ Landing Page & Mini Catalog Builder</div>
+            <div class="card-title">⚙️ Pembuat Website Sementara & Katalog UMKM</div>
             <form onsubmit="handleBuildLanding(event)">
               <div class="form-group">
                 <label>Nama Usaha / Brand</label>
@@ -237,18 +293,23 @@
               </div>
 
               <button type="submit" class="btn btn-primary" style="width: 100%;">
-                <span>🚀</span> Terbitkan Landing Page & Generate Slug
+                <span>🚀</span> Terbitkan Website Sementara & Subdomain Link
               </button>
             </form>
           </div>
 
           <!-- Public Live Preview Box -->
           <div class="card">
-            <div class="card-title">🌐 Live Preview Katalog Web</div>
+            <div class="card-title">🌐 Live Preview Website Sementara</div>
             
-            <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1rem;">
-              <div style="font-size: 0.8rem; color: var(--text-muted);">Tautan Publik Aktif:</div>
-              <div style="font-weight: 700; color: #60a5fa;" id="published-slug-url">https://superumkm.id/warung-berkah</div>
+            <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Domain Subfolder Aktif:</div>
+                <div style="font-weight: 700; color: #60a5fa;" id="published-slug-url">/landing.html?slug=warung-berkah</div>
+              </div>
+              <a id="open-public-site-btn" href="/landing.html?slug=warung-berkah" target="_blank" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                🔗 Buka Web Publik
+              </a>
             </div>
 
             <div style="background: #ffffff; color: #111827; padding: 1.5rem; border-radius: var(--radius-md);">
@@ -277,7 +338,7 @@
         </div>
       </section>
 
-      <!-- TAB 4: Field Services & Ticketing -->
+      <!-- TAB 4: Field Services, Ticketing & Smart Agent Route -->
       <section id="services-tab" class="tab-content">
         <div class="card" style="margin-bottom: 1.5rem;">
           <div class="card-title">
@@ -289,7 +350,7 @@
           </p>
         </div>
 
-        <div class="card">
+        <div class="card" style="margin-bottom: 1.5rem;">
           <div class="card-title">📋 Daftar Tiket & Status Pengerjaan Agen</div>
           <table class="data-table">
             <thead>
@@ -308,6 +369,18 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Smart Agent Route Optimization Widget -->
+        <div class="card">
+          <div class="card-title">
+            <span>🗺️ Smart Route Dispatcher (Khusus Konsultan Wilayah & Admin)</span>
+            <button class="btn btn-secondary" onclick="loadAgentRoute()">🔄 Optimalkan Rute Kunjungan</button>
+          </div>
+          <div id="route-display-box" style="font-size: 0.9rem; color: var(--text-muted);">
+            Klik "Optimalkan Rute Kunjungan" untuk menghasilkan rute hemat waktu & BBM bagi Agen Lapangan.
+          </div>
+        </div>
+
       </section>
 
       <!-- TAB 5: Video Micro-Course -->

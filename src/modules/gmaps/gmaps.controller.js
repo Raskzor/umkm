@@ -32,6 +32,64 @@ router.post('/qr-generate', authenticate, (req, res) => {
   });
 });
 
+// AI Auto-Responder for Google Maps Reviews
+router.post('/auto-reply', authenticate, (req, res) => {
+  const { reviewer_name, rating, review_text, business_name } = req.body;
+
+  if (!reviewer_name || !rating) {
+    return res.status(400).json({ success: false, error: 'Nama penulas dan jumlah bintang rating wajib diisi' });
+  }
+
+  const bizName = business_name || 'toko kami';
+  let suggestedReply = '';
+
+  if (rating >= 4) {
+    suggestedReply = `Terima kasih banyak kak ${reviewer_name} telah memberikan ulasan bintang ${rating} untuk ${bizName}! Senang sekali bisa melayani Anda dengan baik. Sampai jumpa di kunjungan berikutnya! 🙏😊`;
+  } else {
+    suggestedReply = `Halo kak ${reviewer_name}, mohon maaf atas ketidaknyamanan yang dialami di ${bizName}. Masukan Anda sangat berharga bagi kami untuk terus berbenah. Hubungi WhatsApp kami agar kami bisa memberikan solusi terbaik. Terima kasih.`;
+  }
+
+  const replyRecord = {
+    id: `rep-${Date.now()}`,
+    user_id: req.user.id,
+    reviewer_name,
+    rating,
+    review_text: review_text || '',
+    suggested_reply: suggestedReply,
+    created_at: new Date().toISOString()
+  };
+
+  db.reviewReplies.push(replyRecord);
+
+  return res.json({
+    success: true,
+    data: replyRecord
+  });
+});
+
+// Review Loyalty Coupon Generator
+router.post('/coupons', authenticate, (req, res) => {
+  const { coupon_name, discount_text, valid_days } = req.body;
+
+  const couponCode = `DISCOUNT-${Math.floor(1000 + Math.random() * 9000)}`;
+  const coupon = {
+    id: `coup-${Date.now()}`,
+    user_id: req.user.id,
+    code: couponCode,
+    title: coupon_name || 'Voucher Ulasan Bintang 5',
+    discount_text: discount_text || 'Potongan Rp 5.000 / Gratis Es Teh',
+    valid_until: new Date(Date.now() + (valid_days || 30) * 86400000).toISOString().split('T')[0],
+    created_at: new Date().toISOString()
+  };
+
+  db.coupons.push(coupon);
+
+  return res.json({
+    success: true,
+    data: coupon
+  });
+});
+
 // Google Maps Optimization Checklist
 router.get('/checklist', authenticate, (req, res) => {
   const checklist = [

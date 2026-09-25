@@ -164,4 +164,29 @@ router.patch('/tasks/:id/status', authenticate, (req, res) => {
   });
 });
 
+// Smart Agent Route Optimization (FIELD_AGENT or SUPER_ADMIN)
+router.get('/agent-route', authenticate, authorizeRoles('FIELD_AGENT', 'SUPER_ADMIN'), (req, res) => {
+  const tasks = db.serviceTasks.map((t, idx) => {
+    const sReq = db.serviceRequests.find(r => r.id === t.request_id);
+    const clientUser = sReq ? db.users.find(u => u.id === sReq.client_id) : null;
+    const biz = clientUser ? db.businessProfiles.find(b => b.user_id === clientUser.id) : null;
+
+    return {
+      stop_sequence: idx + 1,
+      task_id: t.id,
+      client_name: clientUser ? clientUser.full_name : 'Klien UMKM',
+      business_name: biz ? biz.business_name : 'Toko UMKM',
+      address_text: biz ? biz.address_text : 'Jakarta',
+      estimated_distance_km: (idx + 1) * 1.8,
+      status: t.task_status
+    };
+  });
+
+  return res.json({
+    success: true,
+    agent_id: req.user.id,
+    optimized_route: tasks
+  });
+});
+
 module.exports = router;

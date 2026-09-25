@@ -9,6 +9,9 @@ class Database {
     this.serviceRequests = [];
     this.serviceTasks = [];
     this.tutorialContents = [];
+    this.coupons = [];
+    this.reviewReplies = [];
+    this.waNotifications = [];
 
     this.seed();
   }

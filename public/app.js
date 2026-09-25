@@ -56,9 +56,9 @@ function switchTab(tabId, el) {
 
   const titles = {
     'audit-tab': { title: 'Business Health Audit', subtitle: 'Diagnosis mandiri kesehatan digital usaha UMKM Anda dalam 5 menit' },
-    'gmaps-tab': { title: 'Google Maps & QR Review Standee', subtitle: 'Cetak QR Code Review bintang 5 dan tingkatkan visibilitas lokal' },
-    'landing-tab': { title: 'Mini Catalog & Landing Builder', subtitle: 'Buat katalog web instan dengan tautan WhatsApp otomatis' },
-    'services-tab': { title: 'Jasa Pendampingan Lapangan', subtitle: 'Manajemen tiket pengerjaan verifikasi lokasi oleh Agen Konsultan' },
+    'gmaps-tab': { title: 'Google Maps & AI Review Engine', subtitle: 'Cetak QR Code Review, balasan otomatis AI, dan kupon loyalitas' },
+    'landing-tab': { title: 'Builder Website Sementara UMKM', subtitle: 'Buat katalog web instan dengan tautan WhatsApp otomatis' },
+    'services-tab': { title: 'Jasa Pendampingan & Smart Route Dispatch', subtitle: 'Manajemen tiket pengerjaan verifikasi lokasi & rute efisien agen' },
     'learning-tab': { title: 'Video Micro-Course Edukasi', subtitle: 'Modul pelatihan strategi pemasaran digital & Google Maps' }
   };
 
@@ -151,7 +151,58 @@ function downloadQRPdf() {
   alert('Template PDF siap cetak untuk Standee Akrilik telah di-generate!');
 }
 
-// Build Landing Page
+// Generate AI Review Auto-Reply
+async function handleGenerateAutoReply(e) {
+  e.preventDefault();
+  const reviewer_name = document.getElementById('reply-reviewer').value;
+  const rating = parseInt(document.getElementById('reply-rating').value);
+
+  try {
+    const res = await fetch('/api/v1/gmaps/auto-reply', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify({ reviewer_name, rating, business_name: document.getElementById('qr-biz-name').value })
+    });
+    const result = await res.json();
+    if (result.success) {
+      document.getElementById('reply-result-box').style.display = 'block';
+      document.getElementById('reply-text').innerText = `"${result.data.suggested_reply}"`;
+    }
+  } catch (err) {
+    alert('Gagal generate balasan AI: ' + err.message);
+  }
+}
+
+// Generate Review Loyalty Coupon
+async function handleGenerateCoupon(e) {
+  e.preventDefault();
+  const title = document.getElementById('coupon-title').value;
+  const discount = document.getElementById('coupon-discount').value;
+
+  try {
+    const res = await fetch('/api/v1/gmaps/coupons', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify({ coupon_name: title, discount_text: discount })
+    });
+    const result = await res.json();
+    if (result.success) {
+      document.getElementById('coupon-result-box').style.display = 'block';
+      document.getElementById('coupon-code-val').innerText = result.data.code;
+      document.getElementById('coupon-desc-val').innerText = `${result.data.title} - ${result.data.discount_text} (Berlaku s.d ${result.data.valid_until})`;
+    }
+  } catch (err) {
+    alert('Gagal buat kupon: ' + err.message);
+  }
+}
+
+// Build Website Sementara
 async function handleBuildLanding(e) {
   e.preventDefault();
 
@@ -174,16 +225,18 @@ async function handleBuildLanding(e) {
 
     const result = await res.json();
     if (result.success) {
-      document.getElementById('published-slug-url').innerText = `https://superumkm.id/${result.data.slug}`;
+      const pubLink = `/landing.html?slug=${result.data.slug}`;
+      document.getElementById('published-slug-url').innerText = pubLink;
+      document.getElementById('open-public-site-btn').href = pubLink;
       document.getElementById('live-biz-name').innerText = payload.business_name;
       document.getElementById('live-cat').innerText = payload.category;
       document.getElementById('live-desc').innerText = payload.description;
       document.getElementById('wa-order-btn').href = `https://wa.me/62${payload.whatsapp_number.replace(/^0/, '')}?text=Halo%20${encodeURIComponent(payload.business_name)}`;
       
-      alert('Landing Page Katalog berhasil diterbitkan!');
+      alert('Website Sementara UMKM berhasil diterbitkan! Klik "Buka Web Publik" untuk melihat hasilnya.');
     }
   } catch (err) {
-    alert('Gagal menerbitkan landing page: ' + err.message);
+    alert('Gagal menerbitkan website sementara: ' + err.message);
   }
 }
 
@@ -235,6 +288,29 @@ function renderTaskActions(task) {
     return `<button onclick="uploadEvidence('${task.id}')" class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">Upload Geotag</button>`;
   }
   return `<span style="font-size: 0.8rem; color: var(--text-sub);">Read Only</span>`;
+}
+
+async function loadAgentRoute() {
+  const box = document.getElementById('route-display-box');
+  try {
+    const res = await fetch('/api/v1/services/agent-route', {
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const result = await res.json();
+    if (result.success) {
+      box.innerHTML = `
+        <div style="font-weight: 700; color: #60a5fa; margin-bottom: 0.5rem;">Urutan Rute Optimal Agen Lapangan:</div>
+        ${result.optimized_route.map(r => `
+          <div style="padding: 0.5rem 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; margin-bottom: 0.4rem; display: flex; justify-content: space-between;">
+            <div><b>Stop ${r.stop_sequence}:</b> ${r.business_name} (${r.address_text})</div>
+            <div style="color: #34d399; font-weight: 700;">+${r.estimated_distance_km} KM</div>
+          </div>
+        `).join('')}
+      `;
+    }
+  } catch (err) {
+    alert('Fitur ini khusus untuk peran Field Agent atau Super Admin!');
+  }
 }
 
 async function openOrderModal() {
