@@ -41,7 +41,8 @@ async function switchRole(roleKey) {
   badgeEl.className = `role-badge ${user.badge}`;
   badgeEl.innerText = user.badgeText;
 
-  // Refresh active tab views
+  // Initial load
+  handleAuditEvaluateDefault();
   loadTasks();
   loadCourses();
 }
@@ -55,7 +56,7 @@ function switchTab(tabId, el) {
   if (el) el.classList.add('active');
 
   const titles = {
-    'audit-tab': { title: 'Business Health Audit', subtitle: 'Diagnosis mandiri kesehatan digital usaha UMKM Anda dalam 5 menit' },
+    'audit-tab': { title: 'AI Business Health Audit', subtitle: 'Diagnosis otomatis AI kesehatan digital usaha UMKM Anda dalam 5 menit' },
     'gmaps-tab': { title: 'Google Maps & AI Review Engine', subtitle: 'Cetak QR Code Review, balasan otomatis AI, dan kupon loyalitas' },
     'landing-tab': { title: 'Builder Website Sementara UMKM', subtitle: 'Buat katalog web instan dengan tautan WhatsApp otomatis' },
     'services-tab': { title: 'Jasa Pendampingan & Smart Route Dispatch', subtitle: 'Manajemen tiket pengerjaan verifikasi lokasi & rute efisien agen' },
@@ -68,7 +69,21 @@ function switchTab(tabId, el) {
   }
 }
 
-// Audit Evaluation Form Submit
+// Evaluate Audit Default
+async function handleAuditEvaluateDefault() {
+  const payload = {
+    has_gmaps_profile: true,
+    gmaps_rating: 4.6,
+    review_count: 15,
+    has_website_or_catalog: false,
+    has_whatsapp_business: true,
+    photos_count: 8,
+    weekly_post_updates: false
+  };
+  await runAuditEvaluation(payload);
+}
+
+// Audit Evaluation Form Submit (AI-Powered)
 async function handleAuditSubmit(e) {
   e.preventDefault();
   
@@ -82,6 +97,10 @@ async function handleAuditSubmit(e) {
     weekly_post_updates: false
   };
 
+  await runAuditEvaluation(payload);
+}
+
+async function runAuditEvaluation(payload) {
   try {
     const res = await fetch('/api/v1/audit/evaluate', {
       method: 'POST',
@@ -96,19 +115,44 @@ async function handleAuditSubmit(e) {
     if (result.success) {
       document.getElementById('score-val').innerText = result.data.health_score;
       document.getElementById('score-status').innerText = result.data.status_grade;
+      document.getElementById('ai-diagnosis-summary').innerText = result.data.ai_diagnosis_summary;
 
-      // Render recommendations
+      // Render recommendations with interactive click-to-course support
       const recContainer = document.getElementById('recommendations-list');
       recContainer.innerHTML = result.data.recommendations.map(rec => `
-        <div class="checklist-item">
+        <div class="checklist-item interactive" onclick="openCourseDetail('${rec.target_course_id || 'tut-001'}', '${rec.course_title || 'Modul Edukasi UMKM'}', '${rec.text}')">
           <div class="checklist-icon">💡</div>
-          <div>${rec}</div>
+          <div style="flex: 1;">
+            <div style="font-size: 0.9rem; font-weight: 600;">${rec.text}</div>
+            <div class="course-badge-btn">
+              <span>🎓 Pelajari di Micro-Course:</span>
+              <span>${rec.course_title || 'Lihat Tutorial'}</span>
+            </div>
+          </div>
         </div>
       `).join('');
     }
   } catch (err) {
-    alert('Gagal menghitung skor audit: ' + err.message);
+    console.error('Gagal menghitung skor audit:', err);
   }
+}
+
+// Modal Course Detail Viewer
+function openCourseDetail(courseId, title, description) {
+  document.getElementById('modal-title').innerText = title;
+  document.getElementById('modal-description').innerText = description || 'Ikuti langkah-langkah praktis dalam video edukasi ini untuk menerapkan rekomendasi aksi pada usaha Anda.';
+  
+  // Set video URL
+  const iframe = document.getElementById('modal-video-iframe');
+  iframe.src = 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1';
+
+  document.getElementById('course-modal').classList.add('active');
+}
+
+function closeCourseModal() {
+  document.getElementById('course-modal').classList.remove('active');
+  const iframe = document.getElementById('modal-video-iframe');
+  iframe.src = '';
 }
 
 // Generate QR Standee Config
@@ -394,7 +438,7 @@ async function loadCourses() {
 
     if (result.success) {
       container.innerHTML = result.data.map(course => `
-        <div class="card video-card">
+        <div class="card video-card" onclick="openCourseDetail('${course.id}', '${course.title}', 'Modul Edukasi: ${course.module_category}. Durasi ${Math.round(course.duration_seconds/60)} Menit.')">
           <div class="video-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.8));">
             ▶️
             ${course.is_locked ? `

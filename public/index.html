@@ -33,7 +33,7 @@
 
       <nav class="menu">
         <a class="menu-item active" onclick="switchTab('audit-tab', this)">
-          <span>📊</span> Health Check (Audit)
+          <span>📊</span> Health Check (AI Audit)
         </a>
         <a class="menu-item" onclick="switchTab('gmaps-tab', this)">
           <span>📍</span> Google Maps & AI Review
@@ -60,8 +60,8 @@
       <!-- Topbar Header -->
       <header class="topbar">
         <div class="page-title">
-          <h1 id="active-tab-title">Business Health Audit</h1>
-          <p id="active-tab-subtitle">Diagnosis mandiri kesehatan digital usaha UMKM Anda dalam 5 menit</p>
+          <h1 id="active-tab-title">AI Business Health Audit</h1>
+          <p id="active-tab-subtitle">Diagnosis otomatis AI kesehatan digital usaha UMKM Anda dalam 5 menit</p>
         </div>
         <div style="display: flex; gap: 1rem; align-items: center;">
           <div style="text-align: right;">
@@ -71,14 +71,14 @@
         </div>
       </header>
 
-      <!-- TAB 1: Business Health Audit -->
+      <!-- TAB 1: Business Health Audit (AI-Powered) -->
       <section id="audit-tab" class="tab-content active">
         <div class="grid-2">
           
           <!-- Audit Questionnaire Form -->
           <div class="card">
             <div class="card-title">
-              <span>📋 Form Diagnosis Kesehatan Usaha</span>
+              <span>📋 Form Diagnosis Kesehatan AI</span>
             </div>
             <form id="audit-form" onsubmit="handleAuditSubmit(event)">
               <div class="form-group">
@@ -121,7 +121,7 @@
               </div>
 
               <button type="submit" class="btn btn-primary" style="width: 100%;">
-                <span>⚡</span> Hitung Business Health Score
+                <span>🤖</span> Analisis Skor Kesehatan Usaha via AI
               </button>
             </form>
           </div>
@@ -132,19 +132,17 @@
               <div class="score-number" id="score-val">75</div>
               <div class="score-label">HEALTH SCORE DIGITAL USAMA (0-100)</div>
               <div id="score-status" style="margin-top: 0.5rem; font-weight: 700; color: var(--accent-emerald);">NEEDS OPTIMIZATION</div>
+              <div id="ai-diagnosis-summary" style="margin-top: 1rem; font-size: 0.85rem; color: #94a3b8; line-height: 1.5; text-align: center; background: rgba(0,0,0,0.3); padding: 0.85rem; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08);">
+                🤖 Analisis AI SuperUMKM: Usaha Anda berada di tingkat BERKEMBANG (Skor: 75/100). Potensi pelanggan lokal sangat besar, klik rekomendasi di bawah untuk langsung menuju modul edukasi.
+              </div>
             </div>
 
             <div class="card">
-              <div class="card-title">💡 Rekomendasi Aksi Cepat</div>
+              <div class="card-title">
+                <span>💡 Rekomendasi Aksi Cepat (Klik untuk Pelajari Course)</span>
+              </div>
               <div id="recommendations-list">
-                <div class="checklist-item">
-                  <div class="checklist-icon">📌</div>
-                  <div>Cetak Standee QR Review & Taruh di Meja Kasir untuk mengejar target minimal 20 review bintang 5.</div>
-                </div>
-                <div class="checklist-item">
-                  <div class="checklist-icon">🌐</div>
-                  <div>Gunakan Generator Website Sementara untuk mempublikasikan katalog produk siap pesan via WhatsApp.</div>
-                </div>
+                <!-- Dynamically populated with interactive click handlers -->
               </div>
             </div>
           </div>
@@ -215,7 +213,7 @@
           <div class="card">
             <div class="card-title">🤖 AI Google Review Auto-Responder</div>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-              Hasilkan balasan ramah & SEO-friendly secara otomatis untuk ulasan ulasan Google Maps pelanggan.
+              Hasikan balasan ramah & SEO-friendly secara otomatis untuk ulasan ulasan Google Maps pelanggan.
             </p>
             <form onsubmit="handleGenerateAutoReply(event)">
               <div class="form-group">
@@ -391,6 +389,29 @@
       </section>
 
     </main>
+  </div>
+
+  <!-- Interactive Course Detail Modal -->
+  <div id="course-modal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="close-modal-btn" onclick="closeCourseModal()">✕</button>
+      <div style="font-size: 0.75rem; color: #60a5fa; font-weight: 700; text-transform: uppercase; margin-bottom: 0.25rem;" id="modal-category">Google Maps Optimization</div>
+      <h2 style="font-family: 'Outfit'; font-size: 1.5rem; margin-bottom: 0.75rem;" id="modal-title">Cara Klaim & Verifikasi Google Maps Tempat Usaha</h2>
+      
+      <!-- Mock Video Player Frame -->
+      <div style="width: 100%; height: 260px; background: #000000; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1);">
+        <iframe id="modal-video-iframe" width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Micro Course Video" frameborder="0" allowfullscreen style="border-radius: 12px;"></iframe>
+      </div>
+
+      <div style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 1.25rem;" id="modal-description">
+        Modul edukasi ini memberikan panduan praktis langkah demi langkah untuk menyelesaikan tantangan usaha Anda. Ikuti petunjuk dalam video untuk mengeksekusi rekomendasi ini.
+      </div>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <button class="btn btn-primary" onclick="closeCourseModal()" style="flex: 1;">✓ Selesai Mempelajari</button>
+        <button class="btn btn-secondary" onclick="switchTab('learning-tab'); closeCourseModal();">🎓 Lihat Semua Course</button>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>
