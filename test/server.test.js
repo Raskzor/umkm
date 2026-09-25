@@ -41,3 +41,16 @@ test('Review Loyalty Coupon Data Generation', (t) => {
   const couponCode = `DISCOUNT-${Math.floor(1000 + Math.random() * 9000)}`;
   assert.match(couponCode, /^DISCOUNT-\d{4}$/);
 });
+
+test('AI Model Business Health Diagnosis Generation', async (t) => {
+  const { generateBusinessAuditDiagnosis } = require('../src/shared/utils/ai.service');
+  const summary = await generateBusinessAuditDiagnosis({
+    score: 45,
+    answers: { has_gmaps_profile: false, has_website_or_catalog: false },
+    businessName: 'Warung Berkah',
+    businessCategory: 'Kuliner'
+  });
+  assert.ok(summary.includes('🤖 Analisis AI Model'));
+  assert.ok(summary.includes('Warung Berkah'));
+});
+

@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const db = require('../../shared/database/db');
 const { authenticate, authorizeRoles } = require('../../shared/utils/rbac');
+const { generateBusinessAuditDiagnosis } = require('../../shared/utils/ai.service');
 
 // Execute AI-Powered Business Health Check Evaluation
-router.post('/evaluate', authenticate, (req, res) => {
+router.post('/evaluate', authenticate, async (req, res) => {
   const {
     has_gmaps_profile,
     gmaps_rating,
@@ -172,22 +173,26 @@ router.post('/evaluate', authenticate, (req, res) => {
     });
   }
 
-  // Generate AI Diagnosis Text Summary based on Score & Answers
-  let aiDiagnosisSummary = '';
-  let statusGrade = 'EXCELLENT';
+  const business = db.businessProfiles.find(b => b.user_id === req.user.id);
+  const businessName = business ? business.name : 'Usaha Anda';
+  const businessCategory = business ? business.category : 'Kuliner & Retail';
 
+  let statusGrade = 'EXCELLENT';
   if (score >= 80) {
     statusGrade = 'EXCELLENT';
-    aiDiagnosisSummary = `🤖 Analisis AI SuperUMKM: Usaha Anda memiliki fondasi digital yang SANGAT KUAT (Skor: ${score}/100). Visibilitas Google Maps dan aset katalog web Anda sudah optimal untuk mendorong konversi penjualan.`;
   } else if (score >= 50) {
     statusGrade = 'NEEDS_OPTIMIZATION';
-    aiDiagnosisSummary = `🤖 Analisis AI SuperUMKM: Usaha Anda berada di tingkat BERKEMBANG (Skor: ${score}/100). Potensi pelanggan lokal sangat besar, namun Anda memerlukan penguatan di ulasan Google Maps dan penerbitan Katalog WA.`;
   } else {
     statusGrade = 'CRITICAL';
-    aiDiagnosisSummary = `🤖 Analisis AI SuperUMKM: Usaha Anda berstatus KRITIS DIGITAL (Skor: ${score}/100). Banyak calon pembeli kesulitan menemukan lokasi & katalog produk Anda di internet. Ikuti rekomendasi aksi cepat di bawah ini.`;
   }
 
-  const business = db.businessProfiles.find(b => b.user_id === req.user.id);
+  // Generate AI Model Diagnosis Summary
+  const aiDiagnosisSummary = await generateBusinessAuditDiagnosis({
+    score,
+    answers: req.body,
+    businessName,
+    businessCategory
+  });
   const auditEntry = {
     id: `audit-${Date.now()}`,
     user_id: req.user.id,
