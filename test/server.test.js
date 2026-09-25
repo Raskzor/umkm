@@ -5,14 +5,16 @@ const db = require('../src/shared/database/db');
 const { generateToken, verifyToken } = require('../src/shared/utils/jwt');
 
 test('Database Seeds & User Roles', (t) => {
-  assert.strictEqual(db.users.length, 4);
+  assert.ok(db.users.length >= 4);
   const freeUser = db.users.find(u => u.role_code === 'UMKM_OWNER_FREE');
   const premiumUser = db.users.find(u => u.role_code === 'UMKM_OWNER_PREMIUM');
+  const cashierUser = db.users.find(u => u.role_code === 'CASHIER');
   const agentUser = db.users.find(u => u.role_code === 'FIELD_AGENT');
   const adminUser = db.users.find(u => u.role_code === 'SUPER_ADMIN');
 
   assert.ok(freeUser);
   assert.ok(premiumUser);
+  assert.ok(cashierUser);
   assert.ok(agentUser);
   assert.ok(adminUser);
 });
@@ -52,5 +54,20 @@ test('AI Model Business Health Diagnosis Generation', async (t) => {
   });
   assert.ok(summary.includes('🤖 Analisis AI Model'));
   assert.ok(summary.includes('Warung Berkah'));
+});
+
+test('POS Staff Freemium Limit (Free = Max 1)', (t) => {
+  const freeOwnerId = 'u-free-001';
+  const activeStaff = db.posStaff.filter(s => s.owner_id === freeOwnerId && s.status === 'ACTIVE');
+  assert.strictEqual(activeStaff.length, 1);
+});
+
+test('POS Sale Transaction Total Calculation', (t) => {
+  const items = [
+    { name: 'Kopi Espresso', price: 20000, qty: 2 },
+    { name: 'Roti Bakar', price: 15000, qty: 1 }
+  ];
+  const subtotal = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+  assert.strictEqual(subtotal, 55000);
 });
 

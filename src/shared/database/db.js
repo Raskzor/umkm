@@ -12,16 +12,19 @@ class Database {
     this.coupons = [];
     this.reviewReplies = [];
     this.waNotifications = [];
+    this.posStaff = [];
+    this.posTransactions = [];
 
     this.seed();
   }
 
   seed() {
-    // Seed Users (4 RBAC Roles)
+    // Seed Users (RBAC Roles: Owner Free, Owner Premium, Cashier, Field Agent, Admin)
     const userFreeId = 'u-free-001';
     const userPremId = 'u-prem-002';
     const agentId = 'u-agent-003';
     const adminId = 'u-admin-004';
+    const cashierId = 'u-cashier-005';
 
     this.users = [
       {
@@ -41,6 +44,16 @@ class Database {
         created_at: new Date().toISOString()
       },
       {
+        id: cashierId,
+        phone_number: '081122334455',
+        full_name: 'Dewi (Kasir Warung Berkah)',
+        role_code: 'CASHIER',
+        owner_id: userFreeId,
+        pin: '1234',
+        status: 'ACTIVE',
+        created_at: new Date().toISOString()
+      },
+      {
         id: agentId,
         phone_number: '085551234567',
         full_name: 'Rian Hidayat (Konsultan Wilayah Jakarta)',
@@ -54,6 +67,38 @@ class Database {
         full_name: 'Super Admin System',
         role_code: 'SUPER_ADMIN',
         status: 'ACTIVE',
+        created_at: new Date().toISOString()
+      }
+    ];
+
+    // Seed Staff Assignment (Free Plan Max 1 Limit test)
+    this.posStaff = [
+      {
+        id: 'staff-001',
+        owner_id: userFreeId,
+        user_id: cashierId,
+        staff_name: 'Dewi (Kasir Utama)',
+        phone_number: '081122334455',
+        pin: '1234',
+        status: 'ACTIVE',
+        created_at: new Date().toISOString()
+      }
+    ];
+
+    // Seed Sample Transactions
+    this.posTransactions = [
+      {
+        id: 'tx-1001',
+        owner_id: userFreeId,
+        cashier_id: cashierId,
+        cashier_name: 'Dewi (Kasir Utama)',
+        business_name: 'Warung Kelontong Berkah',
+        items: [
+          { name: 'Beras Premium 5kg', price: 65000, qty: 1, subtotal: 65000 },
+          { name: 'Minyak Goreng 1L', price: 18000, qty: 2, subtotal: 36000 }
+        ],
+        total_amount: 101000,
+        payment_method: 'QRIS',
         created_at: new Date().toISOString()
       }
     ];

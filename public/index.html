@@ -25,6 +25,7 @@
         <select id="role-select" class="form-control" onchange="switchRole(this.value)">
           <option value="UMKM_OWNER_FREE">UMKM Owner (Free)</option>
           <option value="UMKM_OWNER_PREMIUM">UMKM Owner (Premium)</option>
+          <option value="CASHIER">Kasir Toko (Dewi)</option>
           <option value="FIELD_AGENT">Konsultan Lapangan (Field Agent)</option>
           <option value="SUPER_ADMIN">Super Admin Platform</option>
         </select>
@@ -40,6 +41,9 @@
         </a>
         <a class="menu-item" onclick="switchTab('landing-tab', this)">
           <span>🌐</span> Builder Website Sementara
+        </a>
+        <a class="menu-item" onclick="switchTab('pos-tab', this)">
+          <span>📱</span> Kasir & Kelola Anak Buah
         </a>
         <a class="menu-item" onclick="switchTab('services-tab', this)">
           <span>🛠️</span> Jasa & Smart Route
@@ -451,6 +455,149 @@
 
       </section>
 
+      <!-- TAB 4: Mesin Kasir & Kelola Anak Buah -->
+      <section id="pos-tab" class="tab-content">
+        <div class="grid-2">
+
+          <!-- Left Column: Mesin Kasir (Point of Sale) -->
+          <div class="card">
+            <div class="card-title">
+              <span>🛒 Mesin Kasir Toko (Point of Sale)</span>
+              <span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #4ade80;">POS Instant</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Pilih produk dari katalog usaha Anda atau masukkan item manual untuk transaksi cepat.
+            </p>
+
+            <!-- Quick Add from Catalog -->
+            <div style="margin-bottom: 1.25rem;">
+              <label style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; display: block;">⚡ Pilih dari Katalog Toko:</label>
+              <div id="pos-catalog-items" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary" onclick="addToCart('Beras Premium 5kg', 65000)" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Beras 5kg (65rb)</button>
+                <button type="button" class="btn btn-secondary" onclick="addToCart('Minyak Goreng 1L', 18000)" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Minyak 1L (18rb)</button>
+                <button type="button" class="btn btn-secondary" onclick="addToCart('Telur Ayam 1kg', 28000)" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Telur 1kg (28rb)</button>
+                <button type="button" class="btn btn-secondary" onclick="addToCart('Gula Pasir 1kg', 16000)" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Gula 1kg (16rb)</button>
+                <button type="button" class="btn btn-secondary" onclick="addToCart('Kopi Espresso Single', 22000)" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Kopi Single (22rb)</button>
+              </div>
+            </div>
+
+            <!-- Manual Item Entry -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+              <input type="text" id="pos-custom-name" class="form-control" placeholder="Nama Barang Manual" style="flex: 2;">
+              <input type="number" id="pos-custom-price" class="form-control" placeholder="Harga (Rp)" style="flex: 1;">
+              <button type="button" class="btn btn-primary" onclick="addCustomItemToCart()">+ Tambah</button>
+            </div>
+
+            <!-- Cart Table -->
+            <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05);">
+              <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                <thead>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; color: var(--text-sub);">
+                    <th style="padding-bottom: 0.5rem;">Produk</th>
+                    <th style="padding-bottom: 0.5rem; text-align: center;">Jumlah</th>
+                    <th style="padding-bottom: 0.5rem; text-align: right;">Subtotal</th>
+                    <th style="padding-bottom: 0.5rem; text-align: center;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="cart-table-body">
+                  <tr>
+                    <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1rem;">Keranjang belanja masih kosong. Klik produk di atas.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Total & Payment Form -->
+            <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span style="font-weight: 700; color: #93c5fd;">Total Pembayaran:</span>
+                <span id="cart-total-display" style="font-size: 1.5rem; font-weight: 800; color: #4ade80;">Rp 0</span>
+              </div>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <label style="font-size: 0.8rem; color: var(--text-sub);">Metode Bayar:</label>
+                <select id="pos-pay-method" class="form-control" style="font-size: 0.85rem; padding: 0.35rem 0.5rem;">
+                  <option value="TUNAI">💵 Tunai / Cash</option>
+                  <option value="QRIS">📲 QRIS (GoPay/OVO/Dana)</option>
+                  <option value="TRANSFER">🏦 Transfer Bank</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-success" style="width: 100%; font-size: 1rem; font-weight: 700;" onclick="handlePOSCheckout()">
+              🛍️ Proses Transaksi & Cetak Struk
+            </button>
+          </div>
+
+          <!-- Right Column: Kelola Anak Buah / Kasir & Laporan -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+            <!-- Staff Management Card -->
+            <div class="card">
+              <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <span>👥 Manajemen Anak Buah (Kasir)</span>
+                <span id="staff-quota-badge" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 9999px; font-weight: 700; background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.3);">
+                  Paket GRATIS: Max 1 Kasir
+                </span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Tambahkan akun staf kasir untuk membantu operasional usaha. <i>(Gratis: Maks 1 Anak Buah, Premium: Tanpa Batas)</i>.
+              </p>
+
+              <!-- Add Staff Form -->
+              <form id="add-staff-form" onsubmit="handleAddStaff(event)" style="margin-bottom: 1.25rem;">
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                  <input type="text" id="staff-name-input" class="form-control" placeholder="Nama Staf / Kasir" required style="flex: 1; min-width: 140px;">
+                  <input type="text" id="staff-phone-input" class="form-control" placeholder="No. WA (cth: 081122...)" required style="flex: 1; min-width: 140px;">
+                  <input type="text" id="staff-pin-input" class="form-control" placeholder="PIN (4 digit)" value="1234" maxlength="4" style="width: 90px;">
+                  <button type="submit" class="btn btn-primary">+ Tambah Staf</button>
+                </div>
+              </form>
+
+              <!-- Staff List Table -->
+              <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.05);">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                  <thead>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; color: var(--text-sub);">
+                      <th style="padding-bottom: 0.5rem;">Nama Kasir</th>
+                      <th style="padding-bottom: 0.5rem;">No. WA</th>
+                      <th style="padding-bottom: 0.5rem; text-align: center;">Status</th>
+                      <th style="padding-bottom: 0.5rem; text-align: center;">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="staff-list-table-body">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Sales Report Summary Card -->
+            <div class="card">
+              <div class="card-title">
+                <span>📈 Ringkasan Penjualan Kasir Hari Ini</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.85rem; border-radius: 10px;">
+                  <div style="font-size: 0.75rem; color: var(--text-sub);">Total Omset Hari Ini</div>
+                  <div id="pos-total-omset" style="font-size: 1.3rem; font-weight: 800; color: #34d399;">Rp 101.000</div>
+                </div>
+                <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); padding: 0.85rem; border-radius: 10px;">
+                  <div style="font-size: 0.75rem; color: var(--text-sub);">Jumlah Transaksi</div>
+                  <div id="pos-total-orders" style="font-size: 1.3rem; font-weight: 800; color: #818cf8;">1 Transaksi</div>
+                </div>
+              </div>
+
+              <!-- History List -->
+              <div style="max-height: 180px; overflow-y: auto; font-size: 0.8rem;" id="pos-history-container">
+                <!-- Transaction log rows -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
       <!-- TAB 5: Video Micro-Course -->
       <section id="learning-tab" class="tab-content">
         <div class="grid-3" id="courses-grid">
@@ -495,6 +642,46 @@
           🚀 Eksekusi Aksi Ini Sekarang
         </button>
         <button class="btn btn-secondary" onclick="closeCourseModal()">✓ Selesai Mempelajari</button>
+  <!-- Digital Receipt Modal -->
+  <div id="receipt-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 420px; background: #0f172a; color: #f8fafc; border: 1px solid rgba(255,255,255,0.15);">
+      <button class="close-modal-btn" onclick="closeReceiptModal()">✕</button>
+      
+      <div style="text-align: center; border-bottom: 2px dashed rgba(255,255,255,0.2); padding-bottom: 1rem; margin-bottom: 1rem;">
+        <div style="font-size: 1.5rem; font-weight: 800; color: #38bdf8;" id="receipt-biz-name">Warung Kelontong Berkah</div>
+        <div style="font-size: 0.8rem; color: #94a3b8;" id="receipt-tx-id">Struk #TX-1001</div>
+        <div style="font-size: 0.75rem; color: #64748b;" id="receipt-date">25 Sep 2026, 22:30 WIB</div>
+      </div>
+
+      <div style="font-size: 0.85rem; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+          <span style="color: #94a3b8;">Kasir Bertugas:</span>
+          <strong id="receipt-cashier-name" style="color: #f1f5f9;">Dewi (Kasir)</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+          <span style="color: #94a3b8;">Metode Bayar:</span>
+          <strong id="receipt-pay-method" style="color: #4ade80;">QRIS</strong>
+        </div>
+      </div>
+
+      <!-- Items Breakdown -->
+      <div style="border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0.75rem 0; margin-bottom: 1rem; max-height: 200px; overflow-y: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+          <tbody id="receipt-items-body">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Receipt Total -->
+      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; font-weight: 800; color: #34d399; margin-bottom: 1.25rem;">
+        <span>TOTAL:</span>
+        <span id="receipt-total-amount">Rp 101.000</span>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn btn-primary" style="flex: 1;" onclick="window.print()">🖨️ Cetak / Print Struk</button>
+        <button class="btn btn-secondary" onclick="closeReceiptModal()">Tutup</button>
       </div>
     </div>
   </div>

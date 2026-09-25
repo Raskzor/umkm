@@ -7,6 +7,7 @@ let activeModalActionTab = 'gmaps-tab';
 const roleUsers = {
   UMKM_OWNER_FREE: { id: 'u-free-001', name: 'Budi Santoso', phone: '081234567890', role: 'UMKM_OWNER_FREE', badge: 'free', badgeText: 'UMKM FREE TIER' },
   UMKM_OWNER_PREMIUM: { id: 'u-prem-002', name: 'Siti Rahma', phone: '089876543210', role: 'UMKM_OWNER_PREMIUM', badge: 'premium', badgeText: 'UMKM PREMIUM TIER' },
+  CASHIER: { id: 'u-cashier-005', name: 'Dewi (Kasir Toko)', phone: '081122334455', role: 'CASHIER', badge: 'agent', badgeText: 'KASIR TOKO' },
   FIELD_AGENT: { id: 'u-agent-003', name: 'Rian Hidayat (Agen)', phone: '085551234567', role: 'FIELD_AGENT', badge: 'agent', badgeText: 'FIELD CONSULTANT' },
   SUPER_ADMIN: { id: 'u-admin-004', name: 'Super Admin System', phone: '080011223344', role: 'SUPER_ADMIN', badge: 'admin', badgeText: 'SUPER ADMIN' }
 };
@@ -122,6 +123,7 @@ async function switchRole(roleKey) {
   handleAuditEvaluateDefault();
   loadTasks();
   loadCourses();
+  loadPOSData();
 }
 
 // Navigation Tabs
@@ -141,6 +143,7 @@ function switchTab(tabId, el) {
     'audit-tab': { title: 'AI Business Health Audit', subtitle: 'Diagnosis otomatis AI kesehatan digital usaha UMKM Anda dalam 5 menit' },
     'gmaps-tab': { title: 'Google Maps & AI Review Engine', subtitle: 'Cetak QR Code Review, balasan otomatis AI, dan kupon loyalitas' },
     'landing-tab': { title: 'Builder Website Sementara UMKM', subtitle: 'Buat katalog web instan dengan tautan WhatsApp & upload foto' },
+    'pos-tab': { title: 'Mesin Kasir & Kelola Anak Buah (Staf)', subtitle: 'Pencatatan transaksi instan, cetak struk, dan kelola staf kasir toko' },
     'services-tab': { title: 'Jasa Pendampingan & Smart Route Dispatch', subtitle: 'Manajemen tiket pengerjaan verifikasi lokasi & rute efisien agen' },
     'learning-tab': { title: 'Video Micro-Course Edukasi', subtitle: 'Modul pelatihan strategi pemasaran digital & Google Maps' }
   };
@@ -148,6 +151,10 @@ function switchTab(tabId, el) {
   if (titles[tabId]) {
     document.getElementById('active-tab-title').innerText = titles[tabId].title;
     document.getElementById('active-tab-subtitle').innerText = titles[tabId].subtitle;
+  }
+
+  if (tabId === 'pos-tab') {
+    loadPOSData();
   }
 }
 
@@ -644,5 +651,297 @@ async function loadCourses() {
     }
   } catch (err) {
     console.error('Courses load error:', err);
+  }
+}
+
+// ==========================================
+// POS & STAFF MANAGEMENT CLIENT ENGINE
+// ==========================================
+let cartItems = [];
+
+function addToCart(name, price) {
+  const existing = cartItems.find(item => item.name === name);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cartItems.push({ name, price: Number(price), qty: 1 });
+  }
+  renderCart();
+}
+
+function addCustomItemToCart() {
+  const nameInput = document.getElementById('pos-custom-name');
+  const priceInput = document.getElementById('pos-custom-price');
+  
+  if (!nameInput || !priceInput) return;
+
+  const name = nameInput.value.trim();
+  const price = Number(priceInput.value);
+
+  if (!name || isNaN(price) || price <= 0) {
+    alert('Masukkan nama produk dan harga yang valid!');
+    return;
+  }
+
+  addToCart(name, price);
+  nameInput.value = '';
+  priceInput.value = '';
+}
+
+function updateCartQty(index, delta) {
+  if (cartItems[index]) {
+    cartItems[index].qty += delta;
+    if (cartItems[index].qty <= 0) {
+      cartItems.splice(index, 1);
+    }
+    renderCart();
+  }
+}
+
+function removeFromCart(index) {
+  cartItems.splice(index, 1);
+  renderCart();
+}
+
+function renderCart() {
+  const tbody = document.getElementById('cart-table-body');
+  const totalDisplay = document.getElementById('cart-total-display');
+  if (!tbody || !totalDisplay) return;
+
+  if (cartItems.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1rem;">Keranjang belanja masih kosong. Klik produk di atas.</td></tr>`;
+    totalDisplay.innerText = 'Rp 0';
+    return;
+  }
+
+  let total = 0;
+  tbody.innerHTML = cartItems.map((item, idx) => {
+    const subtotal = item.qty * item.price;
+    total += subtotal;
+    return `
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <td style="padding: 0.5rem 0;"><strong>${item.name}</strong><br><span style="font-size: 0.75rem; color: var(--text-muted);">@ Rp ${item.price.toLocaleString('id-ID')}</span></td>
+        <td style="text-align: center; padding: 0.5rem 0;">
+          <button class="btn btn-secondary" type="button" style="padding: 0.15rem 0.4rem; font-size: 0.75rem;" onclick="updateCartQty(${idx}, -1)">-</button>
+          <span style="margin: 0 0.4rem; font-weight: 700;">${item.qty}</span>
+          <button class="btn btn-secondary" type="button" style="padding: 0.15rem 0.4rem; font-size: 0.75rem;" onclick="updateCartQty(${idx}, 1)">+</button>
+        </td>
+        <td style="text-align: right; padding: 0.5rem 0; font-weight: 700; color: #4ade80;">Rp ${subtotal.toLocaleString('id-ID')}</td>
+        <td style="text-align: center; padding: 0.5rem 0;">
+          <span style="color: #f87171; cursor: pointer;" onclick="removeFromCart(${idx})">✕</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  totalDisplay.innerText = `Rp ${total.toLocaleString('id-ID')}`;
+}
+
+async function handlePOSCheckout() {
+  if (cartItems.length === 0) {
+    alert('Keranjang belanja masih kosong!');
+    return;
+  }
+
+  const payMethod = document.getElementById('pos-pay-method').value;
+
+  try {
+    const res = await fetch('/api/v1/pos/transactions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify({
+        items: cartItems,
+        payment_method: payMethod
+      })
+    });
+
+    const result = await res.json();
+    if (result.success) {
+      const receipt = result.data.receipt;
+      cartItems = [];
+      renderCart();
+      showReceiptModal(receipt);
+      loadPOSTransactionHistory();
+    } else {
+      alert(result.error || 'Gagal memproses transaksi');
+    }
+  } catch (err) {
+    console.error('POS Checkout error:', err);
+    alert('Terjadi kesalahan koneksi server');
+  }
+}
+
+function showReceiptModal(receipt) {
+  const modal = document.getElementById('receipt-modal');
+  if (!modal) return;
+
+  document.getElementById('receipt-biz-name').innerText = receipt.business_name || 'Toko UMKM';
+  document.getElementById('receipt-tx-id').innerText = `Struk #${receipt.id}`;
+  document.getElementById('receipt-date').innerText = new Date(receipt.created_at).toLocaleString('id-ID');
+  document.getElementById('receipt-cashier-name').innerText = receipt.cashier_name;
+  document.getElementById('receipt-pay-method').innerText = receipt.payment_method;
+  document.getElementById('receipt-total-amount').innerText = `Rp ${receipt.total_amount.toLocaleString('id-ID')}`;
+
+  const itemsBody = document.getElementById('receipt-items-body');
+  itemsBody.innerHTML = receipt.items.map(item => `
+    <tr>
+      <td style="padding: 0.35rem 0; color: #cbd5e1;">${item.qty}x ${item.name}</td>
+      <td style="padding: 0.35rem 0; text-align: right; color: #f1f5f9; font-weight: 600;">Rp ${item.subtotal.toLocaleString('id-ID')}</td>
+    </tr>
+  `).join('');
+
+  modal.classList.add('active');
+}
+
+function closeReceiptModal() {
+  const modal = document.getElementById('receipt-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+async function loadPOSData() {
+  await loadPOSStaffList();
+  await loadPOSTransactionHistory();
+}
+
+async function loadPOSStaffList() {
+  const tbody = document.getElementById('staff-list-table-body');
+  const badge = document.getElementById('staff-quota-badge');
+  if (!tbody) return;
+
+  try {
+    const res = await fetch('/api/v1/pos/staff', {
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      const { staff_list, quota_summary } = result.data;
+
+      // Update quota badge
+      if (badge) {
+        if (quota_summary.is_free_tier) {
+          badge.className = 'badge';
+          badge.style.cssText = 'font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 9999px; font-weight: 700; background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.3);';
+          badge.innerText = `Paket GRATIS: ${quota_summary.assigned_count} / 1 Kasir Terpakai`;
+        } else {
+          badge.className = 'badge';
+          badge.style.cssText = 'font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 9999px; font-weight: 700; background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3);';
+          badge.innerText = `Paket PREMIUM: ${quota_summary.assigned_count} Kasir (Tanpa Batas)`;
+        }
+      }
+
+      if (staff_list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1rem;">Belum ada anak buah / kasir ditambahkan.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = staff_list.map(staff => `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding: 0.5rem 0;"><strong>${staff.staff_name}</strong><br><span style="font-size: 0.75rem; color: var(--text-muted);">PIN: ${staff.pin}</span></td>
+          <td style="padding: 0.5rem 0;">${staff.phone_number}</td>
+          <td style="text-align: center; padding: 0.5rem 0;"><span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #4ade80;">AKTIF</span></td>
+          <td style="text-align: center; padding: 0.5rem 0;">
+            <button class="btn btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.75rem; color: #f87171;" onclick="handleDeleteStaff('${staff.id}')">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (err) {
+    console.error('Load staff error:', err);
+  }
+}
+
+async function handleAddStaff(e) {
+  e.preventDefault();
+  const nameInput = document.getElementById('staff-name-input');
+  const phoneInput = document.getElementById('staff-phone-input');
+  const pinInput = document.getElementById('staff-pin-input');
+
+  const staff_name = nameInput.value.trim();
+  const phone_number = phoneInput.value.trim();
+  const pin = pinInput.value.trim() || '1234';
+
+  try {
+    const res = await fetch('/api/v1/pos/staff', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify({ staff_name, phone_number, pin })
+    });
+
+    const result = await res.json();
+    if (result.success) {
+      alert(result.message);
+      nameInput.value = '';
+      phoneInput.value = '';
+      loadPOSStaffList();
+    } else {
+      alert(`⚠️ ${result.error}`);
+    }
+  } catch (err) {
+    console.error('Add staff error:', err);
+    alert('Gagal menambahkan staf kasir');
+  }
+}
+
+async function handleDeleteStaff(staffId) {
+  if (!confirm('Apakah Anda yakin ingin menonaktifkan akun staf kasir ini?')) return;
+
+  try {
+    const res = await fetch(`/api/v1/pos/staff/${staffId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const result = await res.json();
+    if (result.success) {
+      alert(result.message);
+      loadPOSStaffList();
+    } else {
+      alert(result.error);
+    }
+  } catch (err) {
+    console.error('Delete staff error:', err);
+  }
+}
+
+async function loadPOSTransactionHistory() {
+  const container = document.getElementById('pos-history-container');
+  const omsetEl = document.getElementById('pos-total-omset');
+  const ordersEl = document.getElementById('pos-total-orders');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/v1/pos/transactions', {
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      const { transactions, summary } = result.data;
+      if (omsetEl) omsetEl.innerText = `Rp ${summary.total_revenue.toLocaleString('id-ID')}`;
+      if (ordersEl) ordersEl.innerText = `${summary.total_orders} Transaksi`;
+
+      if (transactions.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 1rem;">Belum ada riwayat transaksi penjualan hari ini.</div>`;
+        return;
+      }
+
+      container.innerHTML = transactions.map(t => `
+        <div style="background: rgba(0,0,0,0.2); border-left: 3px solid #34d399; padding: 0.6rem; border-radius: 6px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong>Struk #${t.id}</strong> - <span style="color: #94a3b8;">${t.cashier_name}</span><br>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">${t.items.map(i=>`${i.qty}x ${i.name}`).join(', ')} (${t.payment_method})</span>
+          </div>
+          <div style="font-weight: 800; color: #34d399; font-size: 0.9rem;">Rp ${t.total_amount.toLocaleString('id-ID')}</div>
+        </div>
+      `).join('');
+    }
+  } catch (err) {
+    console.error('Load transaction history error:', err);
   }
 }

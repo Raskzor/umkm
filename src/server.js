@@ -8,6 +8,7 @@ const gmapsRoutes = require('./modules/gmaps/gmaps.controller');
 const landingRoutes = require('./modules/landing/landing.controller');
 const learningRoutes = require('./modules/learning/learning.controller');
 const servicesRoutes = require('./modules/services/services.controller');
+const posRoutes = require('./modules/pos/pos.controller');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,6 +28,7 @@ app.use('/api/v1/gmaps', gmapsRoutes);
 app.use('/api/v1/landing', landingRoutes);
 app.use('/api/v1/learning', learningRoutes);
 app.use('/api/v1/services', servicesRoutes);
+app.use('/api/v1/pos', posRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {
