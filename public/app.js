@@ -163,21 +163,63 @@ async function loadDynamicNavigationMenu() {
   }
 }
 
+let isSidebarCollapsed = false;
+let collapsedCategories = {};
+
+function toggleSidebarCollapse() {
+  const sidebar = document.querySelector('.sidebar');
+  const btn = document.getElementById('sidebar-toggle-btn');
+  if (!sidebar) return;
+
+  isSidebarCollapsed = !isSidebarCollapsed;
+  sidebar.classList.toggle('collapsed', isSidebarCollapsed);
+
+  if (btn) {
+    btn.innerText = isSidebarCollapsed ? '▶' : '◀';
+  }
+}
+
+function toggleCategoryAccordion(catKey) {
+  collapsedCategories[catKey] = !collapsedCategories[catKey];
+  const groupEl = document.getElementById(`cat-group-${catKey}`);
+  const arrowEl = document.getElementById(`cat-arrow-${catKey}`);
+  if (groupEl) {
+    groupEl.style.display = collapsedCategories[catKey] ? 'none' : 'block';
+  }
+  if (arrowEl) {
+    arrowEl.innerText = collapsedCategories[catKey] ? '►' : '▼';
+  }
+}
+
 function renderDynamicNavigationSidebar(resolvedData) {
   const container = document.getElementById('sidebar-menu-container');
   if (!container) return;
 
   container.innerHTML = '';
+  container.style.cssText = 'overflow-y: auto; max-height: calc(100vh - 140px); flex: 1; padding-right: 0.2rem;';
 
   const activeTabId = document.querySelector('.tab-content.active') ? document.querySelector('.tab-content.active').id : 'audit-tab';
 
   Object.keys(resolvedData.grouped_menus).forEach(catKey => {
     const catGroup = resolvedData.grouped_menus[catKey];
+    const isCollapsed = !!collapsedCategories[catKey];
 
     const catHeader = document.createElement('div');
-    catHeader.style.cssText = 'font-size: 0.68rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 0.85rem 0 0.35rem 0.5rem; display: flex; align-items: center; gap: 0.4rem;';
-    catHeader.innerHTML = `<span>${catGroup.icon}</span> <span>${catGroup.title}</span>`;
+    catHeader.className = 'tree-category-header';
+    catHeader.style.cssText = 'font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin: 0.85rem 0 0.35rem 0.4rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; padding: 0.25rem 0.4rem; border-radius: 4px; background: rgba(255,255,255,0.03);';
+    catHeader.onclick = () => toggleCategoryAccordion(catKey);
+
+    catHeader.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 0.4rem;" class="cat-header-title">
+        <span>${catGroup.icon}</span> <span>${catGroup.title}</span>
+      </div>
+      <span id="cat-arrow-${catKey}" style="font-size: 0.65rem; color: #64748b;">${isCollapsed ? '►' : '▼'}</span>
+    `;
     container.appendChild(catHeader);
+
+    const itemsWrapper = document.createElement('div');
+    itemsWrapper.id = `cat-group-${catKey}`;
+    itemsWrapper.style.display = isCollapsed ? 'none' : 'block';
 
     catGroup.items.forEach(item => {
       const a = document.createElement('a');
@@ -188,11 +230,13 @@ function renderDynamicNavigationSidebar(resolvedData) {
       }
       a.setAttribute('onclick', `switchTab('${item.tabId}', this)`);
 
-      let badgeHtml = item.badgeLabel ? `<span style="font-size: 0.65rem; background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.15rem 0.4rem; border-radius: 4px; margin-left: auto;">${item.badgeLabel}</span>` : '';
+      let badgeHtml = item.badgeLabel ? `<span class="menu-badge" style="font-size: 0.65rem; background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.15rem 0.4rem; border-radius: 4px; margin-left: auto;">${item.badgeLabel}</span>` : '';
 
-      a.innerHTML = `<span>${item.icon}</span> <span>${item.title}</span> ${badgeHtml}`;
-      container.appendChild(a);
+      a.innerHTML = `<span class="menu-icon">${item.icon}</span> <span class="menu-title-text">${item.title}</span> ${badgeHtml}`;
+      itemsWrapper.appendChild(a);
     });
+
+    container.appendChild(itemsWrapper);
   });
 
   // Update Quota Badge in POS Tab if element exists
@@ -764,6 +808,12 @@ async function loadCourses() {
     if (result.success) {
       container.innerHTML = result.data.map(course => {
         const embedUrl = course.embed_url || course.video_url || 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+        const steps = course.steps || [
+          'Langkah 1: Tonton video panduan sampai selesai.',
+          'Langkah 2: Buka menu modul terkait pada sistem SuperUMKM.',
+          'Langkah 3: Praktikkan panduan pada bisnis UMKM Anda.'
+        ];
+
         return `
           <div class="card video-card" style="padding: 0; overflow: hidden; background: #0f172a; border: 1px solid rgba(255,255,255,0.1);">
             <div style="position: relative; width: 100%; padding-top: 56.25%;">
@@ -782,7 +832,21 @@ async function loadCourses() {
                 <span class="role-badge ${course.minimum_tier === 'PREMIUM' ? 'admin' : 'free'}" style="font-size: 0.65rem;">${course.minimum_tier}</span>
               </div>
               <div style="font-size: 0.95rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.3rem;">${course.title}</div>
-              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">${course.description || 'Tutorial strategi & tips praktis ekosistem SuperUMKM.'}</p>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">${course.description || 'Tutorial strategi & tips praktis ekosistem SuperUMKM.'}</p>
+              
+              <!-- Step-By-Step Action Guidelines for Owners -->
+              <div style="background: rgba(15, 23, 42, 0.9); padding: 0.75rem; border-radius: 8px; border: 1px dashed rgba(59, 130, 246, 0.3); margin-bottom: 0.75rem;">
+                <div style="font-size: 0.78rem; font-weight: 700; color: #38bdf8; margin-bottom: 0.4rem;">📝 Panduan Langkah Demi Langkah:</div>
+                <div style="display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.75rem; color: #cbd5e1;">
+                  ${steps.map((st, sIdx) => `
+                    <div style="display: flex; gap: 0.4rem; align-items: flex-start;">
+                      <span style="color: #34d399; font-weight: 700;">✓</span>
+                      <span>${st}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #64748b;">
                 <span>⏱️ ${Math.round((course.duration_seconds || 300) / 60)} Menit</span>
                 ${currentRole === 'SUPER_ADMIN' ? `
@@ -801,13 +865,15 @@ async function loadCourses() {
 
 async function handleAdminUploadVideo(e) {
   e.preventDefault();
+  const stepsInput = document.getElementById('admin-video-steps');
   const payload = {
     title: document.getElementById('admin-video-title').value,
     module_category: document.getElementById('admin-video-category').value,
     video_url: document.getElementById('admin-video-url').value,
     description: document.getElementById('admin-video-desc').value,
     minimum_tier: document.getElementById('admin-video-tier').value,
-    duration_seconds: document.getElementById('admin-video-duration').value
+    duration_seconds: document.getElementById('admin-video-duration').value,
+    steps: stepsInput ? stepsInput.value : ''
   };
 
   try {
@@ -1094,8 +1160,9 @@ async function handlePOSCheckout() {
     return;
   }
 
-  const payMethod = document.getElementById('pos-pay-method').value;
-  const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const payMethodSelect = document.getElementById('pos-pay-method');
+  const payMethod = payMethodSelect ? payMethodSelect.value : 'TUNAI';
+  const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * (item.qty || 1)), 0);
 
   if (payMethod === 'QRIS') {
     try {
@@ -1121,10 +1188,11 @@ async function handlePOSCheckout() {
     }
   }
 
-  executeFinalPOSCheckout(payMethod);
+  await executeFinalPOSCheckout(payMethod);
 }
 
 async function executeFinalPOSCheckout(payMethod) {
+  const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * (item.qty || 1)), 0);
   try {
     const res = await fetch('/api/v1/pos/transactions', {
       method: 'POST',
@@ -1134,7 +1202,8 @@ async function executeFinalPOSCheckout(payMethod) {
       },
       body: JSON.stringify({
         items: cartItems,
-        payment_method: payMethod
+        payment_method: payMethod || 'TUNAI',
+        paid_amount: totalAmount
       })
     });
 

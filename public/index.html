@@ -11,12 +11,15 @@
   <div id="app-container">
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
-      <div class="brand-header">
-        <div class="brand-logo">🚀</div>
-        <div>
-          <div class="brand-title">SuperUMKM</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted);">Consultant Platform</div>
+      <div class="brand-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <div class="brand-logo">🚀</div>
+          <div class="brand-text">
+            <div class="brand-title">SuperUMKM</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Consultant Platform</div>
+          </div>
         </div>
+        <button id="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" title="Minimize / Expand Sidebar" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; font-size: 0.9rem; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 6px;">◀</button>
       </div>
 
       <!-- Quick Role Switcher for Interactive Testing -->
@@ -630,46 +633,6 @@
           <!-- Right Column: Kelola Anak Buah / Kasir & Laporan -->
           <div style="display: flex; flex-direction: column; gap: 1.5rem;">
 
-            <!-- Staff Management Card -->
-            <div class="card">
-              <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                <span>👥 Manajemen Anak Buah (Kasir)</span>
-                <span id="staff-quota-badge" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 9999px; font-weight: 700; background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.3);">
-                  Paket GRATIS: Max 1 Kasir
-                </span>
-              </div>
-              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-                Tambahkan akun staf kasir untuk membantu operasional usaha. <i>(Gratis: Maks 1 Anak Buah, Premium: Tanpa Batas)</i>.
-              </p>
-
-              <!-- Add Staff Form -->
-              <form id="add-staff-form" onsubmit="handleAddStaff(event)" style="margin-bottom: 1.25rem;">
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                  <input type="text" id="staff-name-input" class="form-control" placeholder="Nama Staf / Kasir" required style="flex: 1; min-width: 140px;">
-                  <input type="text" id="staff-phone-input" class="form-control" placeholder="No. WA (cth: 081122...)" required style="flex: 1; min-width: 140px;">
-                  <input type="text" id="staff-pin-input" class="form-control" placeholder="PIN (4 digit)" value="1234" maxlength="4" style="width: 90px;">
-                  <button type="submit" class="btn btn-primary">+ Tambah Staf</button>
-                </div>
-              </form>
-
-              <!-- Staff List Table -->
-              <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.05);">
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-                  <thead>
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; color: var(--text-sub);">
-                      <th style="padding-bottom: 0.5rem;">Nama Kasir</th>
-                      <th style="padding-bottom: 0.5rem;">No. WA</th>
-                      <th style="padding-bottom: 0.5rem; text-align: center;">Status</th>
-                      <th style="padding-bottom: 0.5rem; text-align: center;">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody id="staff-list-table-body">
-                    <!-- Populated dynamically -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
             <!-- Sales Report Summary Card -->
             <div class="card">
               <div class="card-title">
@@ -694,84 +657,6 @@
 
           </div>
 
-        </div>
-      </section>
-
-      <!-- TAB: Integrasi QRIS Kasir & Dynamic Generator -->
-      <section id="qris-tab" class="tab-content">
-        <div class="grid-2">
-          <!-- Left Column: Generator QRIS & SVG Render -->
-          <div class="card">
-            <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-              <span>📲 Generator Payload QRIS Kasir</span>
-              <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">QRIS Standar Indonesia</span>
-            </div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-              Buat kode QRIS statis atau dinamis lengkap dengan nominal transaksi untuk pembayaran instant e-wallet (GoPay, OVO, Dana, ShopeePay, BCA Mobile).
-            </p>
-
-            <form id="qris-generator-form" onsubmit="handleGenerateQRISForm(event)">
-              <div class="form-group">
-                <label>Nominal Pembayaran (Rp)</label>
-                <input type="number" id="qris-input-amount" class="form-control" placeholder="Contoh: 50000" value="50000" min="1000" required>
-              </div>
-
-              <div class="form-group">
-                <label>Tipe Kode QRIS</label>
-                <select id="qris-input-dynamic" class="form-control">
-                  <option value="true">📲 QRIS Dinamis (Nominal Terkunci Otomatis)</option>
-                  <option value="false">📌 QRIS Statis (Nominal Diinput Pelanggan)</option>
-                </select>
-              </div>
-
-              <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
-                ⚡ Generate Kode QRIS (SVG & String Checksum)
-              </button>
-            </form>
-
-            <!-- Render Box -->
-            <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 1.25rem; text-align: center;">
-              <div id="qris-tab-svg-preview" style="background: #ffffff; padding: 1rem; border-radius: 12px; display: inline-block; margin-bottom: 0.85rem;">
-                <div style="color: #64748b; font-size: 0.8rem; padding: 2rem 1rem;">Klik tombol generate di atas untuk menampilkan kode QRIS</div>
-              </div>
-
-              <div style="font-size: 1rem; font-weight: 800; color: #4ade80; margin-bottom: 0.5rem;" id="qris-tab-amount-display">
-                Rp 50.000
-              </div>
-
-              <div style="background: rgba(0,0,0,0.3); padding: 0.6rem; border-radius: 6px; font-family: monospace; font-size: 0.7rem; color: #94a3b8; word-break: break-all; margin-bottom: 0.75rem;" id="qris-tab-payload-string">
-                Payload string QRIS akan tampil di sini
-              </div>
-
-              <div style="display: flex; gap: 0.5rem;">
-                <button type="button" class="btn btn-secondary" style="flex: 1; font-size: 0.8rem;" onclick="copyQrisPayloadString()">📋 Copy Payload String</button>
-                <button type="button" class="btn btn-success" style="flex: 1; font-size: 0.8rem;" onclick="window.print()">🖨️ Cetak QR Stiker</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right Column: Verification Listener & Test Callback -->
-          <div class="card">
-            <div class="card-title">
-              <span>✅ Mock Auto-Verifier & Status Real-time</span>
-            </div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-              Status pembayaran terverifikasi otomatis melalui webhook callback listener tanpa perlu mengecek mutasi rekening manual.
-            </p>
-
-            <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem;">
-              <div style="font-size: 0.8rem; font-weight: 700; color: #4ade80; margin-bottom: 0.3rem;">🔄 Simulasi Callback Status Pembayaran:</div>
-              <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 0.75rem;">Klik tombol di bawah untuk menyimulasi notifikasi lunas dari jaringan QRIS.</p>
-              <button type="button" class="btn btn-primary" style="width: 100%; font-size: 0.9rem;" onclick="handleSimulateQRISWebhook()">
-                ⚡ Kirim Webhook Verification (Status PAID)
-              </button>
-            </div>
-
-            <div class="card-title" style="font-size: 0.95rem;">Riwayat Transaksi QRIS Terakhir</div>
-            <div id="qris-history-container" style="max-height: 250px; overflow-y: auto; font-size: 0.85rem;">
-              <div style="color: var(--text-muted); text-align: center; padding: 1rem;">Belum ada transaksi QRIS.</div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -1126,6 +1011,11 @@
             <div class="form-group" style="margin-bottom: 0.75rem;">
               <label style="font-size: 0.82rem; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">Deskripsi Singkat Konten *</label>
               <textarea id="admin-video-desc" class="form-control" rows="2" placeholder="Tuliskan deskripsi isi konten materi..." required style="width: 100%; padding: 0.6rem; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;"></textarea>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <label style="font-size: 0.82rem; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">📝 Panduan Langkah Demi Langkah (Step-by-Step Action for Owner) - <i>1 Langkah per baris</i></label>
+              <textarea id="admin-video-steps" class="form-control" rows="3" placeholder="Contoh:&#10;Langkah 1: Buka aplikasi Google Maps lalu cari titik lokasi tempat usaha Anda&#10;Langkah 2: Klik tombol Klaim Tempat Usaha Ini&#10;Langkah 3: Lengkapi profil usaha & upload foto produk" style="width: 100%; padding: 0.6rem; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;"></textarea>
             </div>
 
             <div class="grid-2" style="gap: 0.75rem; margin-bottom: 1rem;">

@@ -53,13 +53,37 @@ aside.sidebar {
   background: var(--bg-card);
   backdrop-filter: blur(16px);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 2rem 1.25rem;
+  padding: 1.5rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.25rem;
   position: fixed;
   height: 100vh;
   z-index: 50;
+  transition: width 0.3s ease, padding 0.3s ease;
+}
+
+aside.sidebar.collapsed {
+  width: 75px;
+  padding: 1.5rem 0.5rem;
+}
+
+aside.sidebar.collapsed .brand-text,
+aside.sidebar.collapsed .role-switcher-card,
+aside.sidebar.collapsed .menu-title-text,
+aside.sidebar.collapsed .menu-badge,
+aside.sidebar.collapsed .tree-category-header .cat-header-title span:nth-child(2),
+aside.sidebar.collapsed .tree-category-header span[id^="cat-arrow-"] {
+  display: none !important;
+}
+
+aside.sidebar.collapsed .menu-item {
+  justify-content: center;
+  padding: 0.75rem 0.25rem;
+}
+
+aside.sidebar.collapsed ~ main.content-area {
+  margin-left: 75px;
 }
 
 .brand-header {
@@ -144,6 +168,7 @@ main.content-area {
   flex: 1;
   padding: 2rem 2.5rem;
   max-width: 1400px;
+  transition: margin-left 0.3s ease;
 }
 
 header.topbar {

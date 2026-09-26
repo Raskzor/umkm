@@ -35,25 +35,14 @@ const NAVIGATION_MENU = [
   // 1. Store Operations (POS, QRIS, Inventory, Staff)
   {
     id: 'pos_instant',
-    title: 'Mesin Kasir Instant (POS)',
+    title: 'Mesin Kasir & QRIS Kasir',
     category: 'store_operations',
     tabId: 'pos-tab',
     path: '/dashboard#pos-tab',
     icon: '📱',
     allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'CASHIER', 'SUPER_ADMIN'],
     allowedTiers: ['FREE', 'PREMIUM'],
-    badgeLabel: 'POS Instant'
-  },
-  {
-    id: 'qris_payment',
-    title: 'Integrasi QRIS Kasir',
-    category: 'store_operations',
-    tabId: 'qris-tab',
-    path: '/dashboard#qris-tab',
-    icon: '📲',
-    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'CASHIER', 'SUPER_ADMIN'],
-    allowedTiers: ['FREE', 'PREMIUM'],
-    badgeLabel: 'QRIS Ready'
+    badgeLabel: 'Kasir & QRIS'
   },
   {
     id: 'inventory_stok_bon',

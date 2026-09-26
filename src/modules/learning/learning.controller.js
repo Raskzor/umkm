@@ -57,13 +57,28 @@ router.get('/courses', authenticate, (req, res) => {
 
 // Admin Upload / Manage Tutorial (SUPER_ADMIN only)
 router.post('/courses', authenticate, authorizeRoles('SUPER_ADMIN'), (req, res) => {
-  const { title, description, module_category, video_url, duration_seconds, minimum_tier } = req.body;
+  const { title, description, module_category, video_url, duration_seconds, minimum_tier, steps } = req.body;
 
   if (!title || !video_url) {
     return res.status(400).json({ success: false, error: 'Judul dan URL Video wajib diisi' });
   }
 
   const embed_url = convertToEmbedUrl(video_url);
+
+  let formattedSteps = [];
+  if (Array.isArray(steps)) {
+    formattedSteps = steps.filter(s => typeof s === 'string' ? s.trim().length > 0 : (s && s.instruction));
+  } else if (typeof steps === 'string') {
+    formattedSteps = steps.split('\n').map(s => s.trim()).filter(Boolean);
+  }
+
+  if (formattedSteps.length === 0) {
+    formattedSteps = [
+      'Langkah 1: Tonton video panduan sampai selesai.',
+      'Langkah 2: Buka menu modul terkait pada sistem SuperUMKM.',
+      'Langkah 3: Praktikkan panduan pada bisnis UMKM Anda.'
+    ];
+  }
 
   const newTutorial = {
     id: `tut-${Date.now()}`,
@@ -74,6 +89,7 @@ router.post('/courses', authenticate, authorizeRoles('SUPER_ADMIN'), (req, res) 
     embed_url,
     duration_seconds: parseInt(duration_seconds) || 300,
     minimum_tier: minimum_tier || 'FREE',
+    steps: formattedSteps,
     is_active: true,
     created_at: new Date().toISOString()
   };

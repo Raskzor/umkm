@@ -32,8 +32,8 @@ test('Navigation Config - Grouped Categories & 14 Modules Resolution', (t) => {
   assert.strictEqual(cashierFlatIds.includes('consultation_services'), false);
   assert.strictEqual(cashierFlatIds.includes('pos_instant'), true);
 
-  // Super Admin receives all 15 navigation menu items
-  assert.strictEqual(adminMenu.flat_menus.length, 15);
+  // Super Admin receives all 14 ecosystem navigation menu items
+  assert.strictEqual(adminMenu.flat_menus.length, 14);
 });
 
 test('Navigation API - GET /api/v1/users/navigation-menus per Role Token', async (t) => {
