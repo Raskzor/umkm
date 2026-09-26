@@ -51,6 +51,9 @@
         <a class="menu-item" onclick="switchTab('learning-tab', this)">
           <span>🎓</span> Micro-Course Edukasi
         </a>
+        <a class="menu-item" onclick="switchTab('kit-tab', this)">
+          <span>📋</span> Kit Lokal Naik Kelas
+        </a>
       </nav>
 
       <div style="font-size: 0.75rem; color: var(--text-sub); text-align: center;">
@@ -602,6 +605,48 @@
       <section id="learning-tab" class="tab-content">
         <div class="grid-3" id="courses-grid">
           <!-- Rendered dynamically based on RBAC Tier -->
+        </div>
+      </section>
+
+      <!-- TAB 6: Kit Lokal Naik Kelas -->
+      <section id="kit-tab" class="tab-content">
+        <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(59, 130, 246, 0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <span class="role-badge premium" style="margin-bottom: 0.5rem;">🚀 DIGITAL ACTION KIT V1</span>
+              <h2 style="font-family: 'Outfit'; font-size: 1.5rem; color: #ffffff;">Kit Lokal Naik Kelas</h2>
+              <p style="font-size: 0.88rem; color: var(--text-muted);">Cek kondisi Google Maps, ulasan, dan WhatsApp usaha. Tentukan prioritas, bereskan, dan buktikan hasil kerja.</p>
+            </div>
+            <div>
+              <button class="btn btn-primary" onclick="exportKitSummaryHTML()">📥 Export Ringkasan HTML / PDF</button>
+            </div>
+          </div>
+
+          <!-- Global Kit Progress Bar -->
+          <div style="margin-top: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem;">
+              <span id="kit-progress-label">0 dari 8 langkah selesai</span>
+              <span id="kit-save-status" style="color: var(--accent-emerald);">✓ Tersimpan di Cloud Backend</span>
+            </div>
+            <div style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden;">
+              <div id="kit-progress-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%); transition: width 0.4s ease;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kit Sub-Navigation Pills -->
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button class="btn btn-secondary kit-nav-btn active" id="kit-nav-welcome" onclick="showKitSubView('welcome')">🏠 Beranda Kit</button>
+          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-checkup" onclick="showKitSubView('checkup')">📋 Cek Kondisi (12 Soal)</button>
+          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-result" onclick="showKitSubView('result')">🎯 Hasil & Prioritas</button>
+          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-steps" onclick="showKitSubView('steps')">📱 8 Langkah Eksekusi</button>
+          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-compare" onclick="showKitSubView('compare')">📊 Sebelum vs Sesudah</button>
+          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-maintenance" onclick="showKitSubView('maintenance')">🗓️ Maintenance Mingguan</button>
+        </div>
+
+        <!-- Dynamic Kit View Container -->
+        <div id="kit-dynamic-view-container">
+          <!-- Populated by app.js rendering logic -->
         </div>
       </section>
 
