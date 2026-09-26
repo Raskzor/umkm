@@ -88,7 +88,10 @@ class Database {
         user_id: cashierId,
         staff_name: 'Dewi (Kasir Utama)',
         phone_number: '081122334455',
+        address: 'Jl. Diponegoro No. 1, Surabaya',
+        role_title: 'Kasir Shift Pagi',
         pin: '1234',
+        allowed_permissions: ['pos_instant', 'qris_payment', 'inventory_stok_bon'],
         status: 'ACTIVE',
         created_at: new Date().toISOString()
       }
@@ -100,15 +103,23 @@ class Database {
         id: 'tx-1001',
         owner_id: userFreeId,
         cashier_id: cashierId,
-        cashier_name: 'Dewi (Kasir Utama)',
-        business_name: 'Warung Kelontong Berkah',
+        cashier_name: 'karis (Dewi)',
+        customer_name: 'Sheila',
+        customer_address: 'Jl. Diponegoro 1, Sby',
+        queue_no: 'No.0-3',
+        business_name: 'Karis Jaya Shop',
+        business_address: 'Jl. Dr. Ir. H. Soekarno No.19, Medokan Semampir Surabaya',
+        business_phone: '0812345678',
         items: [
-          { name: 'Beras Premium 5kg', price: 65000, qty: 1, subtotal: 65000 },
-          { name: 'Minyak Goreng 1L', price: 18000, qty: 2, subtotal: 36000 }
+          { name: 'Indomie Goreng', price: 36000, qty: 1, unit: 'lusin', subtotal: 36000 },
+          { name: 'Fruit Tea Apple', price: 7000, qty: 1, unit: '500 ml', subtotal: 7000 },
+          { name: 'Belfood Sosis Bakar', price: 27000, qty: 1, unit: 'pcs', subtotal: 27000 }
         ],
-        total_amount: 101000,
-        payment_method: 'QRIS',
-        created_at: new Date().toISOString()
+        total_amount: 70000,
+        paid_amount: 70000,
+        change_amount: 0,
+        payment_method: 'Cash',
+        created_at: '2023-08-02T08:46:36.000Z'
       }
     ];
 
@@ -145,6 +156,7 @@ class Database {
       {
         id: 'tut-001',
         title: 'Cara Klaim & Verifikasi Google Maps Tempat Usaha',
+        description: 'Panduan praktis mendaftarkan titik lokasi toko UMKM di Google Maps dan verifikasi instan.',
         module_category: 'Google Maps Optimization',
         video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
         duration_seconds: 300,
@@ -154,6 +166,7 @@ class Database {
       {
         id: 'tut-002',
         title: 'Trik Mendapatkan 100+ Bintang 5 Review Pelanggan',
+        description: 'Cara menggunakan QR Code Review interaktif untuk mendorong pembeli memberikan ulasan positif.',
         module_category: 'Review Management',
         video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
         duration_seconds: 450,
@@ -163,6 +176,7 @@ class Database {
       {
         id: 'tut-003',
         title: 'Masterclass WhatsApp Automation & Landing Page High Conversion',
+        description: 'Strategi membangun corong penjualan otomatis dari WhatsApp Blast hingga katalog produk digital.',
         module_category: 'Digital Marketing',
         video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
         duration_seconds: 900,
@@ -172,6 +186,7 @@ class Database {
       {
         id: 'tut-004',
         title: 'Strategi Ads Lokal Radius 3KM untuk Kafe & Retail',
+        description: 'Tutorial setup iklan berbasis lokasi sekitar tempat usaha dengan anggaran hemat.',
         module_category: 'Local Advertising',
         video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
         duration_seconds: 1200,

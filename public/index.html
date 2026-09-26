@@ -999,8 +999,153 @@
         </div>
       </section>
 
+      <!-- TAB: Manajemen Anak Buah (Kasir) & Hak Akses Staff -->
+      <section id="staff-tab" class="tab-content">
+        <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(59, 130, 246, 0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <span id="staff-quota-badge" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 9999px; font-weight: 700; background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.3);">Paket GRATIS: Max 1 Kasir</span>
+              <h2 style="font-family: 'Outfit'; font-size: 1.4rem; color: #ffffff; margin-top: 0.4rem;">👥 Manajemen Staf Kasir & Hak Akses Menu</h2>
+              <p style="font-size: 0.88rem; color: var(--text-muted);">Kelola data informasi staf kasir, alamat tempat tinggal, PIN login, dan batasi menu yang dapat dibuka.</p>
+            </div>
+            <div>
+              <button class="btn btn-primary" onclick="openAddStaffModal()">➕ Tambah Staf / Anak Buah Baru</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Form Tambah/Edit Staff -->
+          <div class="card">
+            <h3 style="font-size: 1.1rem; color: #38bdf8; margin-bottom: 1rem; font-family: 'Outfit';" id="staff-form-title">👤 Form Informasi Staf Kasir</h3>
+            <form id="staff-manage-form" onsubmit="handleSaveStaff(event)">
+              <input type="hidden" id="staff-edit-id" value="">
+              
+              <div class="form-group" style="margin-bottom: 0.85rem;">
+                <label style="font-size: 0.82rem; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">Nama Lengkap Staf *</label>
+                <input type="text" id="staff-name-input" class="form-control" placeholder="Contoh: Dewi Rahmawati" required style="width: 100%; padding: 0.6rem; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;">
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0.85rem;">
+                <label style="font-size: 0.82rem; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">Nomor Handphone / WhatsApp *</label>
+                <input type="tel" id="staff-phone-input" class="form-control" placeholder="Contoh: 081234567890" required style="width: 100%; padding: 0.6rem; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;">
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0.85rem;">
+                <label style="font-size: 0.82rem; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">Alamat Tempat Tinggal Staf *</label>
+                <textarea id="staff-address-input" class="form-control" rows="2" placeholder="Contoh: Jl. Diponegoro No. 1, Surabaya" required style="width: 100%; padding: 0.6rem; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;"></textarea>
+              </div>
+
+              <div class="grid-2" style="gap: 0.75rem; margin-bottom: 0.85rem;">
+                <div>
+                  <label style="font-size: 0.82rem; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">PIN Kasir (4 Digit) *</label>
+                  <input type="password" id="staff-pin-input" class="form-control" maxlength="6" placeholder="1234" required style="width: 100%; padding: 0.6rem; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;">
+                </div>
+                <div>
+                  <label style="font-size: 0.82rem; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">Jabatan / Shift *</label>
+                  <input type="text" id="staff-role-title-input" class="form-control" placeholder="Kasir Shift Pagi" required style="width: 100%; padding: 0.6rem; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;">
+                </div>
+              </div>
+
+              <!-- Menu Access Permissions Matrix -->
+              <div style="background: rgba(15, 23, 42, 0.6); padding: 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
+                <label style="font-size: 0.85rem; font-weight: 700; color: #60a5fa; display: block; margin-bottom: 0.5rem;">🔒 Pengaturan Hak Akses Menu Kasir:</label>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 0.4rem; font-size: 0.82rem; color: #cbd5e1;">
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="perm-pos" value="pos_instant" checked> 📱 Mesin Kasir Instant (POS)
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="perm-qris" value="qris_payment" checked> 📲 Integrasi QRIS Kasir
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="perm-inventory" value="inventory_stok_bon" checked> 📦 Stok, Bon & Supplier Order
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="perm-cashflow" value="cashflow_pnl"> 💰 Cashflow & P&L Saku
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="perm-loyalty" value="wa_loyalty"> 📢 Smart WA Broadcast & Loyalty
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="perm-course" value="micro_course" checked> 🎓 Video Micro-Course Edukasi
+                  </label>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Simpan Data & Hak Akses</button>
+                <button type="button" class="btn btn-secondary" onclick="resetStaffForm()">Batal</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- List Staff Registered -->
+          <div class="card">
+            <h3 style="font-size: 1.1rem; color: #34d399; margin-bottom: 1rem; font-family: 'Outfit';">📋 Daftar Staf Kasir Terdaftar</h3>
+            <div id="staff-list-container" style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- TAB 5: Video Micro-Course -->
       <section id="learning-tab" class="tab-content">
+        <!-- Super Admin Form Upload Video -->
+        <div id="admin-video-upload-card" class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%); border: 1px solid rgba(168, 85, 247, 0.4); display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div>
+              <span class="role-badge admin">🔒 SUPER ADMIN MODE</span>
+              <h3 style="font-family: 'Outfit'; font-size: 1.3rem; color: #ffffff; margin-top: 0.3rem;">📹 Upload & Setup Konten Video Edukasi</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Tambahkan video berupa tautan Youtube atau Google Drive untuk edukasi UMKM.</p>
+            </div>
+          </div>
+          
+          <form id="admin-video-form" onsubmit="handleAdminUploadVideo(event)">
+            <div class="grid-2" style="gap: 0.75rem; margin-bottom: 0.75rem;">
+              <div>
+                <label style="font-size: 0.82rem; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">Judul Video Edukasi *</label>
+                <input type="text" id="admin-video-title" class="form-control" placeholder="Contoh: Cara Klaim Google Maps Tempat Usaha" required style="width: 100%; padding: 0.6rem; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;">
+              </div>
+              <div>
+                <label style="font-size: 0.82rem; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">Kategori Modul *</label>
+                <select id="admin-video-category" class="form-control" style="width: 100%; padding: 0.6rem; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;">
+                  <option value="Google Maps Optimization">Google Maps Optimization</option>
+                  <option value="Pemasaran Digital & WA">Pemasaran Digital & WA</option>
+                  <option value="Kasir POS & Keuangan">Kasir POS & Keuangan</option>
+                  <option value="Strategi Usaha UMKM">Strategi Usaha UMKM</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <label style="font-size: 0.82rem; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">Link Video (YouTube / Google Drive) *</label>
+              <input type="url" id="admin-video-url" class="form-control" placeholder="https://www.youtube.com/watch?v=... atau https://drive.google.com/file/d/.../view" required style="width: 100%; padding: 0.6rem; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <label style="font-size: 0.82rem; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">Deskripsi Singkat Konten *</label>
+              <textarea id="admin-video-desc" class="form-control" rows="2" placeholder="Tuliskan deskripsi isi konten materi..." required style="width: 100%; padding: 0.6rem; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;"></textarea>
+            </div>
+
+            <div class="grid-2" style="gap: 0.75rem; margin-bottom: 1rem;">
+              <div>
+                <label style="font-size: 0.82rem; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">Akses Tier Video *</label>
+                <select id="admin-video-tier" class="form-control" style="width: 100%; padding: 0.6rem; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;">
+                  <option value="FREE">FREE (Semua User Dapatkan Akses)</option>
+                  <option value="PREMIUM">PREMIUM (Khusus Member Premium)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.82rem; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">Durasi Estimasi (Detik)</label>
+                <input type="number" id="admin-video-duration" class="form-control" value="300" style="width: 100%; padding: 0.6rem; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px;">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">🚀 Simpan & Publikasikan Video Edukasi</button>
+          </form>
+        </div>
+
         <div class="grid-3" id="courses-grid">
           <!-- Rendered dynamically based on RBAC Tier -->
         </div>
@@ -1101,46 +1246,80 @@
           🚀 Eksekusi Aksi Ini Sekarang
         </button>
         <button class="btn btn-secondary" onclick="closeCourseModal()">✓ Selesai Mempelajari</button>
-  <!-- Digital Receipt Modal -->
+  <!-- Digital Receipt Modal (Real Thermal Receipt Layout) -->
   <div id="receipt-modal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 420px; background: #0f172a; color: #f8fafc; border: 1px solid rgba(255,255,255,0.15);">
-      <button class="close-modal-btn" onclick="closeReceiptModal()">✕</button>
+    <div class="modal-content" style="max-width: 380px; background: #ffffff; color: #000000; font-family: 'Courier New', Courier, monospace; border: 1px solid #cbd5e1; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); padding: 1.5rem;">
+      <button class="close-modal-btn" onclick="closeReceiptModal()" style="color: #64748b; top: 0.5rem; right: 0.5rem;">✕</button>
       
-      <div style="text-align: center; border-bottom: 2px dashed rgba(255,255,255,0.2); padding-bottom: 1rem; margin-bottom: 1rem;">
-        <div style="font-size: 1.5rem; font-weight: 800; color: #38bdf8;" id="receipt-biz-name">Warung Kelontong Berkah</div>
-        <div style="font-size: 0.8rem; color: #94a3b8;" id="receipt-tx-id">Struk #TX-1001</div>
-        <div style="font-size: 0.75rem; color: #64748b;" id="receipt-date">25 Sep 2026, 22:30 WIB</div>
+      <!-- Store Logo Header -->
+      <div style="text-align: center; margin-bottom: 0.75rem;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.2rem;">🏪</div>
+        <div style="font-size: 1.25rem; font-weight: 800; color: #000;" id="receipt-biz-name">Karis Jaya Shop</div>
+        <div style="font-size: 0.78rem; color: #1e293b;" id="receipt-biz-addr">Jl. Dr. Ir. H. Soekarno No.19,Medokan Semampir Surabaya</div>
+        <div style="font-size: 0.78rem; color: #1e293b;" id="receipt-biz-phone">No. Telp 0812345678</div>
+        <div style="font-size: 0.78rem; color: #1e293b; font-weight: 700; margin-top: 0.2rem;" id="receipt-tx-id">16413520230802084636</div>
       </div>
 
-      <div style="font-size: 0.85rem; margin-bottom: 1rem;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-          <span style="color: #94a3b8;">Kasir Bertugas:</span>
-          <strong id="receipt-cashier-name" style="color: #f1f5f9;">Dewi (Kasir)</strong>
+      <div style="border-top: 1px dashed #000; margin: 0.5rem 0;"></div>
+
+      <!-- Date & Customer Info -->
+      <div style="font-size: 0.8rem; line-height: 1.4; color: #000;">
+        <div style="display: flex; justify-content: space-between;">
+          <span id="receipt-date-date">2023-08-02</span>
+          <span id="receipt-cashier-name" style="text-align: right;">karis</span>
         </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-          <span style="color: #94a3b8;">Metode Bayar:</span>
-          <strong id="receipt-pay-method" style="color: #4ade80;">QRIS</strong>
+        <div style="display: flex; justify-content: space-between;">
+          <span id="receipt-date-time">08:46:36</span>
+          <span id="receipt-customer-name" style="text-align: right;">Sheila</span>
+        </div>
+        <div style="text-align: right; margin-top: 0.2rem;">
+          <span id="receipt-customer-addr" style="border: 1px solid #16a34a; color: #15803d; padding: 1px 4px; font-weight: 700; font-size: 0.75rem;">Jl. Diponegoro 1, Sby</span>
+        </div>
+        <div style="margin-top: 0.2rem;">
+          <span id="receipt-queue-no">No.0-3</span>
         </div>
       </div>
 
-      <!-- Items Breakdown -->
-      <div style="border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0.75rem 0; margin-bottom: 1rem; max-height: 200px; overflow-y: auto;">
-        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-          <tbody id="receipt-items-body">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
+      <div style="border-top: 1px dashed #000; margin: 0.5rem 0;"></div>
+
+      <!-- Item Breakdown -->
+      <div id="receipt-items-container" style="font-size: 0.8rem; color: #000; max-height: 250px; overflow-y: auto;">
+        <!-- Populated dynamically -->
       </div>
 
-      <!-- Receipt Total -->
-      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; font-weight: 800; color: #34d399; margin-bottom: 1.25rem;">
-        <span>TOTAL:</span>
-        <span id="receipt-total-amount">Rp 101.000</span>
+      <div style="border-top: 1px dashed #000; margin: 0.5rem 0;"></div>
+
+      <!-- Totals & Subtotal -->
+      <div style="font-size: 0.85rem; color: #000; line-height: 1.5;">
+        <div style="margin-bottom: 0.3rem;">Total QTY : <span id="receipt-total-qty">14</span></div>
+        <div style="display: flex; justify-content: space-between;">
+          <span>Sub Total</span>
+          <span id="receipt-subtotal-val">Rp 70.000</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.05rem; margin: 0.2rem 0;">
+          <span>Total</span>
+          <span id="receipt-total-val">Rp 70.000</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span>Bayar (<span id="receipt-pay-method">Cash</span>)</span>
+          <span id="receipt-paid-val">Rp 70.000</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span>Kembali</span>
+          <span id="receipt-change-val">Rp 0</span>
+        </div>
       </div>
 
-      <div style="display: flex; gap: 0.5rem;">
-        <button class="btn btn-primary" style="flex: 1;" onclick="window.print()">🖨️ Cetak / Print Struk</button>
-        <button class="btn btn-secondary" onclick="closeReceiptModal()">Tutup</button>
+      <!-- Footer Message -->
+      <div style="text-align: center; margin-top: 1rem; font-size: 0.78rem; color: #000;">
+        <div style="font-weight: 700; margin-bottom: 0.3rem;">Terimakasih Telah Berbelanja</div>
+        <div>Link Kritik dan Saran:</div>
+        <div style="font-size: 0.72rem; word-break: break-all;" id="receipt-ereceipt-url">com/e-receipt/S-00D39U-07G344G</div>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; margin-top: 1rem;" class="no-print">
+        <button class="btn btn-primary" style="flex: 1; font-size: 0.82rem;" onclick="window.print()">🖨️ Cetak / Print Struk</button>
+        <button class="btn btn-secondary" style="font-size: 0.82rem;" onclick="closeReceiptModal()">Tutup</button>
       </div>
     </div>
   </div>

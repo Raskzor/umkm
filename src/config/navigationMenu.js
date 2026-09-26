@@ -69,12 +69,12 @@ const NAVIGATION_MENU = [
     id: 'staff_management',
     title: 'Manajemen Anak Buah (Kasir)',
     category: 'store_operations',
-    tabId: 'pos-tab',
-    path: '/dashboard#pos-tab',
+    tabId: 'staff-tab',
+    path: '/dashboard#staff-tab',
     icon: '👥',
     allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'SUPER_ADMIN'],
     allowedTiers: ['FREE', 'PREMIUM'],
-    badgeLabel: 'Freemium Limit'
+    badgeLabel: 'Hak Akses Staf'
   },
 
   // 2. Finance (Cashflow & P&L Saku)

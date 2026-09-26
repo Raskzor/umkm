@@ -182,6 +182,10 @@ function renderDynamicNavigationSidebar(resolvedData) {
     catGroup.items.forEach(item => {
       const a = document.createElement('a');
       a.className = `menu-item ${item.tabId === activeTabId ? 'active' : ''}`;
+      if (item.id === 'system_docs_admin' || item.tabId === 'docs-tab') {
+        a.id = 'menu-item-docs';
+        a.style.cssText = 'background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); font-weight: 700; color: #a5b4fc;';
+      }
       a.setAttribute('onclick', `switchTab('${item.tabId}', this)`);
 
       let badgeHtml = item.badgeLabel ? `<span style="font-size: 0.65rem; background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.15rem 0.4rem; border-radius: 4px; margin-left: auto;">${item.badgeLabel}</span>` : '';
@@ -212,11 +216,17 @@ function switchTab(tabId, el) {
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
 
-  document.getElementById(tabId).classList.add('active');
+  const targetTab = document.getElementById(tabId);
+  if (targetTab) {
+    targetTab.classList.add('active');
+  } else {
+    document.getElementById('audit-tab').classList.add('active');
+  }
+
   if (el) {
     el.classList.add('active');
   } else {
-    const matchingMenu = Array.from(document.querySelectorAll('.menu-item')).find(item => item.getAttribute('onclick').includes(tabId));
+    const matchingMenu = Array.from(document.querySelectorAll('.menu-item')).find(item => item.getAttribute('onclick') && item.getAttribute('onclick').includes(tabId));
     if (matchingMenu) matchingMenu.classList.add('active');
   }
 
@@ -225,6 +235,7 @@ function switchTab(tabId, el) {
     'gmaps-tab': { title: 'Google Maps & AI Review Engine', subtitle: 'Cetak QR Code Review, balasan otomatis AI, dan kupon loyalitas' },
     'landing-tab': { title: 'Builder Website Sementara UMKM', subtitle: 'Buat katalog web instan dengan tautan WhatsApp & upload foto' },
     'pos-tab': { title: 'Mesin Kasir & Integrasi QRIS', subtitle: 'Pencatatan transaksi instan, QRIS dinamis, cetak struk, dan kelola staf kasir toko' },
+    'staff-tab': { title: 'Manajemen Anak Buah (Kasir) & Hak Akses Staff', subtitle: 'Kelola informasi staf kasir, alamat tempat tinggal, PIN login, dan batasi menu yang dapat dibuka.' },
     'cashflow-tab': { title: 'Modul Cashflow & P&L Saku', subtitle: 'Pencatatan pemasukan/pengeluaran harian, omzet bersih & export laporan WA' },
     'loyalty-tab': { title: 'Smart WhatsApp Broadcast & Loyalty', subtitle: 'Himpunan kontak otomatis, deteksi pelanggan churn & template wa.me' },
     'inventory-tab': { title: 'Manajemen Stok, Supplier & Buku Bon', subtitle: 'Monitoring stok kritis, draft order WA supplier & utang-piutang' },
@@ -242,6 +253,8 @@ function switchTab(tabId, el) {
   }
 
   if (tabId === 'pos-tab') loadPOSData();
+  if (tabId === 'staff-tab') loadStaffData();
+  if (tabId === 'learning-tab') loadCourses();
   if (tabId === 'kit-tab') loadKitStateFromBackend();
   if (tabId === 'cashflow-tab') loadCashflowData();
   if (tabId === 'loyalty-tab') loadLoyaltyData();
@@ -732,10 +745,15 @@ async function uploadEvidence(taskId) {
   }
 }
 
-// Load Video Courses
+// Load Video Courses with Embed Player & Admin Controls
 async function loadCourses() {
   const container = document.getElementById('courses-grid');
   if (!container) return;
+
+  const adminVideoUploadCard = document.getElementById('admin-video-upload-card');
+  if (adminVideoUploadCard) {
+    adminVideoUploadCard.style.display = currentRole === 'SUPER_ADMIN' ? 'block' : 'none';
+  }
 
   try {
     const res = await fetch('/api/v1/learning/courses', {
@@ -744,25 +762,244 @@ async function loadCourses() {
     const result = await res.json();
 
     if (result.success) {
-      container.innerHTML = result.data.map(course => `
-        <div class="card video-card" onclick="openCourseDetail('${course.id}', '${course.title}', 'Modul Edukasi: ${course.module_category}. Durasi ${Math.round(course.duration_seconds/60)} Menit.')">
-          <div class="video-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.8));">
-            ▶️
-            ${course.is_locked ? `
-              <div class="lock-overlay">
-                <span style="font-size: 2rem;">🔒</span>
-                <span style="font-size: 0.8rem; font-weight: 700;">PREMIUM ONLY</span>
+      container.innerHTML = result.data.map(course => {
+        const embedUrl = course.embed_url || course.video_url || 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+        return `
+          <div class="card video-card" style="padding: 0; overflow: hidden; background: #0f172a; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="position: relative; width: 100%; padding-top: 56.25%;">
+              <iframe src="${embedUrl}" style="position: absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe>
+              ${course.is_locked ? `
+                <div class="lock-overlay" style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(15,23,42,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
+                  <span style="font-size: 2rem;">🔒</span>
+                  <span style="font-size: 0.8rem; font-weight: 700; color: #f87171;">KHUSUS MEMBER PREMIUM</span>
+                  <span style="font-size: 0.72rem; color: #94a3b8; margin-top: 0.2rem;">Upgrade akun ke Premium untuk menonton</span>
+                </div>
+              ` : ''}
+            </div>
+            <div style="padding: 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+                <span style="font-size: 0.7rem; color: #60a5fa; font-weight: 700; text-transform: uppercase;">${course.module_category}</span>
+                <span class="role-badge ${course.minimum_tier === 'PREMIUM' ? 'admin' : 'free'}" style="font-size: 0.65rem;">${course.minimum_tier}</span>
               </div>
-            ` : ''}
+              <div style="font-size: 0.95rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.3rem;">${course.title}</div>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">${course.description || 'Tutorial strategi & tips praktis ekosistem SuperUMKM.'}</p>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #64748b;">
+                <span>⏱️ ${Math.round((course.duration_seconds || 300) / 60)} Menit</span>
+                ${currentRole === 'SUPER_ADMIN' ? `
+                  <button class="btn btn-secondary" style="font-size: 0.7rem; padding: 0.2rem 0.5rem; color: #f87171;" onclick="handleDeleteVideo('${course.id}')">🗑️ Hapus</button>
+                ` : ''}
+              </div>
+            </div>
           </div>
-          <div style="font-size: 0.75rem; color: #60a5fa; font-weight: 700; text-transform: uppercase;">${course.module_category}</div>
-          <div style="font-size: 1rem; font-weight: 700; margin: 0.4rem 0;">${course.title}</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted);">Durasi: ${Math.round(course.duration_seconds / 60)} Menit</div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
   } catch (err) {
     console.error('Courses load error:', err);
+  }
+}
+
+async function handleAdminUploadVideo(e) {
+  e.preventDefault();
+  const payload = {
+    title: document.getElementById('admin-video-title').value,
+    module_category: document.getElementById('admin-video-category').value,
+    video_url: document.getElementById('admin-video-url').value,
+    description: document.getElementById('admin-video-desc').value,
+    minimum_tier: document.getElementById('admin-video-tier').value,
+    duration_seconds: document.getElementById('admin-video-duration').value
+  };
+
+  try {
+    const res = await fetch('/api/v1/learning/courses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if (result.success) {
+      alert('Video edukasi berhasil diupload & dipublikasikan!');
+      document.getElementById('admin-video-form').reset();
+      loadCourses();
+    } else {
+      alert(result.error || 'Gagal mengupload video');
+    }
+  } catch (err) {
+    console.error('handleAdminUploadVideo error:', err);
+    alert('Terjadi kesalahan server saat mengupload video');
+  }
+}
+
+async function handleDeleteVideo(videoId) {
+  if (!confirm('Apakah Anda yakin ingin menghapus video edukasi ini?')) return;
+  try {
+    const res = await fetch(`/api/v1/learning/courses/${videoId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const result = await res.json();
+    if (result.success) {
+      alert('Video berhasil dihapus');
+      loadCourses();
+    } else {
+      alert(result.error || 'Gagal menghapus video');
+    }
+  } catch (err) {
+    console.error('handleDeleteVideo error:', err);
+  }
+}
+
+// ==========================================
+// STAFF MANAGEMENT CLIENT ENGINE
+// ==========================================
+async function loadStaffData() {
+  if (!userToken) return;
+  try {
+    const res = await fetch('/api/v1/pos/staff', {
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const result = await res.json();
+    if (result.success) {
+      renderStaffList(result.data.staff_list);
+    }
+  } catch (err) {
+    console.error('loadStaffData error:', err);
+  }
+}
+
+function renderStaffList(staffList) {
+  const container = document.getElementById('staff-list-container');
+  if (!container) return;
+
+  if (!staffList || staffList.length === 0) {
+    container.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1.5rem;">Belum ada staf kasir yang ditambahkan.</div>`;
+    return;
+  }
+
+  container.innerHTML = staffList.map(staff => `
+    <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.85rem;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+        <div>
+          <strong style="color: #f8fafc; font-size: 0.95rem;">${staff.staff_name}</strong>
+          <span style="font-size: 0.75rem; background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.1rem 0.4rem; border-radius: 4px; margin-left: 0.4rem;">${staff.role_title || 'Kasir'}</span>
+        </div>
+        <span class="role-badge ${staff.status === 'ACTIVE' ? 'free' : 'admin'}" style="font-size: 0.65rem;">${staff.status === 'ACTIVE' ? 'AKTIF' : 'NONAKTIF'}</span>
+      </div>
+      <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.3rem;">
+        <div>📱 WA: <strong>${staff.phone_number}</strong></div>
+        <div>🏠 Alamat: ${staff.address || '-'}</div>
+        <div>🔑 PIN Login: <code>${staff.pin || '1234'}</code></div>
+      </div>
+      <div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.3rem; font-size: 0.7rem;">
+        ${(staff.allowed_permissions || ['pos_instant', 'qris_payment']).map(p => `<span style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 0.1rem 0.4rem; border-radius: 4px;">✓ ${p}</span>`).join('')}
+      </div>
+      <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+        <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick='editStaff(${JSON.stringify(staff).replace(/'/g, "&apos;")})'>✏️ Edit</button>
+        <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; color: #f87171;" onclick="deleteStaff('${staff.id}')">🗑️ Nonaktifkan</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAddStaffModal() {
+  resetStaffForm();
+  document.getElementById('staff-form-title').innerText = '👤 Form Tambah Staf Kasir';
+  document.getElementById('staff-name-input').focus();
+}
+
+function resetStaffForm() {
+  document.getElementById('staff-edit-id').value = '';
+  document.getElementById('staff-manage-form').reset();
+  document.getElementById('staff-form-title').innerText = '👤 Form Informasi Staf Kasir';
+}
+
+function editStaff(staff) {
+  document.getElementById('staff-edit-id').value = staff.id;
+  document.getElementById('staff-name-input').value = staff.staff_name || '';
+  document.getElementById('staff-phone-input').value = staff.phone_number || '';
+  document.getElementById('staff-address-input').value = staff.address || '';
+  document.getElementById('staff-pin-input').value = staff.pin || '1234';
+  document.getElementById('staff-role-title-input').value = staff.role_title || 'Kasir Toko';
+
+  const perms = staff.allowed_permissions || [];
+  document.getElementById('perm-pos').checked = perms.includes('pos_instant');
+  document.getElementById('perm-qris').checked = perms.includes('qris_payment');
+  document.getElementById('perm-inventory').checked = perms.includes('inventory_stok_bon');
+  document.getElementById('perm-cashflow').checked = perms.includes('cashflow_pnl');
+  document.getElementById('perm-loyalty').checked = perms.includes('wa_loyalty');
+  document.getElementById('perm-course').checked = perms.includes('micro_course');
+
+  document.getElementById('staff-form-title').innerText = `✏️ Edit Staf: ${staff.staff_name}`;
+}
+
+async function handleSaveStaff(e) {
+  e.preventDefault();
+  const staffId = document.getElementById('staff-edit-id').value;
+
+  const allowed_permissions = [];
+  if (document.getElementById('perm-pos').checked) allowed_permissions.push('pos_instant');
+  if (document.getElementById('perm-qris').checked) allowed_permissions.push('qris_payment');
+  if (document.getElementById('perm-inventory').checked) allowed_permissions.push('inventory_stok_bon');
+  if (document.getElementById('perm-cashflow').checked) allowed_permissions.push('cashflow_pnl');
+  if (document.getElementById('perm-loyalty').checked) allowed_permissions.push('wa_loyalty');
+  if (document.getElementById('perm-course').checked) allowed_permissions.push('micro_course');
+
+  const payload = {
+    staff_name: document.getElementById('staff-name-input').value,
+    phone_number: document.getElementById('staff-phone-input').value,
+    address: document.getElementById('staff-address-input').value,
+    pin: document.getElementById('staff-pin-input').value,
+    role_title: document.getElementById('staff-role-title-input').value,
+    allowed_permissions
+  };
+
+  const method = staffId ? 'PUT' : 'POST';
+  const url = staffId ? `/api/v1/pos/staff/${staffId}` : '/api/v1/pos/staff';
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      alert(result.message || 'Data staf berhasil disimpan!');
+      resetStaffForm();
+      loadStaffData();
+      loadDynamicNavigationMenu();
+    } else {
+      alert(result.error || 'Gagal menyimpan data staf');
+    }
+  } catch (err) {
+    console.error('handleSaveStaff error:', err);
+    alert('Terjadi kesalahan saat menyimpan data staf');
+  }
+}
+
+async function deleteStaff(staffId) {
+  if (!confirm('Apakah Anda yakin ingin menonaktifkan staf kasir ini?')) return;
+  try {
+    const res = await fetch(`/api/v1/pos/staff/${staffId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const result = await res.json();
+    if (result.success) {
+      alert(result.message);
+      loadStaffData();
+    } else {
+      alert(result.error || 'Gagal menonaktifkan staf');
+    }
+  } catch (err) {
+    console.error('deleteStaff error:', err);
   }
 }
 
@@ -950,20 +1187,60 @@ function showReceiptModal(receipt) {
   const modal = document.getElementById('receipt-modal');
   if (!modal) return;
 
-  document.getElementById('receipt-biz-name').innerText = receipt.business_name || 'Toko UMKM';
-  document.getElementById('receipt-tx-id').innerText = `Struk #${receipt.id}`;
-  document.getElementById('receipt-date').innerText = new Date(receipt.created_at).toLocaleString('id-ID');
-  document.getElementById('receipt-cashier-name').innerText = receipt.cashier_name;
-  document.getElementById('receipt-pay-method').innerText = receipt.payment_method;
-  document.getElementById('receipt-total-amount').innerText = `Rp ${receipt.total_amount.toLocaleString('id-ID')}`;
+  const createdDate = new Date(receipt.created_at || Date.now());
+  const dateStr = createdDate.toISOString().split('T')[0];
+  const timeStr = createdDate.toTimeString().split(' ')[0];
 
-  const itemsBody = document.getElementById('receipt-items-body');
-  itemsBody.innerHTML = receipt.items.map(item => `
-    <tr>
-      <td style="padding: 0.35rem 0; color: #cbd5e1;">${item.qty}x ${item.name}</td>
-      <td style="padding: 0.35rem 0; text-align: right; color: #f1f5f9; font-weight: 600;">Rp ${item.subtotal.toLocaleString('id-ID')}</td>
-    </tr>
-  `).join('');
+  document.getElementById('receipt-biz-name').innerText = receipt.business_name || 'Karis Jaya Shop';
+  const bizAddrEl = document.getElementById('receipt-biz-addr');
+  if (bizAddrEl) bizAddrEl.innerText = receipt.business_address || 'Jl. Dr. Ir. H. Soekarno No.19,Medokan Semampir Surabaya';
+  const bizPhoneEl = document.getElementById('receipt-biz-phone');
+  if (bizPhoneEl) bizPhoneEl.innerText = `No. Telp ${receipt.business_phone || '0812345678'}`;
+  document.getElementById('receipt-tx-id').innerText = receipt.receipt_no || receipt.id || '16413520230802084636';
+
+  const dateDateEl = document.getElementById('receipt-date-date');
+  if (dateDateEl) dateDateEl.innerText = dateStr;
+  const dateTimeEl = document.getElementById('receipt-date-time');
+  if (dateTimeEl) dateTimeEl.innerText = timeStr;
+
+  document.getElementById('receipt-cashier-name').innerText = receipt.cashier_name || 'karis';
+  const custNameEl = document.getElementById('receipt-customer-name');
+  if (custNameEl) custNameEl.innerText = receipt.customer_name || 'Sheila';
+  const custAddrEl = document.getElementById('receipt-customer-addr');
+  if (custAddrEl) custAddrEl.innerText = receipt.customer_address || 'Jl. Diponegoro 1, Sby';
+  const queueNoEl = document.getElementById('receipt-queue-no');
+  if (queueNoEl) queueNoEl.innerText = receipt.queue_no || 'No.0-3';
+
+  const itemsContainer = document.getElementById('receipt-items-container');
+  if (itemsContainer) {
+    itemsContainer.innerHTML = (receipt.items || []).map((item, idx) => `
+      <div style="margin-top: 0.35rem;">
+        <strong style="color: #000; font-weight: 700;">${item.index || (idx + 1)}. ${item.name}</strong>
+        <div style="display: flex; justify-content: space-between;">
+          <span>${item.qty} ${item.unit || ''} x ${(item.price || 0).toLocaleString('id-ID')}</span>
+          <span>Rp ${(item.subtotal || 0).toLocaleString('id-ID')}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  const totalQty = receipt.total_qty || (receipt.items || []).reduce((acc, i) => acc + (i.qty || 1), 0);
+  const totalQtyEl = document.getElementById('receipt-total-qty');
+  if (totalQtyEl) totalQtyEl.innerText = totalQty;
+
+  const subtotalValEl = document.getElementById('receipt-subtotal-val');
+  if (subtotalValEl) subtotalValEl.innerText = `Rp ${(receipt.subtotal || receipt.total_amount || 0).toLocaleString('id-ID')}`;
+  
+  const totalValEl = document.getElementById('receipt-total-val');
+  if (totalValEl) totalValEl.innerText = `Rp ${(receipt.total_amount || 0).toLocaleString('id-ID')}`;
+
+  document.getElementById('receipt-pay-method').innerText = receipt.payment_method || 'Cash';
+
+  const paidValEl = document.getElementById('receipt-paid-val');
+  if (paidValEl) paidValEl.innerText = `Rp ${(receipt.paid_amount || receipt.total_amount || 0).toLocaleString('id-ID')}`;
+
+  const changeValEl = document.getElementById('receipt-change-val');
+  if (changeValEl) changeValEl.innerText = `Rp ${(receipt.change_amount || 0).toLocaleString('id-ID')}`;
 
   modal.classList.add('active');
 }
