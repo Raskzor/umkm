@@ -236,8 +236,10 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
+      const pathParts = window.location.pathname.split('/');
+      const pathSlug = (pathParts[1] === 'toko' && pathParts[2]) ? pathParts[2] : null;
       const params = new URLSearchParams(window.location.search);
-      const slug = params.get('slug') || 'warung-berkah';
+      const slug = pathSlug || params.get('slug') || 'warung-berkah';
 
       try {
         const res = await fetch(`/api/v1/landing/${slug}`);

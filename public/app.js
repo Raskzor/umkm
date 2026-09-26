@@ -275,20 +275,20 @@ function switchTab(tabId, el) {
   }
 
   const titles = {
-    'audit-tab': { title: 'AI Business Health Audit', subtitle: 'Diagnosis otomatis AI kesehatan digital usaha UMKM Anda dalam 5 menit' },
+    'audit-tab': { title: 'AI Business Health Audit & Action Center', subtitle: 'Diagnosis otomatis AI kesehatan digital usaha UMKM Anda berbasis siklus CHECK → FIX → GROW' },
     'gmaps-tab': { title: 'Google Maps & AI Review Engine', subtitle: 'Cetak QR Code Review, balasan otomatis AI, dan kupon loyalitas' },
-    'landing-tab': { title: 'Builder Website Sementara UMKM', subtitle: 'Buat katalog web instan dengan tautan WhatsApp & upload foto' },
+    'landing-tab': { title: 'Mini Website & Toko Online Instan', subtitle: 'Buat katalog web instan dengan tautan WhatsApp, media sosial & upload foto' },
     'pos-tab': { title: 'Mesin Kasir & Integrasi QRIS', subtitle: 'Pencatatan transaksi instan, QRIS dinamis, cetak struk, dan kelola staf kasir toko' },
-    'staff-tab': { title: 'Manajemen Anak Buah (Kasir) & Hak Akses Staff', subtitle: 'Kelola informasi staf kasir, alamat tempat tinggal, PIN login, dan batasi menu yang dapat dibuka.' },
+    'staff-tab': { title: 'Manajemen Staf Kasir & Hak Akses Staf', subtitle: 'Kelola informasi staf kasir, alamat tempat tinggal, PIN login, dan batasi menu yang dapat dibuka.' },
     'cashflow-tab': { title: 'Modul Cashflow & P&L Saku', subtitle: 'Pencatatan pemasukan/pengeluaran harian, omzet bersih & export laporan WA' },
     'loyalty-tab': { title: 'Smart WhatsApp Broadcast & Loyalty', subtitle: 'Himpunan kontak otomatis, deteksi pelanggan churn & template wa.me' },
     'inventory-tab': { title: 'Manajemen Stok, Supplier & Buku Bon', subtitle: 'Monitoring stok kritis, draft order WA supplier & utang-piutang' },
     'copywriting-tab': { title: 'AI Promo Generator & Data Poster', subtitle: 'Copywriting otomatis santai lokal & renderer visual poster promo' },
-    'services-tab': { title: 'Jasa Pendampingan & Smart Route Dispatch', subtitle: 'Manajemen tiket pengerjaan verifikasi lokasi & rute efisien agen' },
+    'services-tab': { title: 'Jasa Pendampingan & Pusat Rute Agen', subtitle: 'Manajemen tiket pengerjaan verifikasi lokasi & rute efisien agen' },
     'learning-tab': { title: 'Video Micro-Course Edukasi', subtitle: 'Modul pelatihan strategi pemasaran digital & Google Maps' },
     'kit-tab': { title: 'Kit Lokal Naik Kelas', subtitle: 'Action kit interaktif untuk diagnosis & penanganan etalase digital UMKM' },
     'qris-tab': { title: 'Integrasi QRIS Kasir & Dynamic QR Generator', subtitle: 'Payload QRIS dinamis/statis, SVG QR renderer, dan verifikasi status bayar otomatis' },
-    'docs-tab': { title: 'Dokumentasi Sistem IT (System Admin)', subtitle: 'Spesifikasi arsitektur, registry REST API, SQL DDL PostgreSQL, matriks RBAC, dan sequence diagram' }
+    'docs-tab': { title: 'Dokumentasi Sistem IT (System Admin)', subtitle: 'Spesifikasi arsitektur, registry REST API, SQL DDL PostgreSQL, matriks Hak Akses Staf, dan sequence diagram' }
   };
 
   if (titles[tabId]) {
@@ -307,18 +307,68 @@ function switchTab(tabId, el) {
   if (tabId === 'docs-tab') loadITAdminDocsBackend();
 }
 
-// Toggle Google Maps Audit Fields Visibility
+let currentAuditStep = 1;
+let isScoreBreakdownOpen = false;
+
+// Toggle Google Maps Audit Fields Visibility & Conditional Branch Notice
 function toggleGmapsAuditFields() {
   const gmapsSelect = document.getElementById('audit-gmaps');
   const gmapsFields = document.getElementById('gmaps-audit-fields');
-  if (!gmapsSelect || !gmapsFields) return;
+  const skipNotice = document.getElementById('gmaps-skip-notice');
+  if (!gmapsSelect) return;
+
   const isGmaps = gmapsSelect.value === 'true';
-  gmapsFields.style.display = isGmaps ? 'block' : 'none';
+  if (gmapsFields) gmapsFields.style.display = isGmaps ? 'block' : 'none';
+  if (skipNotice) skipNotice.style.display = isGmaps ? 'none' : 'block';
+}
+
+function nextAuditStep() {
+  if (currentAuditStep < 4) {
+    currentAuditStep++;
+    updateWizardStepUI();
+  }
+}
+
+function prevAuditStep() {
+  if (currentAuditStep > 1) {
+    currentAuditStep--;
+    updateWizardStepUI();
+  }
+}
+
+function updateWizardStepUI() {
+  for (let i = 1; i <= 4; i++) {
+    const stepEl = document.getElementById(`audit-step-${i}`);
+    if (stepEl) {
+      stepEl.style.display = (i === currentAuditStep) ? 'block' : 'none';
+    }
+  }
+
+  const badge = document.getElementById('wizard-step-badge');
+  if (badge) badge.innerText = `Langkah ${currentAuditStep} dari 4`;
+
+  const pBar = document.getElementById('wizard-progress-bar');
+  if (pBar) pBar.style.width = `${currentAuditStep * 25}%`;
+
+  const prevBtn = document.getElementById('wizard-prev-btn');
+  const nextBtn = document.getElementById('wizard-next-btn');
+  const submitBtn = document.getElementById('wizard-submit-btn');
+
+  if (prevBtn) prevBtn.style.display = (currentAuditStep > 1) ? 'inline-flex' : 'none';
+  if (nextBtn) nextBtn.style.display = (currentAuditStep < 4) ? 'inline-flex' : 'none';
+  if (submitBtn) submitBtn.style.display = (currentAuditStep === 4) ? 'inline-flex' : 'none';
+}
+
+function toggleScoreBreakdownDetails() {
+  isScoreBreakdownOpen = !isScoreBreakdownOpen;
+  const container = document.getElementById('score-breakdown-container');
+  if (container) container.style.display = isScoreBreakdownOpen ? 'block' : 'none';
 }
 
 // Evaluate Audit Default
 async function handleAuditEvaluateDefault() {
   toggleGmapsAuditFields();
+  updateWizardStepUI();
   const payload = {
     has_gmaps_profile: true,
     gmaps_rating: 4.6,
@@ -371,30 +421,97 @@ async function runAuditEvaluation(payload) {
 
     const result = await res.json();
     if (result.success) {
-      document.getElementById('score-val').innerText = result.data.health_score;
-      document.getElementById('score-status').innerText = result.data.status_grade;
-      document.getElementById('ai-diagnosis-summary').innerText = result.data.ai_diagnosis_summary;
+      const data = result.data;
+      document.getElementById('score-val').innerText = data.health_score;
+      document.getElementById('score-status').innerText = data.status_grade;
+      document.getElementById('ai-diagnosis-summary').innerText = data.ai_diagnosis_summary;
 
-      currentRecommendations = result.data.recommendations || [];
+      currentRecommendations = data.recommendations || [];
 
-      // Render recommendations with interactive click-to-course support
-      const recContainer = document.getElementById('recommendations-list');
-      recContainer.innerHTML = currentRecommendations.map((rec, index) => `
-        <div class="checklist-item interactive" onclick="openCourseDetailByIndex(${index})">
-          <div class="checklist-icon">💡</div>
-          <div style="flex: 1;">
-            <div style="font-size: 0.9rem; font-weight: 600;">${rec.text}</div>
-            <div class="course-badge-btn">
-              <span>🎓 Pelajari Video & Step-by-Step:</span>
-              <span>${rec.course_title || 'Lihat Tutorial'}</span>
-            </div>
-          </div>
-        </div>
-      `).join('');
+      // Render transparent 8-dimension breakdown
+      renderScoreBreakdown(data.breakdown || []);
+
+      // Render Top 3 Focus Tasks Component
+      renderTopFocusTasks(data.top_focus_tasks || []);
+
+      // Render recommendations list with direct execution buttons
+      renderRecommendationsList(currentRecommendations);
     }
   } catch (err) {
     console.error('Gagal menghitung skor audit:', err);
   }
+}
+
+function renderScoreBreakdown(breakdown) {
+  const container = document.getElementById('score-breakdown-container');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+      ${breakdown.map(item => `
+        <div style="font-size: 0.78rem; padding: 0.35rem 0.5rem; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+          <div style="display: flex; justify-content: space-between; font-weight: 700; color: #f8fafc;">
+            <span>${item.dimension}</span>
+            <span style="color: ${item.earned === item.max ? '#34d399' : '#fbbf24'};">${item.earned}/${item.max} Poin</span>
+          </div>
+          <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 0.15rem;">${item.gap_reason}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderTopFocusTasks(focusTasks) {
+  const container = document.getElementById('top-focus-tasks-container');
+  if (!container) return;
+
+  if (!focusTasks || focusTasks.length === 0) {
+    container.innerHTML = `<div style="font-size: 0.85rem; color: #34d399; text-align: center; padding: 0.5rem;">🎉 Selamat! Semua dimensi utama aset digital Anda sudah optimal!</div>`;
+    return;
+  }
+
+  container.innerHTML = focusTasks.slice(0, 3).map((task, idx) => `
+    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(245, 158, 11, 0.2); padding: 0.85rem; border-radius: 10px; margin-bottom: 0.6rem; gap: 0.75rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1;">
+        <span style="font-size: 1.2rem; background: rgba(245, 158, 11, 0.2); color: #fbbf24; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;">${idx + 1}</span>
+        <div>
+          <div style="font-weight: 700; font-size: 0.88rem; color: #ffffff;">${task.title}</div>
+          <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.15rem;">${task.description}</div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; flex-shrink: 0;">
+        <span style="font-size: 0.75rem; font-weight: 800; background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 0.2rem 0.5rem; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.3);">+${task.impact_points} Poin</span>
+        <button class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="switchTab('${task.action_tab_id || 'gmaps-tab'}')">
+          🚀 Eksekusi
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderRecommendationsList(recs) {
+  const recContainer = document.getElementById('recommendations-list');
+  if (!recContainer) return;
+
+  recContainer.innerHTML = recs.map((rec, index) => `
+    <div class="checklist-item interactive" style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; padding: 0.85rem; background: rgba(255,255,255,0.02); border-radius: 10px; margin-bottom: 0.5rem;">
+      <div style="display: flex; gap: 0.75rem; align-items: center; flex: 1;">
+        <div class="checklist-icon" style="font-size: 1.1rem;">💡</div>
+        <div>
+          <div style="font-size: 0.88rem; font-weight: 600; color: #ffffff;">${rec.text}</div>
+          <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 0.15rem;">Kategori: ${rec.category || 'Digital Growth'}</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.4rem; flex-shrink: 0;">
+        <button class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="openCourseDetailByIndex(${index})">
+          🎓 Tutorial
+        </button>
+        <button class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="switchTab('${rec.action_tab_id || 'gmaps-tab'}')">
+          🚀 Buka Modul
+        </button>
+      </div>
+    </div>
+  `).join('');
 }
 
 // Modal Course Detail Viewer
@@ -611,7 +728,7 @@ async function handleBuildLanding(e) {
 
     const result = await res.json();
     if (result.success) {
-      const pubLink = `/landing.html?slug=${result.data.slug}`;
+      const pubLink = `/toko/${result.data.slug}`;
       document.getElementById('published-slug-url').innerText = pubLink;
       document.getElementById('open-public-site-btn').href = pubLink;
       document.getElementById('live-biz-name').innerText = payload.business_name;
@@ -639,9 +756,10 @@ async function handleBuildLanding(e) {
         </div>
       `).join('');
 
-      document.getElementById('wa-order-btn').href = `https://wa.me/62${payload.whatsapp_number.replace(/^0/, '')}?text=Halo%20${encodeURIComponent(payload.business_name)}`;
+      const waBtn = document.getElementById('wa-order-btn');
+      if (waBtn) waBtn.href = `https://wa.me/62${payload.whatsapp_number.replace(/^0/, '')}?text=Halo%20${encodeURIComponent(payload.business_name)}`;
       
-      alert('Website Sementara UMKM berhasil diterbitkan! Klik "Buka Web Publik" untuk melihat hasilnya.');
+      alert('Mini Website & Toko Online Instan UMKM berhasil diterbitkan! Klik "Buka Web Publik" untuk melihat hasilnya.');
     }
   } catch (err) {
     alert('Gagal menerbitkan website sementara: ' + err.message);

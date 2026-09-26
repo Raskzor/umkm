@@ -4,235 +4,277 @@ const db = require('../../shared/database/db');
 const { authenticate, authorizeRoles } = require('../../shared/utils/rbac');
 const { generateBusinessAuditDiagnosis } = require('../../shared/utils/ai.service');
 
-// Execute AI-Powered Business Health Check Evaluation
+// Execute AI-Powered Business Health Check Evaluation (Deterministic 100-Point Engine)
 router.post('/evaluate', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'FIELD_AGENT', 'SUPER_ADMIN'), async (req, res) => {
   const {
-    has_gmaps_profile,
-    gmaps_rating,
-    review_count,
-    has_website_or_catalog,
-    has_whatsapp_business,
-    has_qris_payment,
-    has_physical_banner,
-    has_social_media,
-    has_promo_program
+    has_gmaps_profile = false,
+    gmaps_verified = false,
+    gmaps_rating = 0,
+    review_count = 0,
+    photos_count = 0,
+    has_physical_banner = false,
+    has_website_or_catalog = false,
+    has_whatsapp_business = false,
+    has_product_prices = false,
+    has_qris_payment = false,
+    has_operational_hours = false,
+    has_promo_program = false,
+    has_social_media = false
   } = req.body;
 
-  let score = 0;
+  let totalScore = 0;
   const breakdown = [];
   const recommendations = [];
 
-  // 1. Google Maps Optimization Check (Conditional max 25 pts)
+  // 1. Google Business Presence (20%) - Max 20 Poin
+  let gmapsEarned = 0;
+  let gmapsGap = null;
   if (has_gmaps_profile) {
-    score += 10;
-    breakdown.push({ item: 'Google Maps Profil Diklaim', points: 10, max: 10 });
-
-    if (gmaps_rating >= 4.5) {
-      score += 8;
-      breakdown.push({ item: 'Rating Pelanggan Bintang 5 (>=4.5)', points: 8, max: 8 });
-    } else if (gmaps_rating >= 4.0) {
-      score += 4;
-      breakdown.push({ item: 'Rating Pelanggan Cukup (>=4.0)', points: 4, max: 8 });
+    gmapsEarned += 10;
+    if (gmaps_verified) {
+      gmapsEarned += 10;
     } else {
-      recommendations.push({
-        id: 'rec-rating-boost',
-        text: 'Tingkatkan rating Google Maps dengan mencetak QR Standee ulasan dan memberikan respons ramah AI.',
-        target_course_id: 'tut-002',
-        course_title: 'Trik Mendapatkan 100+ Bintang 5 Review Pelanggan',
-        category: 'Review Management',
-        video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-        action_tab_id: 'gmaps-tab',
-        action_button_label: '🎨 Cetak QR Standee & Auto-Reply AI',
-        steps: [
-          { num: 1, title: 'Generate QR Standee Akrilik', desc: 'Buka menu Google Maps & QR, masukkan link ulasan toko Anda lalu klik "Generate Standee".' },
-          { num: 2, title: 'Letakkan QR di Meja Kasir', desc: 'Cetak dan letakkan Standee QR di kasir. Minta kasir menyapa: "Boleh bantu ulas bintang 5 kak?"' },
-          { num: 3, title: 'Gunakan AI Auto-Reply', desc: 'Aktifkan fitur AI Auto-Responder di SuperUMKM untuk membalas ulasan secara ramah & otomatis.' }
-        ]
-      });
+      gmapsGap = 'Titik lokasi Google Maps belum terverifikasi instan';
+    }
+  } else {
+    gmapsGap = 'Belum mendaftarkan lokasi toko di Google Maps';
+  }
+  totalScore += gmapsEarned;
+  breakdown.push({
+    dimension: 'Google Business Presence',
+    earned: gmapsEarned,
+    max: 20,
+    gap_reason: gmapsGap
+  });
+
+  if (!has_gmaps_profile || !gmaps_verified) {
+    recommendations.push({
+      id: 'rec-gmaps-claim',
+      title: 'Klaim & Verifikasi Lokasi Google Maps',
+      text: 'Daftarkan & verifikasi lokasi toko Anda di Google Maps agar mudah ditemukan pembeli sekitar.',
+      impact_points: 20 - gmapsEarned,
+      category: 'Google Maps Optimization',
+      action_tab_id: 'gmaps-tab',
+      action_button_label: '📍 Klaim & Buat QR Code Review',
+      steps: [
+        'Langkah 1: Buka aplikasi Google Maps, cari nama toko Anda lalu klik "Klaim Bisnis Ini".',
+        'Langkah 2: Lakukan verifikasi via SMS/WA ke nomor HP toko.',
+        'Langkah 3: Cetak QR Code Ulasan dari SuperUMKM dan letakkan di meja kasir.'
+      ]
+    });
+  }
+
+  // 2. Review & Reputasi (15%) - Max 15 Poin
+  let reviewEarned = 0;
+  let reviewGap = null;
+  if (has_gmaps_profile) {
+    if (gmaps_rating >= 4.5) {
+      reviewEarned += 8;
+    } else if (gmaps_rating >= 4.0) {
+      reviewEarned += 4;
+      reviewGap = 'Rating toko masih di bawah 4.5 bintang';
+    } else {
+      reviewGap = 'Rating toko di bawah 4.0 bintang';
     }
 
     if (review_count >= 20) {
-      score += 7;
-      breakdown.push({ item: 'Jumlah Review Pelanggan (>=20)', points: 7, max: 7 });
+      reviewEarned += 7;
+    } else if (review_count >= 5) {
+      reviewEarned += 3;
+      reviewGap = reviewGap || 'Jumlah ulasan pelanggan masih di bawah 20 review';
     } else {
-      recommendations.push({
-        id: 'rec-review-count',
-        text: 'Kejar target minimal 20 review pertama menggunakan Standee Akrilik QR Code di meja kasir.',
-        target_course_id: 'tut-002',
-        course_title: 'Trik Mendapatkan 100+ Bintang 5 Review Pelanggan',
-        category: 'Review Management',
-        video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-        action_tab_id: 'gmaps-tab',
-        action_button_label: '🎟️ Buat Kupon Diskon Ulasan Bintang 5',
-        steps: [
-          { num: 1, title: 'Terbitkan Kupon Digital Loyalitas', desc: 'Buka fitur QR Review Coupon Generator, buat promo "Diskon Rp 5.000 / Gratis Es Teh".' },
-          { num: 2, title: 'Sajikan QR Code Ulasan', desc: 'Minta pelanggan memindai QR Code setelah selesai transaksi.' },
-          { num: 3, title: 'Berikan Hadiah Langsung', desc: 'Tunjukkan bukti ulasan bintang 5 ke kasir untuk mengklaim promo diskon.' }
-        ]
-      });
+      reviewGap = reviewGap || 'Jumlah ulasan pelanggan masih di bawah 5 review';
     }
   } else {
+    reviewGap = 'Fitur ulasan belum aktif karena belum ada lokasi Google Maps';
+  }
+  totalScore += reviewEarned;
+  breakdown.push({
+    dimension: 'Review & Reputasi Toko',
+    earned: reviewEarned,
+    max: 15,
+    gap_reason: reviewGap
+  });
+
+  if (reviewEarned < 15 && has_gmaps_profile) {
     recommendations.push({
-      id: 'rec-gmaps-claim',
-      text: 'Klaim & verifikasi lokasi usaha Anda di Google Maps untuk meningkatkan visibilitas di area sekitar.',
-      target_course_id: 'tut-001',
-      course_title: 'Cara Klaim & Verifikasi Google Maps Tempat Usaha',
-      category: 'Google Maps Optimization',
-      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      id: 'rec-review-boost',
+      title: 'Kumpulkan 20+ Ulasan Bintang 5',
+      text: 'Gunakan QR Standee ulasan & kupon ulasan jujur untuk menambah bintang 5 dari pembeli.',
+      impact_points: 15 - reviewEarned,
+      category: 'Review Management',
       action_tab_id: 'gmaps-tab',
-      action_button_label: '📍 Buka Modul Google Maps & QR Generator',
+      action_button_label: '⭐ Cetak Standee QR Ulasan Jujur',
       steps: [
-        { num: 1, title: 'Cari Toko Anda di Google Maps', desc: 'Buka aplikasi Google Maps di HP, ketik nama usaha Anda. Jika sudah muncul, pilih "Klaim Bisnis Ini".' },
-        { num: 2, title: 'Verifikasi Nomor & Alamat', desc: 'Pilih metode verifikasi via SMS atau WhatsApp ke nomor telepon toko Anda yang aktif.' },
-        { num: 3, title: 'Lengkapi Foto & Jam Buka', desc: 'Unggah foto plang toko tampak depan dan sesuaikan jam operasional toko dari Senin-Minggu.' }
+        'Langkah 1: Buka menu Google Maps & QR, buat template "Berikan Ulasan Jujur Anda".',
+        'Langkah 2: Minta kasir mengajak pembeli memindai QR saat transaksi selesai.',
+        'Langkah 3: Gunakan balasan otomatis AI untuk merespons ulasan pelanggan secara ramah.'
       ]
     });
   }
 
-  // 2. Transaksi Digital & Omset (Max 15 pts)
-  if (has_qris_payment) {
-    score += 15;
-    breakdown.push({ item: 'Menerima Pembayaran QRIS / E-Wallet', points: 15, max: 15 });
-  } else {
-    recommendations.push({
-      id: 'rec-qris-payment',
-      text: 'Aktifkan QRIS / Digital Payment untuk mempercepat checkout kasir & meningkatkan omset penjualan.',
-      target_course_id: 'tut-003',
-      course_title: 'Strategi Akselerasi Omset dengan Pembayaran QRIS',
-      category: 'Penjualan & Kasir',
-      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-      action_tab_id: 'pos-tab',
-      action_button_label: '📱 Buka Fitur Kasir & QRIS',
-      steps: [
-        { num: 1, title: 'Daftar Merchant QRIS', desc: 'Aktifkan QRIS toko via aplikasi perbankan atau e-wallet.' },
-        { num: 2, title: 'Tempel QRIS di Meja Kasir', desc: 'Cetak dan letakkan stiker QRIS di dekat mesin kasir.' },
-        { num: 3, title: 'Catat Penjualan di POS', desc: 'Gunakan mesin kasir SuperUMKM untuk merekap transaksi QRIS otomatis.' }
-      ]
-    });
-  }
+  // 3. Foto & Kelengkapan Visual (10%) - Max 10 Poin
+  let visualEarned = 0;
+  let visualGap = null;
+  if (has_physical_banner) visualEarned += 5;
+  if (photos_count >= 5) visualEarned += 5;
+  else if (photos_count > 0) visualEarned += 2;
 
-  // 3. Pamor Merek & Plang Fisik (Max 15 pts)
-  if (has_physical_banner) {
-    score += 15;
-    breakdown.push({ item: 'Plang Merek / Spanduk Toko Jelas', points: 15, max: 15 });
-  } else {
+  if (visualEarned < 10) {
+    visualGap = 'Foto plang nama toko & visual produk masih kurang lengkap';
     recommendations.push({
-      id: 'rec-physical-banner',
-      text: 'Pasang Plang Merek / Spanduk Toko yang jelas untuk mendongkrak pamor & daya tarik pembeli lokal.',
-      target_course_id: 'tut-001',
-      course_title: 'Branding Toko Fisik & Visual Kredibilitas',
-      category: 'Pamor & Branding',
-      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-      action_tab_id: 'audit-tab',
-      action_button_label: '📸 Ambil Foto Plang Toko',
-      steps: [
-        { num: 1, title: 'Buat Spanduk / Plang Jelas', desc: 'Pastikan nama toko dan nomor WhatsApp terlihat dari jarak 10 meter.' },
-        { num: 2, title: 'Foto Tampak Depan Toko', desc: 'Unggah foto plang toko ke profil lokasi Google Maps Anda.' }
-      ]
-    });
-  }
-
-  // 4. Promosi & Jangkauan Media Sosial (Max 15 pts)
-  if (has_social_media) {
-    score += 15;
-    breakdown.push({ item: 'Promosi Aktif Media Sosial (IG/TikTok/FB)', points: 15, max: 15 });
-  } else {
-    recommendations.push({
-      id: 'rec-social-media',
-      text: 'Aktifkan Media Sosial (Instagram/TikTok) untuk memperluas jangkauan pembeli & pamor merek UMKM.',
-      target_course_id: 'tut-004',
-      course_title: 'Konten Viral Media Sosial untuk Usaha Lokal',
-      category: 'Digital Marketing',
-      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      id: 'rec-visual-photos',
+      title: 'Lengkapi Foto Toko & Produk',
+      text: 'Unggah minimal 5 foto produk & foto plang nama toko agar pembeli makin percaya.',
+      impact_points: 10 - visualEarned,
+      category: 'Kredibilitas Visual',
       action_tab_id: 'landing-tab',
-      action_button_label: '🌐 Pasang Link Medsos di Katalog Web',
+      action_button_label: '📸 Unggah Foto ke Toko Online',
       steps: [
-        { num: 1, title: 'Buat Akun Bisnis Instagram/TikTok', desc: 'Gunakan nama toko yang sama dengan lokasi Google Maps.' },
-        { num: 2, title: 'Unggah Video Produk Pendek', desc: 'Upload 1-2 video produk per minggu dengan musik populer.' }
+        'Langkah 1: Ambil foto plang toko tampak depan dari jarak 5 meter.',
+        'Langkah 2: Ambil 5 foto produk terlaris dengan pencahayaan terang.',
+        'Langkah 3: Unggah foto ke Mini Website Toko Online Instan Anda.'
       ]
     });
   }
+  totalScore += visualEarned;
+  breakdown.push({
+    dimension: 'Foto & Kelengkapan Visual',
+    earned: visualEarned,
+    max: 10,
+    gap_reason: visualGap
+  });
 
-  // 5. Program Diskon & Repeat Order (Max 15 pts)
-  if (has_promo_program) {
-    score += 15;
-    breakdown.push({ item: 'Program Promo / Paket Hemat / Loyalty', points: 15, max: 15 });
-  } else {
-    recommendations.push({
-      id: 'rec-promo-program',
-      text: 'Buat Program Promo Paket Hemat atau Voucher Ulasan untuk mendongkrak omset & repeat order.',
-      target_course_id: 'tut-002',
-      course_title: 'Strategi Promo Bundling untuk Menaikkan Omset 2x Lipat',
-      category: 'Strategi Penjualan',
-      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-      action_tab_id: 'gmaps-tab',
-      action_button_label: '🎟️ Buat Voucher Kupon Promo',
-      steps: [
-        { num: 1, title: 'Buat Paket Hemat Bundling', desc: 'Contoh: Beli 2 Produk Gratis 1 Minuman / Diskon Paket Hemat.' },
-        { num: 2, title: 'Sebarkan Promo di WhatsApp', desc: 'Kirim info promo ke pelanggan via WhatsApp Business.' }
-      ]
-    });
-  }
+  // 4. Website / Katalog Produk (15%) - Max 15 Poin
+  let catalogEarned = has_website_or_catalog ? 15 : 0;
+  let catalogGap = has_website_or_catalog ? null : 'Belum menerbitkan Mini Website & Toko Online Instan';
+  totalScore += catalogEarned;
+  breakdown.push({
+    dimension: 'Mini Website & Toko Online Instan',
+    earned: catalogEarned,
+    max: 15,
+    gap_reason: catalogGap
+  });
 
-  // 6. Katalog Web & WhatsApp Business (Max 15 pts)
-  if (has_website_or_catalog) {
-    score += 8;
-    breakdown.push({ item: 'Landing Page / Mini Katalog Aktif', points: 8, max: 8 });
-  } else {
+  if (!has_website_or_catalog) {
     recommendations.push({
-      id: 'rec-landing-build',
-      text: 'Terbitkan Website Sementara & Mini Catalog instan dalam 3 menit di fitur Builder.',
-      target_course_id: 'tut-003',
-      course_title: 'Masterclass WhatsApp Automation & Landing Page High Conversion',
-      category: 'Digital Marketing',
-      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      id: 'rec-catalog-build',
+      title: 'Terbitkan Mini Website & Toko Online Instan',
+      text: 'Buat katalog web instan dalam 3 menit agar pelanggan bisa memesan via WhatsApp.',
+      impact_points: 15,
+      category: 'Toko Online Instan',
       action_tab_id: 'landing-tab',
-      action_button_label: '🌐 Buka Builder Website Sementara',
+      action_button_label: '🌐 Buat Mini Website Toko Online',
       steps: [
-        { num: 1, title: 'Isi Profil & Katalog Usaha', desc: 'Buka menu Builder Website Sementara, masukkan nama toko, deskripsi, dan daftar produk.' },
-        { num: 2, title: 'Tautkan Nomor WhatsApp', desc: 'Masukkan nomor WhatsApp toko agar pelanggan bisa klik tombol beli langsung kirim pesan WA.' },
-        { num: 3, title: 'Terbitkan & Bagikan Link', desc: 'Klik "Terbitkan Website", lalu pasang link publik tersebut di bio Instagram & Google Maps!' }
+        'Langkah 1: Masukkan nama toko, alamat, dan deskripsi singkat usaha.',
+        'Langkah 2: Tambahkan daftar produk beserta foto dan harga.',
+        'Langkah 3: Terbitkan website dan bagikan tautan /toko/nama-toko-anda di media sosial.'
       ]
     });
   }
 
-  if (has_whatsapp_business) {
-    score += 7;
-    breakdown.push({ item: 'WhatsApp Business Hook Built-in', points: 7, max: 7 });
-  } else {
+  // 5. WhatsApp & Kontak (10%) - Max 10 Poin
+  let waEarned = has_whatsapp_business ? 10 : 0;
+  let waGap = has_whatsapp_business ? null : 'Nomor WhatsApp Business resmi belum terhubung';
+  totalScore += waEarned;
+  breakdown.push({
+    dimension: 'WhatsApp & Kontak Toko',
+    earned: waEarned,
+    max: 10,
+    gap_reason: waGap
+  });
+
+  if (!has_whatsapp_business) {
     recommendations.push({
       id: 'rec-wa-business',
-      text: 'Aktifkan WhatsApp Business resmi agar pembeli dari katalog web bisa langsung memesan instan.',
-      target_course_id: 'tut-003',
-      course_title: 'Masterclass WhatsApp Automation & Landing Page High Conversion',
-      category: 'Digital Marketing',
-      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      title: 'Hubungkan WhatsApp Business Toko',
+      text: 'Aktifkan WhatsApp Business agar tombol pesan di katalog langsung terhubung ke HP toko.',
+      impact_points: 10,
+      category: 'Komunikasi Pelanggan',
       action_tab_id: 'landing-tab',
-      action_button_label: '💬 Hubungkan WhatsApp Business ke Web',
+      action_button_label: '💬 Tautkan WhatsApp Business',
       steps: [
-        { num: 1, title: 'Download WA Business', desc: 'Unduh aplikasi WhatsApp Business resmi gratis dari Google Play Store / App Store.' },
-        { num: 2, title: 'Atur Pesan Otomatis (Greeting)', desc: 'Aktifkan Salam Otomatis di menu Fitur Bisnis WhatsApp.' },
-        { num: 3, title: 'Pasang Tautan di Katalog', desc: 'Salin nomor WA Anda ke Builder Website SuperUMKM untuk hook pesan instan.' }
+        'Langkah 1: Unduh aplikasi WhatsApp Business gratis di smartphone.',
+        'Langkah 2: Masukkan nomor WA toko Anda ke form Toko Online SuperUMKM.',
+        'Langkah 3: Atur salam otomatis di WA Business untuk menyapa pembeli.'
       ]
     });
   }
 
-  const business = db.businessProfiles.find(b => b.user_id === req.user.id);
-  const businessName = business ? business.name : 'Usaha Anda';
-  const businessCategory = business ? business.category : 'Kuliner & Retail';
+  // 6. Produk & Kesiapan Harga (10%) - Max 10 Poin
+  let priceEarned = has_product_prices ? 10 : (has_website_or_catalog ? 5 : 0);
+  let priceGap = priceEarned === 10 ? null : 'Daftar harga produk belum dicantumkan secara jelas';
+  totalScore += priceEarned;
+  breakdown.push({
+    dimension: 'Produk & Kesiapan Harga',
+    earned: priceEarned,
+    max: 10,
+    gap_reason: priceGap
+  });
 
-  let statusGrade = 'EXCELLENT';
-  if (score >= 80) {
-    statusGrade = 'EXCELLENT';
-  } else if (score >= 50) {
-    statusGrade = 'NEEDS_OPTIMIZATION';
-  } else {
-    statusGrade = 'CRITICAL';
+  // 7. Transaksi Digital (10%) - Max 10 Poin
+  let qrisEarned = has_qris_payment ? 10 : 0;
+  let qrisGap = has_qris_payment ? null : 'Belum menyediakan pembayaran digital QRIS / Kasir';
+  totalScore += qrisEarned;
+  breakdown.push({
+    dimension: 'Transaksi Digital & QRIS',
+    earned: qrisEarned,
+    max: 10,
+    gap_reason: qrisGap
+  });
+
+  if (!has_qris_payment) {
+    recommendations.push({
+      id: 'rec-qris-setup',
+      title: 'Aktifkan Pembayaran QRIS Kasir',
+      text: 'Terima pembayaran e-wallet (GoPay, OVO, Dana, QRIS Bank) untuk mempercepat checkout kasir.',
+      impact_points: 10,
+      category: 'Transaksi Digital',
+      action_tab_id: 'pos-tab',
+      action_button_label: '📱 Buka Mesin Kasir & QRIS',
+      steps: [
+        'Langkah 1: Buka modul Mesin Kasir & QRIS di SuperUMKM.',
+        'Langkah 2: Pilih pembayaran QRIS saat checkout kasir.',
+        'Langkah 3: Tampilkan QR Code di layar HP/tablet agar di-scan pelanggan.'
+      ]
+    });
   }
 
-  // Generate AI Model Diagnosis Summary
+  // 8. Kesiapan Operasional (10%) - Max 10 Poin
+  let opsEarned = (has_operational_hours || has_promo_program) ? 10 : 5;
+  let opsGap = opsEarned === 10 ? null : 'Jam operasional & program penawaran promo perlu dilengkapi';
+  totalScore += opsEarned;
+  breakdown.push({
+    dimension: 'Kesiapan Operasional Toko',
+    earned: opsEarned,
+    max: 10,
+    gap_reason: opsGap
+  });
+
+  // Ensure Total Score clamped 0 - 100
+  totalScore = Math.min(100, Math.max(0, totalScore));
+
+  // Determine merchant-friendly status grade
+  let statusGrade = 'SANGAT BAIK & OPTIMAL';
+  if (totalScore >= 80) {
+    statusGrade = 'SANGAT BAIK & OPTIMAL';
+  } else if (totalScore >= 50) {
+    statusGrade = 'PERLU OPTIMALISASI LOKAL';
+  } else {
+    statusGrade = 'PERLU PERHATIAN KHUSUS';
+  }
+
+  // Sort recommendations by impact_points descending for "Fokus Minggu Ini"
+  recommendations.sort((a, b) => b.impact_points - a.impact_points);
+  const topFocusTasks = recommendations.slice(0, 3);
+
+  const business = db.businessProfiles.find(b => b.user_id === req.user.id);
+  const businessName = business ? business.business_name : 'Usaha Anda';
+  const businessCategory = business ? business.category : 'Kuliner & Retail';
+
+  // Generate AI Model Diagnosis Summary with state consistency check
   const aiDiagnosisSummary = await generateBusinessAuditDiagnosis({
-    score,
+    score: totalScore,
     answers: req.body,
     businessName,
     businessCategory
@@ -242,10 +284,12 @@ router.post('/evaluate', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_O
     id: `audit-${Date.now()}`,
     user_id: req.user.id,
     business_id: business ? business.id : null,
-    health_score: score,
+    health_score: totalScore,
+    status_grade: statusGrade,
     audit_answers: req.body,
     breakdown,
     recommendations,
+    top_focus_tasks: topFocusTasks,
     ai_diagnosis_summary: aiDiagnosisSummary,
     created_at: new Date().toISOString()
   };
@@ -255,11 +299,12 @@ router.post('/evaluate', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_O
   return res.json({
     success: true,
     data: {
-      health_score: score,
+      health_score: totalScore,
       status_grade: statusGrade,
       ai_diagnosis_summary: aiDiagnosisSummary,
       breakdown,
       recommendations,
+      top_focus_tasks: topFocusTasks,
       created_at: auditEntry.created_at
     }
   });

@@ -52,7 +52,7 @@ test('AI Model Business Health Diagnosis Generation', async (t) => {
     businessName: 'Warung Berkah',
     businessCategory: 'Kuliner'
   });
-  assert.ok(summary.includes('🤖 Analisis AI Model'));
+  assert.ok(summary.includes('🤖 Analisis Kesehatan Usaha AI'));
   assert.ok(summary.includes('Warung Berkah'));
 });
 

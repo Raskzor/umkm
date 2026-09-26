@@ -132,117 +132,191 @@
           <button class="btn btn-secondary kit-nav-btn" id="kit-nav-maintenance" onclick="showKitSubView('maintenance')">🗓️ Maintenance Mingguan</button>
         </div>
 
-        <!-- Container for AI Diagnosis engine view -->
+        <!-- Container for AI Business Consultant & Action Center engine view -->
         <div id="audit-subview-ai">
           <div class="grid-2">
-            <!-- Form Diagnosis AI -->
+            <!-- Multistep Progressive Onboarding & Audit Questionnaire -->
             <div class="card">
-              <div class="card-title">
-                <span>📋 Form Diagnosis Kesehatan AI</span>
+              <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>📋 Form Diagnosis Kesehatan Usaha</span>
+                <span id="wizard-step-badge" style="font-size: 0.75rem; background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.25rem 0.6rem; border-radius: 9999px; font-weight: 700;">Langkah 1 dari 4</span>
               </div>
+              
+              <!-- Progressive Wizard Progress Bar -->
+              <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 99px; margin-bottom: 1.25rem; overflow: hidden;">
+                <div id="wizard-progress-bar" style="height: 100%; width: 25%; background: linear-gradient(90deg, #3b82f6, #10b981); transition: width 0.3s ease;"></div>
+              </div>
+
               <form id="audit-form" onsubmit="handleAuditSubmit(event)">
-                <div class="form-group">
-                  <label>Nama Usaha / Toko</label>
-                  <input type="text" id="audit-biz-name" class="form-control" value="Warung Kelontong Berkah" required>
-                </div>
-
-                <div class="form-group">
-                  <label>Apakah Toko Memiliki Profil Google Maps?</label>
-                  <select id="audit-gmaps" class="form-control" onchange="toggleGmapsAuditFields()">
-                    <option value="true">Ya, Sudah Terverifikasi / Diklaim</option>
-                    <option value="false">Belum Punya / Belum Diklaim</option>
-                  </select>
-                </div>
-
-                <!-- Conditional Google Maps Questions -->
-                <div id="gmaps-audit-fields">
+                <!-- STEP 1: Profil Usaha -->
+                <div id="audit-step-1" class="audit-wizard-step">
+                  <div style="font-size: 0.85rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.85rem;">1️⃣ Profil Utama Usaha & Kategori</div>
                   <div class="form-group">
-                    <label>Estimasi Rating Google Maps Saat Ini</label>
-                    <input type="number" step="0.1" id="audit-rating" class="form-control" value="4.6" min="1" max="5">
+                    <label>Nama Usaha / Toko</label>
+                    <input type="text" id="audit-biz-name" class="form-control" value="Warung Kelontong Berkah" required>
                   </div>
-
                   <div class="form-group">
-                    <label>Estimasi Jumlah Review Pelanggan</label>
-                    <input type="number" id="audit-reviews" class="form-control" value="15" min="0">
+                    <label>Kategori Jenis Usaha</label>
+                    <select id="audit-biz-category" class="form-control">
+                      <option value="Retail & Sembako">Retail & Sembako</option>
+                      <option value="Kuliner / F&B">Kuliner / Makanan & Minuman</option>
+                      <option value="Jasa & Servis">Jasa & Pelayanan</option>
+                      <option value="Fashion & Pakaian">Fashion & Aksesoris</option>
+                      <option value="Lainnya">Lainnya</option>
+                    </select>
                   </div>
                 </div>
 
-                <div class="form-group">
-                  <label>Memiliki Landing Page / Mini Catalog Web?</label>
-                  <select id="audit-catalog" class="form-control">
-                    <option value="true">Ya, Punya Website / Catalog</option>
-                    <option value="false">Belum Punya</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label>Memiliki Nomor WhatsApp Business Resmi?</label>
-                  <select id="audit-wa" class="form-control">
-                    <option value="true">Ya, Memiliki WA Business</option>
-                    <option value="false">Belum Punya</option>
-                  </select>
-                </div>
-
-                <!-- Pertanyaan Akselerasi Keuntungan & Pamor UMKM -->
-                <div style="border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 0.85rem; margin-top: 0.85rem;">
-                  <div style="font-size: 0.8rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">📈 Diagnosis Akselerasi Omset & Pamor Usaha:</div>
-
+                <!-- STEP 2: Google Maps Presence & Reputasi -->
+                <div id="audit-step-2" class="audit-wizard-step" style="display: none;">
+                  <div style="font-size: 0.85rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.85rem;">2️⃣ Kehadiran di Google Maps & Review</div>
                   <div class="form-group">
-                    <label>Menerima Pembayaran Digital / QRIS / Transfer?</label>
-                    <select id="audit-qris" class="form-control">
-                      <option value="true">Ya, Menerima QRIS / Transfer Bank / E-Wallet</option>
-                      <option value="false">Belum, Hanya Cash / Tunai</option>
+                    <label>Apakah Toko Memiliki Profil Google Maps?</label>
+                    <select id="audit-gmaps" class="form-control" onchange="toggleGmapsAuditFields()">
+                      <option value="true">Ya, Sudah Terverifikasi / Diklaim</option>
+                      <option value="false">Belum Punya / Belum Diklaim</option>
                     </select>
                   </div>
 
+                  <!-- Conditional Google Maps Questions -->
+                  <div id="gmaps-audit-fields">
+                    <div class="form-group">
+                      <label>Estimasi Rating Google Maps Saat Ini</label>
+                      <input type="number" step="0.1" id="audit-rating" class="form-control" value="4.6" min="1" max="5">
+                    </div>
+                    <div class="form-group">
+                      <label>Estimasi Jumlah Ulasan / Review Pelanggan</label>
+                      <input type="number" id="audit-reviews" class="form-control" value="15" min="0">
+                    </div>
+                  </div>
+
+                  <div id="gmaps-skip-notice" style="display: none; background: rgba(234, 179, 8, 0.1); border: 1px dashed rgba(234, 179, 8, 0.4); padding: 0.85rem; border-radius: 8px; font-size: 0.82rem; color: #fde047; margin-top: 0.5rem;">
+                    💡 <b>Info:</b> Pertanyaan rating & ulasan dilewati karena lokasi belum terdaftar. Task pendaftaran Google Maps akan otomatis ditugaskan di Action Center.
+                  </div>
+                </div>
+
+                <!-- STEP 3: Digital Presence & Katalog -->
+                <div id="audit-step-3" class="audit-wizard-step" style="display: none;">
+                  <div style="font-size: 0.85rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.85rem;">3️⃣ Etalase Digital & Katalog Produk</div>
                   <div class="form-group">
-                    <label>Memiliki Plang Merek / Spanduk Nama Toko Fisik Jelas?</label>
+                    <label>Memiliki Plang Merek / Foto Spanduk Fisik Toko Jelas?</label>
                     <select id="audit-banner" class="form-control">
-                      <option value="true">Ya, Ada Plang Merek / Spanduk Jelas</option>
-                      <option value="false">Belum Ada / Toko Polosan</option>
+                      <option value="true">Ya, Ada Plang Merek / Foto Jelas</option>
+                      <option value="false">Belum Ada / Polosan</option>
                     </select>
                   </div>
-
+                  <div class="form-group">
+                    <label>Memiliki Mini Website / Toko Online Instan?</label>
+                    <select id="audit-catalog" class="form-control">
+                      <option value="true">Ya, Sudah Punya Website / Katalog</option>
+                      <option value="false">Belum Punya</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Memiliki WhatsApp Business Resmi & Kontak Toko?</label>
+                    <select id="audit-wa" class="form-control">
+                      <option value="true">Ya, Memiliki WA Business</option>
+                      <option value="false">Belum Punya</option>
+                    </select>
+                  </div>
                   <div class="form-group">
                     <label>Aktif Berpromosi di Media Sosial (IG / TikTok / FB)?</label>
                     <select id="audit-sosmed" class="form-control">
-                      <option value="true">Ya, Aktif Upload Konten Media Sosial</option>
+                      <option value="true">Ya, Aktif Upload Konten</option>
                       <option value="false">Belum Aktif / Jarang</option>
                     </select>
                   </div>
+                </div>
 
+                <!-- STEP 4: Transaksi & Operasional Toko -->
+                <div id="audit-step-4" class="audit-wizard-step" style="display: none;">
+                  <div style="font-size: 0.85rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.85rem;">4️⃣ Kesiapan Transaksi & Operasional</div>
                   <div class="form-group">
-                    <label>Memiliki Program Promo Diskon / Paket Hemat / Member?</label>
+                    <label>Menerima Pembayaran Digital / QRIS / Transfer?</label>
+                    <select id="audit-qris" class="form-control">
+                      <option value="true">Ya, Menerima QRIS / Transfer / E-Wallet</option>
+                      <option value="false">Belum, Hanya Cash / Tunai</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Memiliki Program Promo Diskon / Paket Hemat?</label>
                     <select id="audit-promo" class="form-control">
-                      <option value="true">Ya, Rutin Ada Program Promo / Paket Hemat</option>
+                      <option value="true">Ya, Rutin Ada Program Promo</option>
                       <option value="false">Belum Ada Program Promo</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Memiliki Staf Kasir & Pencatatan Struk Transaksi?</label>
+                    <select id="audit-staff" class="form-control">
+                      <option value="true">Ya, Ada Staf Kasir / Pencatatan Digital</option>
+                      <option value="false">Belum Ada Staf Kasir Khusus</option>
                     </select>
                   </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
-                  <span>🤖</span> Analisis Skor Kesehatan & Potensi Omset via AI
-                </button>
+                <!-- Wizard Step Buttons -->
+                <div style="display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 1.25rem;">
+                  <button type="button" id="wizard-prev-btn" class="btn btn-secondary" onclick="prevAuditStep()" style="display: none;">
+                    <span>←</span> Sebelumnya
+                  </button>
+                  <button type="button" id="wizard-next-btn" class="btn btn-primary" onclick="nextAuditStep()" style="margin-left: auto;">
+                    Selanjutnya <span>→</span>
+                  </button>
+                  <button type="submit" id="wizard-submit-btn" class="btn btn-primary" style="display: none; margin-left: auto;">
+                    <span>🤖</span> Hitung Skor Kesehatan Usaha
+                  </button>
+                </div>
               </form>
             </div>
 
-            <!-- Audit Result Display -->
+            <!-- Action Center Dashboard Display -->
             <div>
-              <div class="card score-display-box" style="margin-bottom: 1.5rem;">
-                <div class="score-number" id="score-val">75</div>
-                <div class="score-label">HEALTH SCORE DIGITAL USAHA (0-100)</div>
-                <div id="score-status" style="margin-top: 0.5rem; font-weight: 700; color: var(--accent-emerald);">NEEDS OPTIMIZATION</div>
-                <div id="ai-diagnosis-summary" style="margin-top: 1rem; font-size: 0.85rem; color: #94a3b8; line-height: 1.5; text-align: center; background: rgba(0,0,0,0.3); padding: 0.85rem; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08);">
-                  🤖 Analisis AI SuperUMKM: Usaha Anda berada di tingkat BERKEMBANG (Skor: 75/100). Potensi pelanggan lokal sangat besar, klik rekomendasi di bawah untuk langsung menuju modul penanganan.
+              <!-- Health Score & Progress Card -->
+              <div class="card score-display-box" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98)); border: 1px solid rgba(59, 130, 246, 0.3);">
+                <div style="font-size: 0.75rem; font-weight: 800; color: #60a5fa; letter-spacing: 0.05em; text-transform: uppercase;">Action Center Pendamping Usaha</div>
+                <div style="display: flex; align-items: baseline; justify-content: center; gap: 0.5rem; margin: 0.5rem 0;">
+                  <span class="score-number" id="score-val">75</span>
+                  <span style="font-size: 1.2rem; color: #94a3b8; font-weight: 700;">/ 100</span>
+                </div>
+                <div style="font-size: 0.8rem; color: #a5b4fc; margin-bottom: 0.4rem;" id="score-target-info">🎯 Target Ideal Platform: 85+ Poin</div>
+                <div id="score-status" style="display: inline-block; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.82rem; font-weight: 800; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);">
+                  PERLU OPTIMALISASI LOKAL
+                </div>
+                <div id="ai-diagnosis-summary" style="margin-top: 1rem; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; text-align: left; background: rgba(0,0,0,0.4); padding: 0.85rem; border-radius: var(--radius-md); border-left: 3px solid #3b82f6;">
+                  🤖 Analisis Kesehatan Usaha AI: Usaha Anda berada di tingkat BERKEMBANG (Skor: 75/100). Potensi pelanggan lokal sangat besar, jalankan 3 tugas prioritas di bawah.
+                </div>
+
+                <!-- Transparent 8 Dimension Breakdown Collapsible -->
+                <div style="margin-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.75rem;">
+                  <button type="button" class="btn btn-secondary" style="width: 100%; font-size: 0.78rem; padding: 0.35rem;" onclick="toggleScoreBreakdownDetails()">
+                    📊 Lihat Transparansi 8 Dimensi Skor
+                  </button>
+                  <div id="score-breakdown-container" style="display: none; margin-top: 0.75rem; text-align: left;">
+                    <!-- Dynamically populated 8 dimensions -->
+                  </div>
                 </div>
               </div>
 
+              <!-- Fokus Minggu Ini (Top 3 Priority Tasks Component) -->
+              <div class="card" style="margin-bottom: 1.5rem; border: 1px solid rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.03);">
+                <div class="card-title" style="color: #fbbf24;">
+                  <span>🔥 Fokus Minggu Ini (Top 3 Prioritas Usaha)</span>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
+                  Eksekusi 3 tugas dengan dampak poin tertinggi untuk menaikkan skor kesehatan toko Anda minggu ini:
+                </p>
+                <div id="top-focus-tasks-container">
+                  <!-- Dynamically populated top 3 priority focus tasks -->
+                </div>
+              </div>
+
+              <!-- All Recommendations & Action Execution -->
               <div class="card">
                 <div class="card-title">
-                  <span>💡 Rekomendasi Aksi Cepat & Langkah Eksekusi</span>
+                  <span>💡 Daftar Lengkap Checklist & Aksi Perbaikan</span>
                 </div>
                 <div id="recommendations-list">
-                  <!-- Dynamically populated with interactive click handlers -->
+                  <!-- Dynamically populated -->
                 </div>
               </div>
             </div>
@@ -284,7 +358,7 @@
 
               <div class="form-group">
                 <label>Pesan Ajakan Pelanggan</label>
-                <input type="text" id="qr-custom-text" class="form-control" value="Beri Kami Ulasan Bintang 5 & Dapatkan Diskon!">
+                <input type="text" id="qr-custom-text" class="form-control" value="Berikan Ulasan Jujur Anda">
               </div>
 
               <button type="submit" class="btn btn-primary" style="width: 100%;">
@@ -298,7 +372,7 @@
             <div class="qr-preview-card" id="qr-visual-card">
               <div style="font-size: 0.8rem; font-weight: 800; color: #3b82f6; text-transform: uppercase;">Google Review Standee</div>
               <h3 id="preview-biz-name">Warung Kelontong Berkah</h3>
-              <p style="font-size: 0.85rem; color: #4b5563;" id="preview-custom-text">Beri Kami Ulasan Bintang 5 & Dapatkan Diskon!</p>
+              <p style="font-size: 0.85rem; color: #4b5563;" id="preview-custom-text">Berikan Ulasan Jujur Anda</p>
               
               <img id="qr-img-element" src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://maps.google.com" alt="QR Review" class="qr-img">
               
@@ -374,7 +448,7 @@
         <div class="grid-2">
           
           <div class="card">
-            <div class="card-title">⚙️ Pembuat Website Sementara & Katalog UMKM</div>
+            <div class="card-title">⚙️ Pembuat Mini Website & Toko Online Instan</div>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
               Buat website sederhana toko Anda cukup dengan 3 langkah mudah & upload foto langsung dari HP/Laptop:
             </p>
@@ -456,21 +530,21 @@
               </div>
 
               <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.05rem;">
-                <span>🚀</span> Terbitkan Website Sementara Toko
+                <span>🚀</span> Terbitkan Mini Website & Toko Online Instan
               </button>
             </form>
           </div>
 
           <!-- Public Live Preview Box -->
           <div class="card">
-            <div class="card-title">🌐 Live Preview Website Sementara</div>
+            <div class="card-title">🌐 Live Preview Mini Website & Toko Online Instan</div>
             
             <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
               <div>
                 <div style="font-size: 0.75rem; color: var(--text-muted);">Domain Subfolder Aktif:</div>
-                <div style="font-weight: 700; color: #60a5fa;" id="published-slug-url">/landing.html?slug=warung-berkah</div>
+                <div style="font-weight: 700; color: #60a5fa;" id="published-slug-url">/toko/warung-berkah</div>
               </div>
-              <a id="open-public-site-btn" href="/landing.html?slug=warung-berkah" target="_blank" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+              <a id="open-public-site-btn" href="/toko/warung-berkah" target="_blank" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
                 🔗 Buka Web Publik
               </a>
             </div>

@@ -59,6 +59,11 @@ app.get('/health', (req, res) => {
 });
 
 
+// Clean Route for Mini Website & Toko Online Instan
+app.get('/toko/:slug', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/landing.html'));
+});
+
 // Dashboard App Route
 app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));

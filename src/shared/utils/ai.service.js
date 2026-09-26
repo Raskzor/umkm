@@ -83,54 +83,63 @@ Tuliskan diagnosis kesehatan bisnis secara ringkas, ramah, meyakinkan, dan beror
   // Attempt real LLM API call if API key exists
   const externalResult = await callGeminiAPI(prompt);
   if (externalResult) {
-    return `🤖 Analisis AI Model (Gemini): ${externalResult.trim()}`;
+    return `🤖 Analisis Kesehatan Usaha AI (Gemini): ${externalResult.trim()}`;
   }
 
-  // Fallback: Advanced Built-in AI Model Reasoning Engine
+  // Fallback: Advanced Built-in AI Model Reasoning Engine (Strict State Alignment)
   const strengths = [];
   const criticalGaps = [];
 
-  if (has_gmaps_profile && gmaps_rating >= 4.5) {
-    strengths.push(`Reputasi Google Maps sudah unggul dengan rating ${gmaps_rating} ⭐`);
-  } else if (!has_gmaps_profile) {
-    criticalGaps.push('Lokasi toko belum terdaftar resmi di Google Maps');
-  } else if (gmaps_rating < 4.0) {
-    criticalGaps.push(`Rating Google Maps (${gmaps_rating}) perlu ditingkatkan`);
+  if (has_gmaps_profile) {
+    if (gmaps_rating >= 4.5) {
+      strengths.push(`Reputasi Google Maps unggul dengan rating ${gmaps_rating} ⭐`);
+    } else if (gmaps_rating > 0 && gmaps_rating < 4.5) {
+      criticalGaps.push(`Rating Google Maps (${gmaps_rating} ⭐) perlu ditingkatkan ke 4.5+`);
+    }
+  } else {
+    criticalGaps.push('Lokasi toko belum terdaftar & terverifikasi resmi di Google Maps');
   }
 
-  if (has_website_or_catalog && has_whatsapp_business) {
-    strengths.push('Jalur pemesanan online via WhatsApp Catalog sudah siap memproses order');
-  } else if (!has_website_or_catalog) {
-    criticalGaps.push('Belum memiliki Website Katalog produk sementara');
-  } else if (!has_whatsapp_business) {
-    criticalGaps.push('Integrasi WhatsApp Business otomatis belum aktif');
+  if (has_website_or_catalog) {
+    strengths.push('Mini Website & Toko Online Instan telah aktif');
+  } else {
+    criticalGaps.push('Belum menerbitkan Mini Website & Toko Online Instan');
   }
 
-  if (photos_count < 10) {
-    criticalGaps.push('Jumlah foto produk masih di bawah 10 foto');
+  if (has_whatsapp_business) {
+    strengths.push('Kanal pemesanan WhatsApp Business telah terhubung');
+  } else {
+    criticalGaps.push('WhatsApp Business resmi belum terhubung ke toko');
   }
-  if (!weekly_post_updates) {
-    criticalGaps.push('Pembaruan promo mingguan masih belum rutin');
+
+  if (answers && answers.has_qris_payment) {
+    strengths.push('Pembayaran digital QRIS / Kasir sudah siap menerima transaksi');
+  } else {
+    criticalGaps.push('Belum menyediakan pembayaran digital QRIS');
+  }
+
+  if (photos_count > 0 && photos_count < 5) {
+    criticalGaps.push('Jumlah foto produk & toko masih kurang dari 5 foto');
   }
 
   let statusTitle = '';
   let adviceStr = '';
 
   if (score >= 80) {
-    statusTitle = 'SANGAT OPTIMAL & SIAP SKALA BISNIS';
+    statusTitle = 'SANGAT BAIK & OPTIMAL';
     const strengthText = strengths.length ? strengths.join(' serta ') : 'Kinerja aset digital Anda di atas rata-rata industri';
-    adviceStr = `${name} memiliki fondasi digital yang ${statusTitle} (Skor: ${score}/100). ${strengthText}. Untuk meningkatkan transaksi 2x lipat, pertahankan kebiasaan update posting promo mingguan dan gunakan QR Standee ulasan kasir.`;
+    adviceStr = `${name} memiliki fondasi digital yang ${statusTitle} (Skor: ${score}/100). ${strengthText}. Pertahankan kebiasaan posting promo dan dorong ulasan ulasan jujur pembeli.`;
   } else if (score >= 50) {
-    statusTitle = 'BERKEMBANG DENGAN POTENSI LOKAL TINGGI';
-    const gapText = criticalGaps.length ? `Prioritas perbaikan utama Anda adalah: ${criticalGaps.slice(0, 2).join(' dan ')}.` : 'Diperlukan penguatan konsistensi di aset digital.';
-    adviceStr = `${name} berstatus ${statusTitle} (Skor: ${score}/100). ${gapText} Dengan melengkapi katalog WA dan mengejar 20 review pertama, potensi konversi pelanggan lokal Anda dapat meningkat secara signifikan.`;
+    statusTitle = 'PERLU OPTIMALISASI LOKAL';
+    const gapText = criticalGaps.length ? `Prioritas perbaikan utama: ${criticalGaps.slice(0, 2).join(' dan ')}.` : 'Diperlukan penguatan konsistensi di aset digital.';
+    adviceStr = `${name} berstatus ${statusTitle} (Skor: ${score}/100). ${gapText} Dengan melengkapi aksi rekomendasi di bawah, potensi pelanggan lokal Anda akan meningkat pesat.`;
   } else {
-    statusTitle = 'PERLU PERBAIKAN SEGERA (DOKTER BISNIS DIGITAL)';
-    const gapText = criticalGaps.length ? `Temuan kritis AI: ${criticalGaps.join(', ')}.` : 'Lokasi & katalog produk Anda masih sulit ditemukan pelanggan.';
-    adviceStr = `${name} berstatus ${statusTitle} (Skor: ${score}/100). ${gapText} Segera jalankan Rekomendasi Aksi Cepat di bawah ini untuk mengklaim lokasi toko dan menerbitan Katalog WA dalam 3 menit.`;
+    statusTitle = 'PERLU PERHATIAN KHUSUS';
+    const gapText = criticalGaps.length ? `Temuan prioritas AI: ${criticalGaps.join(', ')}.` : 'Lokasi & katalog produk Anda masih belum lengkap.';
+    adviceStr = `${name} berstatus ${statusTitle} (Skor: ${score}/100). ${gapText} Segera jalankan Rekomendasi Fokus Minggu Ini di bawah untuk mengklaim lokasi toko dan menerbitkan Mini Website Toko Online Instan.`;
   }
 
-  return `🤖 Analisis AI Model SuperUMKM: ${adviceStr}`;
+  return `🤖 Analisis Kesehatan Usaha AI: ${adviceStr}`;
 }
 
 module.exports = {
