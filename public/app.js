@@ -232,6 +232,7 @@ function switchTab(tabId, el) {
     'services-tab': { title: 'Jasa Pendampingan & Smart Route Dispatch', subtitle: 'Manajemen tiket pengerjaan verifikasi lokasi & rute efisien agen' },
     'learning-tab': { title: 'Video Micro-Course Edukasi', subtitle: 'Modul pelatihan strategi pemasaran digital & Google Maps' },
     'kit-tab': { title: 'Kit Lokal Naik Kelas', subtitle: 'Action kit interaktif untuk diagnosis & penanganan etalase digital UMKM' },
+    'qris-tab': { title: 'Integrasi QRIS Kasir & Dynamic QR Generator', subtitle: 'Payload QRIS dinamis/statis, SVG QR renderer, dan verifikasi status bayar otomatis' },
     'docs-tab': { title: 'Dokumentasi Sistem IT (System Admin)', subtitle: 'Spesifikasi arsitektur, registry REST API, SQL DDL PostgreSQL, matriks RBAC, dan sequence diagram' }
   };
 
@@ -245,6 +246,7 @@ function switchTab(tabId, el) {
   if (tabId === 'cashflow-tab') loadCashflowData();
   if (tabId === 'loyalty-tab') loadLoyaltyData();
   if (tabId === 'inventory-tab') loadInventoryData();
+  if (tabId === 'qris-tab') loadQRISData();
   if (tabId === 'docs-tab') loadITAdminDocsBackend();
 }
 
@@ -2145,4 +2147,82 @@ function showDocsView(docKey, btnEl) {
   if (titleEl) titleEl.innerText = selected.title;
   if (tagEl) tagEl.innerText = selected.tag;
   if (contentBox) contentBox.innerText = selected.content || 'Berkas dokumentasi belum ditemukan.';
+}
+
+/* ========================================================
+   MODULE 5: INTEGRASI QRIS KASIR & AUTO-VERIFIER
+======================================================== */
+async function loadQRISData() {
+  const amountInput = document.getElementById('qris-input-amount');
+  const amount = amountInput ? Number(amountInput.value) || 50000 : 50000;
+  const isDynamic = document.getElementById('qris-input-dynamic') ? document.getElementById('qris-input-dynamic').value === 'true' : true;
+
+  try {
+    const res = await fetch('/api/v1/qris/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userToken}` },
+      body: JSON.stringify({ amount, isDynamic })
+    });
+    const data = await res.json();
+    if (data.success) {
+      activeQrisTransactionId = data.data.transaction_id;
+      const previewBox = document.getElementById('qris-tab-svg-preview');
+      if (previewBox) previewBox.innerHTML = data.data.qr_svg;
+
+      const amountDisplay = document.getElementById('qris-tab-amount-display');
+      if (amountDisplay) amountDisplay.innerText = `Rp ${amount.toLocaleString('id-ID')}`;
+
+      const payloadStr = document.getElementById('qris-tab-payload-string');
+      if (payloadStr) payloadStr.innerText = data.data.qris_payload;
+    }
+  } catch (err) {
+    console.error('loadQRISData error:', err);
+  }
+}
+
+async function handleGenerateQRISForm(e) {
+  e.preventDefault();
+  await loadQRISData();
+}
+
+async function handleSimulateQRISWebhook() {
+  if (!activeQrisTransactionId) {
+    await loadQRISData();
+  }
+
+  try {
+    const res = await fetch('/api/v1/qris/verify-mock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userToken}` },
+      body: JSON.stringify({ transaction_id: activeQrisTransactionId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const historyContainer = document.getElementById('qris-history-container');
+      if (historyContainer) {
+        historyContainer.innerHTML = `
+          <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); padding: 0.75rem; border-radius: 8px; margin-bottom: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; font-weight: 700;">
+              <span style="color: #4ade80;">✅ #${data.data.transaction_id}</span>
+              <span style="color: #ffffff;">Rp ${(data.data.amount || 50000).toLocaleString('id-ID')}</span>
+            </div>
+            <div style="font-size: 0.75rem; color: #cbd5e1; margin-top: 0.25rem;">
+              Status: <strong style="color: #4ade80;">${data.data.status}</strong> | Merchant: ${data.data.merchant_name || 'Toko UMKM'}
+            </div>
+          </div>
+        ` + historyContainer.innerHTML;
+      }
+      alert(`✅ Webhook Callback Sukses! Transaksi QRIS #${data.data.transaction_id} terverifikasi LUNAS (PAID).`);
+    }
+  } catch (err) {
+    console.error('handleSimulateQRISWebhook error:', err);
+  }
+}
+
+function copyQrisPayloadString() {
+  const payloadStr = document.getElementById('qris-tab-payload-string');
+  if (payloadStr && payloadStr.innerText) {
+    navigator.clipboard.writeText(payloadStr.innerText);
+    alert('📋 String Payload QRIS disalin ke clipboard!');
+  }
 }
