@@ -8,7 +8,7 @@ Platform pendampingan, konsultasi, dan operasional digital terpadu untuk UMKM se
 
 Sistem menggunakan model *Role-Based Access Control* (RBAC) dengan 5 entitas pengguna utama:
 
-| Fitur / Modul | UMKM Owner (Free) | UMKM Owner (Premium) | Cashier (Anak Buah) | Consultant / Field Agent | Super Admin |
+| Fitur / Modul | UMKM Owner (Free) | UMKM Owner (Premium) | Staf Kasir Toko | Consultant / Field Agent | Super Admin |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Self-Audit & Action Kit** | Read / Execute | Read / Execute | No Access | Read All | Read All / Manage |
 | **Google Maps & QR Review** | Standard PDF | Custom Branded PDF | Read / Print | Assist Setup | Manage Templates |
