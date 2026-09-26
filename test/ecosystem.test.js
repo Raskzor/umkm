@@ -88,3 +88,24 @@ test('System Admin Exclusive IT Documentation Hub Endpoint', (t) => {
   assert.ok(adminToken);
   assert.ok(freeToken);
 });
+
+test('Audit Logging Engine - Structured Logging into audit.log and DB Persistence', (t) => {
+  const { logAuditEvent, readAuditLogFile } = require('../src/shared/utils/auditLogger');
+  
+  const record = logAuditEvent({
+    userId: 'u-admin-004',
+    role: 'SUPER_ADMIN',
+    action: 'POST /api/v1/pos/staff',
+    resource: 'pos_staff',
+    details: { staff_name: 'Test Staff' },
+    ip: '127.0.0.1',
+    status: 'SUCCESS'
+  });
+
+  assert.ok(record.id);
+  assert.strictEqual(record.user_id, 'u-admin-004');
+  assert.strictEqual(record.action, 'POST /api/v1/pos/staff');
+
+  const fileLogs = readAuditLogFile(10);
+  assert.ok(fileLogs.includes('POST /api/v1/pos/staff'));
+});

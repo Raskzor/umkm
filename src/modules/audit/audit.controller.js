@@ -280,4 +280,37 @@ router.get('/history', authenticate, (req, res) => {
   });
 });
 
+/**
+ * @route GET /api/v1/audit/logs
+ * @desc Get system audit logs (Admin & Field Agent Oversight)
+ */
+router.get('/logs', authenticate, authorizeRoles('SUPER_ADMIN', 'FIELD_AGENT'), (req, res) => {
+  const { limit = 50 } = req.query;
+  const logs = db.auditLogs.slice(0, Number(limit));
+
+  return res.json({
+    success: true,
+    total_logs: db.auditLogs.length,
+    data: logs
+  });
+});
+
+/**
+ * @route GET /api/v1/audit/file-log
+ * @desc Read physical audit.log file contents for system debugging & security auditing
+ */
+router.get('/file-log', authenticate, authorizeRoles('SUPER_ADMIN'), (req, res) => {
+  const { readAuditLogFile } = require('../../shared/utils/auditLogger');
+  const fileContent = readAuditLogFile(200);
+
+  return res.json({
+    success: true,
+    message: 'Physical audit.log file contents fetched successfully',
+    data: {
+      log_file_path: 'logs/audit.log',
+      content: fileContent
+    }
+  });
+});
+
 module.exports = router;

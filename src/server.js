@@ -17,6 +17,7 @@ const copywritingRoutes = require('./modules/copywriting/copywriting.controller'
 const qrisRoutes = require('./modules/qris/qris.controller');
 const docsRoutes = require('./modules/docs/docs.controller');
 const usersRoutes = require('./modules/users/users.controller');
+const { auditLogMiddleware } = require('./shared/utils/auditLogger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +26,12 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(auditLogMiddleware);
+
+// Root Route: Redirect main URL to home.html
+app.get('/', (req, res) => {
+  res.redirect('/home.html');
+});
 
 // Serve static frontend dashboard
 app.use(express.static(path.join(__dirname, '../public')));
@@ -51,10 +58,6 @@ app.get('/health', (req, res) => {
   res.json({ status: 'UP', service: 'Business Consultant UMKM Platform Engine', timestamp: new Date() });
 });
 
-// Root Route: Serve Main Product Landing Page
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/home.html'));
-});
 
 // Dashboard App Route
 app.get('/dashboard', (req, res) => {
