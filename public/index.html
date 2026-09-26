@@ -34,7 +34,7 @@
 
       <nav class="menu">
         <a class="menu-item active" onclick="switchTab('audit-tab', this)">
-          <span>📊</span> Health Check (AI Audit)
+          <span>📊</span> Health Check & Action Kit
         </a>
         <a class="menu-item" onclick="switchTab('gmaps-tab', this)">
           <span>📍</span> Google Maps & AI Review
@@ -43,16 +43,25 @@
           <span>🌐</span> Builder Website Sementara
         </a>
         <a class="menu-item" onclick="switchTab('pos-tab', this)">
-          <span>📱</span> Kasir & Kelola Anak Buah
+          <span>📱</span> Kasir & QRIS Kasir
+        </a>
+        <a class="menu-item" onclick="switchTab('cashflow-tab', this)">
+          <span>💰</span> Cashflow & P&L Saku
+        </a>
+        <a class="menu-item" onclick="switchTab('loyalty-tab', this)">
+          <span>📢</span> Smart WA & Loyalty
+        </a>
+        <a class="menu-item" onclick="switchTab('inventory-tab', this)">
+          <span>📦</span> Stok, Bon & Supplier
+        </a>
+        <a class="menu-item" onclick="switchTab('copywriting-tab', this)">
+          <span>✍️</span> AI Promo & Poster
         </a>
         <a class="menu-item" onclick="switchTab('services-tab', this)">
           <span>🛠️</span> Jasa & Smart Route
         </a>
         <a class="menu-item" onclick="switchTab('learning-tab', this)">
           <span>🎓</span> Micro-Course Edukasi
-        </a>
-        <a class="menu-item" onclick="switchTab('kit-tab', this)">
-          <span>📋</span> Kit Lokal Naik Kelas
         </a>
       </nav>
 
@@ -71,6 +80,7 @@
           <p id="active-tab-subtitle">Diagnosis otomatis AI kesehatan digital usaha UMKM Anda dalam 5 menit</p>
         </div>
         <div style="display: flex; gap: 1rem; align-items: center;">
+          <a href="/home.html" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.85rem;">🏠 Landing Page Utama</a>
           <div style="text-align: right;">
             <div style="font-weight: 700;" id="user-display-name">Budi Santoso</div>
             <div style="font-size: 0.8rem; color: var(--text-muted);" id="user-display-phone">081234567890</div>
@@ -78,82 +88,165 @@
         </div>
       </header>
 
-      <!-- TAB 1: Business Health Audit (AI-Powered) -->
+      <!-- TAB 1: Health Check & Action Kit (Unified AI Audit + Kit Lokal Naik Kelas) -->
       <section id="audit-tab" class="tab-content active">
-        <div class="grid-2">
-          
-          <!-- Audit Questionnaire Form -->
-          <div class="card">
-            <div class="card-title">
-              <span>📋 Form Diagnosis Kesehatan AI</span>
+        
+        <!-- Header Banner Card -->
+        <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(59, 130, 246, 0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <span class="role-badge premium" style="margin-bottom: 0.5rem;">📊 UNIFIED DIAGNOSIS & ACTION KIT</span>
+              <h2 style="font-family: 'Outfit'; font-size: 1.5rem; color: #ffffff;">Health Check & Action Kit "Lokal Naik Kelas"</h2>
+              <p style="font-size: 0.88rem; color: var(--text-muted);">Diagnosis AI otomatis & eksekusi 8 langkah penanganan etalase digital secara sistematis.</p>
             </div>
-            <form id="audit-form" onsubmit="handleAuditSubmit(event)">
-              <div class="form-group">
-                <label>Nama Usaha / Toko</label>
-                <input type="text" id="audit-biz-name" class="form-control" value="Warung Kelontong Berkah" required>
-              </div>
-
-              <div class="form-group">
-                <label>Apakah Toko Memiliki Profil Google Maps?</label>
-                <select id="audit-gmaps" class="form-control">
-                  <option value="true">Ya, Sudah Terverifikasi</option>
-                  <option value="false">Belum Punya / Belum Diklaim</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label>Estimasi Rating Google Maps Saat Ini</label>
-                <input type="number" step="0.1" id="audit-rating" class="form-control" value="4.6" min="1" max="5">
-              </div>
-
-              <div class="form-group">
-                <label>Estimasi Jumlah Review Pelanggan</label>
-                <input type="number" id="audit-reviews" class="form-control" value="15" min="0">
-              </div>
-
-              <div class="form-group">
-                <label>Memiliki Landing Page / Mini Catalog Web?</label>
-                <select id="audit-catalog" class="form-control">
-                  <option value="true">Ya, Punya Website / Catalog</option>
-                  <option value="false">Belum Punya</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label>Memiliki Nomor WhatsApp Business Resmi?</label>
-                <select id="audit-wa" class="form-control">
-                  <option value="true">Ya, Memiliki WA Business</option>
-                  <option value="false">Belum Punya</option>
-                </select>
-              </div>
-
-              <button type="submit" class="btn btn-primary" style="width: 100%;">
-                <span>🤖</span> Analisis Skor Kesehatan Usaha via AI
-              </button>
-            </form>
+            <div>
+              <button class="btn btn-primary" onclick="exportKitSummaryHTML()">📥 Export Laporan HTML / PDF</button>
+            </div>
           </div>
 
-          <!-- Audit Result Display -->
-          <div>
-            <div class="card score-display-box" style="margin-bottom: 1.5rem;">
-              <div class="score-number" id="score-val">75</div>
-              <div class="score-label">HEALTH SCORE DIGITAL USAMA (0-100)</div>
-              <div id="score-status" style="margin-top: 0.5rem; font-weight: 700; color: var(--accent-emerald);">NEEDS OPTIMIZATION</div>
-              <div id="ai-diagnosis-summary" style="margin-top: 1rem; font-size: 0.85rem; color: #94a3b8; line-height: 1.5; text-align: center; background: rgba(0,0,0,0.3); padding: 0.85rem; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08);">
-                🤖 Analisis AI SuperUMKM: Usaha Anda berada di tingkat BERKEMBANG (Skor: 75/100). Potensi pelanggan lokal sangat besar, klik rekomendasi di bawah untuk langsung menuju modul edukasi.
-              </div>
+          <!-- Progress Bar -->
+          <div style="margin-top: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem;">
+              <span id="kit-progress-label">0 dari 8 langkah selesai</span>
+              <span id="kit-save-status" style="color: var(--accent-emerald);">✓ Tersimpan di Cloud Backend</span>
             </div>
+            <div style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden;">
+              <div id="kit-progress-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%); transition: width 0.4s ease;"></div>
+            </div>
+          </div>
+        </div>
 
+        <!-- Unified Sub-Navigation Pills -->
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button class="btn btn-secondary kit-nav-btn active" id="kit-nav-ai" onclick="showKitSubView('ai')">🤖 Diagnosis AI (5 Menit)</button>
+          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-checkup" onclick="showKitSubView('checkup')">📋 Cek Kondisi (12 Soal)</button>
+          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-result" onclick="showKitSubView('result')">🎯 Hasil & Prioritas</button>
+          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-steps" onclick="showKitSubView('steps')">📱 8 Langkah Eksekusi</button>
+          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-compare" onclick="showKitSubView('compare')">📊 Sebelum vs Sesudah</button>
+          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-maintenance" onclick="showKitSubView('maintenance')">🗓️ Maintenance Mingguan</button>
+        </div>
+
+        <!-- Container for AI Diagnosis engine view -->
+        <div id="audit-subview-ai">
+          <div class="grid-2">
+            <!-- Form Diagnosis AI -->
             <div class="card">
               <div class="card-title">
-                <span>💡 Rekomendasi Aksi Cepat (Klik untuk Pelajari Course)</span>
+                <span>📋 Form Diagnosis Kesehatan AI</span>
               </div>
-              <div id="recommendations-list">
-                <!-- Dynamically populated with interactive click handlers -->
+              <form id="audit-form" onsubmit="handleAuditSubmit(event)">
+                <div class="form-group">
+                  <label>Nama Usaha / Toko</label>
+                  <input type="text" id="audit-biz-name" class="form-control" value="Warung Kelontong Berkah" required>
+                </div>
+
+                <div class="form-group">
+                  <label>Apakah Toko Memiliki Profil Google Maps?</label>
+                  <select id="audit-gmaps" class="form-control" onchange="toggleGmapsAuditFields()">
+                    <option value="true">Ya, Sudah Terverifikasi / Diklaim</option>
+                    <option value="false">Belum Punya / Belum Diklaim</option>
+                  </select>
+                </div>
+
+                <!-- Conditional Google Maps Questions -->
+                <div id="gmaps-audit-fields">
+                  <div class="form-group">
+                    <label>Estimasi Rating Google Maps Saat Ini</label>
+                    <input type="number" step="0.1" id="audit-rating" class="form-control" value="4.6" min="1" max="5">
+                  </div>
+
+                  <div class="form-group">
+                    <label>Estimasi Jumlah Review Pelanggan</label>
+                    <input type="number" id="audit-reviews" class="form-control" value="15" min="0">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Memiliki Landing Page / Mini Catalog Web?</label>
+                  <select id="audit-catalog" class="form-control">
+                    <option value="true">Ya, Punya Website / Catalog</option>
+                    <option value="false">Belum Punya</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Memiliki Nomor WhatsApp Business Resmi?</label>
+                  <select id="audit-wa" class="form-control">
+                    <option value="true">Ya, Memiliki WA Business</option>
+                    <option value="false">Belum Punya</option>
+                  </select>
+                </div>
+
+                <!-- Pertanyaan Akselerasi Keuntungan & Pamor UMKM -->
+                <div style="border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 0.85rem; margin-top: 0.85rem;">
+                  <div style="font-size: 0.8rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">📈 Diagnosis Akselerasi Omset & Pamor Usaha:</div>
+
+                  <div class="form-group">
+                    <label>Menerima Pembayaran Digital / QRIS / Transfer?</label>
+                    <select id="audit-qris" class="form-control">
+                      <option value="true">Ya, Menerima QRIS / Transfer Bank / E-Wallet</option>
+                      <option value="false">Belum, Hanya Cash / Tunai</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Memiliki Plang Merek / Spanduk Nama Toko Fisik Jelas?</label>
+                    <select id="audit-banner" class="form-control">
+                      <option value="true">Ya, Ada Plang Merek / Spanduk Jelas</option>
+                      <option value="false">Belum Ada / Toko Polosan</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Aktif Berpromosi di Media Sosial (IG / TikTok / FB)?</label>
+                    <select id="audit-sosmed" class="form-control">
+                      <option value="true">Ya, Aktif Upload Konten Media Sosial</option>
+                      <option value="false">Belum Aktif / Jarang</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Memiliki Program Promo Diskon / Paket Hemat / Member?</label>
+                    <select id="audit-promo" class="form-control">
+                      <option value="true">Ya, Rutin Ada Program Promo / Paket Hemat</option>
+                      <option value="false">Belum Ada Program Promo</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+                  <span>🤖</span> Analisis Skor Kesehatan & Potensi Omset via AI
+                </button>
+              </form>
+            </div>
+
+            <!-- Audit Result Display -->
+            <div>
+              <div class="card score-display-box" style="margin-bottom: 1.5rem;">
+                <div class="score-number" id="score-val">75</div>
+                <div class="score-label">HEALTH SCORE DIGITAL USAHA (0-100)</div>
+                <div id="score-status" style="margin-top: 0.5rem; font-weight: 700; color: var(--accent-emerald);">NEEDS OPTIMIZATION</div>
+                <div id="ai-diagnosis-summary" style="margin-top: 1rem; font-size: 0.85rem; color: #94a3b8; line-height: 1.5; text-align: center; background: rgba(0,0,0,0.3); padding: 0.85rem; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08);">
+                  🤖 Analisis AI SuperUMKM: Usaha Anda berada di tingkat BERKEMBANG (Skor: 75/100). Potensi pelanggan lokal sangat besar, klik rekomendasi di bawah untuk langsung menuju modul penanganan.
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-title">
+                  <span>💡 Rekomendasi Aksi Cepat & Langkah Eksekusi</span>
+                </div>
+                <div id="recommendations-list">
+                  <!-- Dynamically populated with interactive click handlers -->
+                </div>
               </div>
             </div>
-          </div>
 
+          </div>
+        </div>
+
+        <!-- Dynamic Kit View Container (checkup, result, steps, compare, maintenance) -->
+        <div id="kit-dynamic-view-container" style="display: none;">
+          <!-- Populated by app.js -->
         </div>
       </section>
 
@@ -601,52 +694,234 @@
         </div>
       </section>
 
+      <!-- TAB: Cashflow & P&L Saku -->
+      <section id="cashflow-tab" class="tab-content">
+        <div class="grid-2">
+          <!-- Left: Input Record & Overview -->
+          <div class="card">
+            <div class="card-title">
+              <span>💰 Form Catat Pemasukan / Pengeluaran</span>
+            </div>
+            <form id="cashflow-form" onsubmit="handleAddCashflow(event)">
+              <div class="form-group">
+                <label>Tipe Transaksi</label>
+                <select id="cf-type" class="form-control">
+                  <option value="INCOME">💵 Pemasukan (Omzet/Penjualan)</option>
+                  <option value="EXPENSE">💸 Pengeluaran (Beban/Biaya)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Kategori (Standar UMKM)</label>
+                <select id="cf-category" class="form-control">
+                  <option value="Bahan Baku">📦 Bahan Baku & Stok</option>
+                  <option value="Utilitas/Listrik">💡 Utilitas / Listrik / Air / Internet</option>
+                  <option value="Sewa">🏢 Sewa Tempat / Lapak</option>
+                  <option value="Gaji">👥 Gaji Karyawan / Staf</option>
+                  <option value="Penjualan Tunai">🛒 Penjualan Tunai Kasir</option>
+                  <option value="Lain-lain">🌀 Lain-lain</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Jumlah Nominal (Rp)</label>
+                <input type="number" id="cf-amount" class="form-control" placeholder="Contoh: 150000" required min="1">
+              </div>
+              <div class="form-group">
+                <label>Keterangan / Catatan</label>
+                <input type="text" id="cf-notes" class="form-control" placeholder="Contoh: Beli telur 5kg di pasar">
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%;">+ Simpan Catatan Keuangan</button>
+            </form>
+          </div>
+
+          <!-- Right: P&L Summary & Export WA -->
+          <div class="card">
+            <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>📊 Laporan Laba / Rugi (P&L Saku)</span>
+              <button class="btn btn-secondary" onclick="exportCashflowWA()" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">📲 Export via WA</button>
+            </div>
+            <div id="pnl-summary-box" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                <span style="color: var(--text-sub);">Total Pemasukan:</span>
+                <span id="pnl-income" style="font-weight: 700; color: #4ade80;">Rp 0</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                <span style="color: var(--text-sub);">Total Pengeluaran:</span>
+                <span id="pnl-expense" style="font-weight: 700; color: #f87171;">Rp 0</span>
+              </div>
+              <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.5rem; display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 800;">
+                <span>Omzet Bersih (Laba Bersih):</span>
+                <span id="pnl-net" style="color: #60a5fa;">Rp 0</span>
+              </div>
+            </div>
+
+            <div class="card-title" style="font-size: 0.95rem; margin-top: 1rem;">Riwayat Transaksi Terakhir</div>
+            <div id="cashflow-list-container" style="max-height: 250px; overflow-y: auto; font-size: 0.85rem;">
+              <!-- Dynamic rows -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: Smart WA Broadcast & Loyalty Engine -->
+      <section id="loyalty-tab" class="tab-content">
+        <div class="grid-2">
+          <!-- Left: Customer Contacts & Churn Alerts -->
+          <div class="card">
+            <div class="card-title">
+              <span>👥 Kontak Pelanggan & Churn Alert</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Terhimpun otomatis dari transaksi struk kasir & scanner QR review.
+            </p>
+            <div id="churn-alert-box" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 0.85rem; margin-bottom: 1rem;">
+              <div style="font-size: 0.8rem; font-weight: 700; color: #f87171; margin-bottom: 0.3rem;">⚠️ Deteksi Pelanggan Tidak Aktif (Churn Alert):</div>
+              <div id="churn-alert-list" style="font-size: 0.85rem;">Memuat data...</div>
+            </div>
+
+            <div class="card-title" style="font-size: 0.95rem;">Buku Kontak Pelanggan</div>
+            <div id="loyalty-contacts-list" style="max-height: 220px; overflow-y: auto; font-size: 0.85rem;">
+              <!-- Dynamic contact rows -->
+            </div>
+          </div>
+
+          <!-- Right: WA Broadcast & Link Engine -->
+          <div class="card">
+            <div class="card-title">
+              <span>📢 Template Broadcast & wa.me Click-to-Chat</span>
+            </div>
+            <div class="form-group">
+              <label>Nomor WhatsApp Tujuan</label>
+              <input type="text" id="wa-target-phone" class="form-control" placeholder="Contoh: 081234567890">
+            </div>
+            <div class="form-group">
+              <label>Template Pesan Musiman / Promo</label>
+              <select id="wa-template-select" class="form-control" onchange="applyWATemplate(this.value)">
+                <option value="churn">🎁 Promo Churn / Kangen Pelanggan</option>
+                <option value="greetings">🌟 Sapaan Akhir Pekan / Promo Jumat Berkah</option>
+                <option value="custom">✏️ Tulis Pesan Kustom</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Isi Pesan Promosi</label>
+              <textarea id="wa-message-text" class="form-control" rows="4"></textarea>
+            </div>
+            <button type="button" class="btn btn-success" style="width: 100%;" onclick="openWABroadcastLink()">
+              📲 Buka WhatsApp Direct Link (wa.me)
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: Inventaris, Buku Bon & Supplier Order -->
+      <section id="inventory-tab" class="tab-content">
+        <div class="grid-2">
+          <!-- Left: Inventaris & Low Stock Alert -->
+          <div class="card">
+            <div class="card-title">
+              <span>📦 Monitoring Stok & Low Stock Trigger</span>
+            </div>
+            <div id="low-stock-alert-banner" style="background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.3); padding: 0.85rem; border-radius: 10px; margin-bottom: 1rem;">
+              <div style="font-size: 0.8rem; font-weight: 700; color: #fde047;">🔔 Warning Stok Menipis:</div>
+              <div id="low-stock-items-list" style="font-size: 0.85rem; margin-top: 0.3rem;">Tidak ada item kritis.</div>
+            </div>
+
+            <form id="inventory-form" onsubmit="handleSaveInventory(event)" style="margin-bottom: 1rem;">
+              <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.5rem;">
+                <input type="text" id="inv-name" class="form-control" placeholder="Nama Barang / Bahan" required>
+                <input type="number" id="inv-qty" class="form-control" placeholder="Stok" required>
+                <input type="number" id="inv-min" class="form-control" placeholder="Min Stok" required>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                <input type="text" id="inv-supplier" class="form-control" placeholder="Nama Supplier">
+                <input type="text" id="inv-supplier-phone" class="form-control" placeholder="No. WA Supplier">
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">+ Tambah / Update Item</button>
+            </form>
+
+            <div id="inventory-table-container" style="max-height: 200px; overflow-y: auto; font-size: 0.85rem;">
+              <!-- Dynamic inventory list -->
+            </div>
+          </div>
+
+          <!-- Right: Buku Bon (Utang-Piutang) -->
+          <div class="card">
+            <div class="card-title">
+              <span>📖 Buku Bon & Catatan Utang-Piutang</span>
+            </div>
+            <form id="debt-form" onsubmit="handleSaveDebt(event)" style="margin-bottom: 1rem;">
+              <div class="form-group">
+                <label>Tipe Catatan</label>
+                <select id="debt-type" class="form-control">
+                  <option value="RECEIVABLE">📥 Piutang (Orang Utang Ke Toko)</option>
+                  <option value="PAYABLE">📤 Utang (Toko Utang Ke Supplier)</option>
+                </select>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <input type="text" id="debt-person" class="form-control" placeholder="Nama Orang / Supplier" required>
+                <input type="number" id="debt-amount" class="form-control" placeholder="Nominal (Rp)" required>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <input type="date" id="debt-due" class="form-control">
+                <input type="text" id="debt-recorder" class="form-control" placeholder="Nama Pencatat" value="Dewi (Kasir)">
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%;">+ Simpan Catatan Bon</button>
+            </form>
+
+            <div id="debt-list-container" style="max-height: 200px; overflow-y: auto; font-size: 0.85rem;">
+              <!-- Dynamic debt rows -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: AI Copywriting & Generator Promosi Poster -->
+      <section id="copywriting-tab" class="tab-content">
+        <div class="grid-2">
+          <!-- Left: AI Promo Teks Wrapper -->
+          <div class="card">
+            <div class="card-title">
+              <span>✍️ Generator AI Copywriting Lokal</span>
+            </div>
+            <div class="form-group">
+              <label>Nama Produk / Promo Unggulan</label>
+              <input type="text" id="copy-product" class="form-control" value="Es Kopi Susu Gula Aren & Gorengan Crispy">
+            </div>
+            <div class="form-group">
+              <label>Target Channel & Tone</label>
+              <select id="copy-tone" class="form-control">
+                <option value="santai_wa">WhatsApp Status (Santai & Akrab)</option>
+                <option value="instagram">Instagram / Facebook (Menarik & Visual)</option>
+                <option value="diskon_terbatas">Promo Flash Sale / Diskon Terbatas</option>
+              </select>
+            </div>
+            <button type="button" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;" onclick="handleGenerateCopywriting()">
+              🤖 Buat Teks Promosi AI
+            </button>
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px; padding: 1rem;">
+              <label style="font-size: 0.8rem; color: var(--text-sub);">Hasil Copywriting AI (Klik untuk copy):</label>
+              <textarea id="copy-output-text" class="form-control" rows="6" readonly style="margin-top: 0.5rem;"></textarea>
+            </div>
+          </div>
+
+          <!-- Right: Data Linker Poster Visual -->
+          <div class="card">
+            <div class="card-title">
+              <span>🖼️ Data Linker Poster Visual Promo</span>
+            </div>
+            <button type="button" class="btn btn-secondary" style="width: 100%; margin-bottom: 1rem;" onclick="handleGeneratePromoPoster()">
+              ⚡ Render Data Poster Promo
+            </button>
+            <div id="promo-poster-preview" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 1.25rem; text-align: center;">
+              <p style="color: var(--text-muted); font-size: 0.85rem;">Klik tombol di atas untuk generate poster data visual promo.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- TAB 5: Video Micro-Course -->
       <section id="learning-tab" class="tab-content">
         <div class="grid-3" id="courses-grid">
           <!-- Rendered dynamically based on RBAC Tier -->
-        </div>
-      </section>
-
-      <!-- TAB 6: Kit Lokal Naik Kelas -->
-      <section id="kit-tab" class="tab-content">
-        <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(59, 130, 246, 0.3);">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div>
-              <span class="role-badge premium" style="margin-bottom: 0.5rem;">🚀 DIGITAL ACTION KIT V1</span>
-              <h2 style="font-family: 'Outfit'; font-size: 1.5rem; color: #ffffff;">Kit Lokal Naik Kelas</h2>
-              <p style="font-size: 0.88rem; color: var(--text-muted);">Cek kondisi Google Maps, ulasan, dan WhatsApp usaha. Tentukan prioritas, bereskan, dan buktikan hasil kerja.</p>
-            </div>
-            <div>
-              <button class="btn btn-primary" onclick="exportKitSummaryHTML()">📥 Export Ringkasan HTML / PDF</button>
-            </div>
-          </div>
-
-          <!-- Global Kit Progress Bar -->
-          <div style="margin-top: 1.25rem;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem;">
-              <span id="kit-progress-label">0 dari 8 langkah selesai</span>
-              <span id="kit-save-status" style="color: var(--accent-emerald);">✓ Tersimpan di Cloud Backend</span>
-            </div>
-            <div style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden;">
-              <div id="kit-progress-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%); transition: width 0.4s ease;"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Kit Sub-Navigation Pills -->
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-          <button class="btn btn-secondary kit-nav-btn active" id="kit-nav-welcome" onclick="showKitSubView('welcome')">🏠 Beranda Kit</button>
-          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-checkup" onclick="showKitSubView('checkup')">📋 Cek Kondisi (12 Soal)</button>
-          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-result" onclick="showKitSubView('result')">🎯 Hasil & Prioritas</button>
-          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-steps" onclick="showKitSubView('steps')">📱 8 Langkah Eksekusi</button>
-          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-compare" onclick="showKitSubView('compare')">📊 Sebelum vs Sesudah</button>
-          <button class="btn btn-secondary kit-nav-btn" id="kit-nav-maintenance" onclick="showKitSubView('maintenance')">🗓️ Maintenance Mingguan</button>
-        </div>
-
-        <!-- Dynamic Kit View Container -->
-        <div id="kit-dynamic-view-container">
-          <!-- Populated by app.js rendering logic -->
         </div>
       </section>
 
@@ -727,6 +1002,34 @@
       <div style="display: flex; gap: 0.5rem;">
         <button class="btn btn-primary" style="flex: 1;" onclick="window.print()">🖨️ Cetak / Print Struk</button>
         <button class="btn btn-secondary" onclick="closeReceiptModal()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Digital QRIS Payment Modal -->
+  <div id="qris-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px; background: #0f172a; text-align: center; border: 1px solid rgba(59, 130, 246, 0.3);">
+      <button class="close-modal-btn" onclick="closeQrisModal()">✕</button>
+      <div style="font-size: 1.25rem; font-weight: 800; color: #38bdf8; margin-bottom: 0.5rem;">📲 Scan QRIS Kasir SuperUMKM</div>
+      <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 1rem;">Tunjukkan kode QR ini ke pelanggan untuk scan via GoPay/OVO/Dana/BCA Mobile</p>
+      
+      <div id="qris-svg-container" style="background: #ffffff; padding: 1rem; border-radius: 12px; display: inline-block; margin-bottom: 1rem;">
+        <!-- QR Code SVG rendered here -->
+      </div>
+      
+      <div style="font-size: 1.1rem; font-weight: 800; color: #4ade80; margin-bottom: 1rem;" id="qris-modal-amount">
+        Rp 0
+      </div>
+
+      <div id="qris-status-text" style="font-size: 0.85rem; color: #fde047; margin-bottom: 1.25rem;">
+        ⏳ Menunggu konfirmasi pembayaran otomatis...
+      </div>
+
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn btn-primary" style="flex: 1;" onclick="triggerMockQrisVerify()">
+          ✅ Simulasi Verifikasi Sukses
+        </button>
+        <button class="btn btn-secondary" onclick="closeQrisModal()">Batal</button>
       </div>
     </div>
   </div>

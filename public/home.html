@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SuperUMKM - Platform Pendampingan & Konsultasi Digital UMKM Indonesia</title>
+  <meta name="description" content="Platform pendampingan digital UMKM segmen menengah-bawah. Optimasi Google Maps, AI Auto-Reply Ulasan, Builder Katalog WhatsApp, Kasir QRIS, & Edukasi Usaha.">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap">
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: rgba(18, 25, 41, 0.85);
+      --bg-card-hover: rgba(30, 41, 69, 0.9);
+      --primary: #3b82f6;
+      --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+      --accent-teal: #10b981;
+      --accent-amber: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-light: rgba(255, 255, 255, 0.1);
+      --radius-lg: 18px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.12) 0px, transparent 50%);
+      background-attachment: fixed;
+      line-height: 1.6;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* Header Navbar */
+    header.navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 1rem 2rem;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      background: var(--primary-gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #60a5fa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+      list-style: none;
+    }
+
+    .nav-link {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover { color: #ffffff; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: #ffffff;
+      box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px -5px rgba(59, 130, 246, 0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: #ffffff;
+      border: 1px solid var(--border-light);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Hero Section */
+    section.hero {
+      max-width: 1200px;
+      margin: 4rem auto;
+      padding: 0 1.5rem;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    /* Stats Banner */
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      max-width: 1000px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(16px);
+    }
+
+    .stat-item h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #34d399;
+    }
+
+    .stat-item p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Features Grid */
+    section.features {
+      max-width: 1200px;
+      margin: 6rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .section-header h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      background: var(--bg-card-hover);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+
+    .feature-icon {
+      width: 52px;
+      height: 52px;
+      background: rgba(59, 130, 246, 0.15);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #ffffff;
+    }
+
+    .feature-card p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Pricing Section */
+    section.pricing {
+      max-width: 1000px;
+      margin: 6rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .price-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      position: relative;
+    }
+
+    .price-card.featured {
+      border: 2px solid #3b82f6;
+      background: linear-gradient(135deg, rgba(30, 41, 69, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+      box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.3);
+    }
+
+    .price-badge {
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      background: var(--primary-gradient);
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 0.3rem 0.85rem;
+      border-radius: 20px;
+    }
+
+    .price-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .price-amount { font-family: 'Outfit', sans-serif; font-size: 2.5rem; font-weight: 800; color: #34d399; margin-bottom: 1.5rem; }
+
+    .price-features {
+      list-style: none;
+      margin-bottom: 2rem;
+    }
+
+    .price-features li {
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Contact Section */
+    section.contact {
+      max-width: 1200px;
+      margin: 6rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 3rem;
+    }
+
+    .contact-info h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .contact-info p {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .contact-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .contact-card-icon {
+      width: 46px;
+      height: 46px;
+      background: rgba(59, 130, 246, 0.15);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+
+    .form-control {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 0.9rem;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-light);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      .nav-menu { display: none; }
+      .contact-grid { grid-template-columns: 1fr; padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand-logo-wrap">
+        <div class="brand-icon">🚀</div>
+        <div>
+          <div class="brand-title">SuperUMKM</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted);">Consultant Platform</div>
+        </div>
+      </div>
+
+      <ul class="nav-menu">
+        <li><a href="#fitur" class="nav-link">Fitur Utama</a></li>
+        <li><a href="#action-kit" class="nav-link">Action Kit</a></li>
+        <li><a href="#paket" class="nav-link">Paket Harga</a></li>
+        <li><a href="#kontak" class="nav-link">Kontak Kami</a></li>
+        <li><a href="/kit-landing.html" class="nav-link" style="color: #34d399;">📋 Kit Public Checkup</a></li>
+      </ul>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <a href="/index.html" class="btn btn-primary">🚀 Buka Dashboard App</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span>✨ Platform Pendampingan Digital UMKM Indonesia #1</span>
+    </div>
+    <h1 class="hero-title">Bantu Usaha Lokal Anda Mendominasi Pasar Digital & Google Maps</h1>
+    <p class="hero-subtitle">
+      Diagnosis kesehatan usaha via AI, otomatisasi ulasan bintang-5, kasir digital QRIS, katalog WhatsApp instan dalam 3 menit, serta panduan 8 langkah eksekusi etalase digital.
+    </p>
+
+    <div class="hero-actions">
+      <a href="/index.html" class="btn btn-primary" style="font-size: 1.05rem; padding: 0.9rem 2rem;">
+        🚀 Masuk Dashboard & Coba Gratis
+      </a>
+      <a href="#kontak" class="btn btn-secondary" style="font-size: 1.05rem; padding: 0.9rem 2rem;">
+        📞 Hubungi Konsultan Wilayah
+      </a>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="hero-stats">
+      <div class="stat-item">
+        <h3>100%</h3>
+        <p>Khusus Segmen UMKM Lokal</p>
+      </div>
+      <div class="stat-item">
+        <h3>3 Menit</h3>
+        <p>Setup Katalog Web WhatsApp</p>
+      </div>
+      <div class="stat-item">
+        <h3>8 Langkah</h3>
+        <p>Eksekusi Etalase Digital</p>
+      </div>
+      <div class="stat-item">
+        <h3>AI Powered</h3>
+        <p>Auto-Reply Ulasan & Diagnosis</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="fitur">
+    <div class="section-header">
+      <h2>6 Modul Utama Pendampingan SuperUMKM</h2>
+      <p>Solusi terpadu dan praktis yang dirancang khusus untuk pemilik toko, kafe, retail, dan jasa lokal.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>AI Health Check & Action Kit</h3>
+        <p>Diagnosis kesehatan digital usaha otomatis via AI dan 8 langkah eksekusi "Kit Lokal Naik Kelas" lengkap dengan checklist bukti sebelum/sesudah.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📍</div>
+        <h3>Google Maps & AI Review Engine</h3>
+        <p>Cetak QR Standee ulasan akrilik meja kasir, balasan ulasan otomatis berbasis AI, dan pembuat kupon loyalitas diskon pelanggan.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <h3>Builder Website Sementara</h3>
+        <p>Terbitkan katalog online usaha instan dalam 3 menit yang terhubung langsung ke WhatsApp Business resmi tanpa perlu paham coding/SEO.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3>Kasir POS Digital & Staf</h3>
+        <p>Pencatatan transaksi penjualan instan, cetak struk belanja digital, dan manajemen batas staf kasir toko (Freemium Quota Control).</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🛠️</div>
+        <h3>Jasa Pendamping & Smart Route</h3>
+        <p>Pengajuan tiket pendampingan fisik agen wilayah (foto geotag & verifikasi lokasi) serta optimasi rute kunjungan lapangan efisien.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🎓</div>
+        <h3>Video Micro-Course Edukasi</h3>
+        <p>Modul pelatihan video singkat strategi promosi lokal radius 3KM, trik 100+ review bintang 5, dan otorisasi kelas sesuai tier paket.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Action Kit Preview Banner -->
+  <section id="action-kit" style="max-width: 1200px; margin: 6rem auto; padding: 0 1.5rem;">
+    <div style="background: linear-gradient(135deg, rgba(30, 41, 69, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-lg); padding: 3rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2rem;">
+      <div style="max-width: 650px;">
+        <span class="hero-badge" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #34d399;">📋 ACTION KIT V1 INTEGRATED</span>
+        <h2 style="font-family: 'Outfit'; font-size: 2.2rem; margin: 0.75rem 0; color: #ffffff;">Kit Lokal Naik Kelas — 8 Langkah Praktis</h2>
+        <p style="color: var(--text-muted); font-size: 1rem;">
+          Cek kondisi Google Maps, ulasan, dan WhatsApp usaha Anda. Ikuti 8 langkah penanganan faktual: Cek, Kuasai, Benahi, Tunjukkan, Mudahkan, Respons, Siapkan Chat, dan Percepat.
+        </p>
+      </div>
+      <div>
+        <a href="/index.html" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.05rem;">
+          🚀 Buka Kit di Dashboard App
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Tiers -->
+  <section class="pricing" id="paket">
+    <div class="section-header">
+      <h2>Paket Layanan SuperUMKM</h2>
+      <p>Pilih paket pendampingan yang sesuai dengan skala usaha Anda.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-title">Paket GRATIS</div>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Untuk UMKM Pemula / Rintisan</p>
+        <div class="price-amount">Rp 0 <span style="font-size: 0.9rem; color: var(--text-muted);">/selamanya</span></div>
+        
+        <ul class="price-features">
+          <li>✅ AI Health Audit & Action Kit</li>
+          <li>✅ Generator QR Code Standard</li>
+          <li>✅ 1 Katalog Mini Website</li>
+          <li>✅ Maksimal 1 Staf Kasir POS</li>
+          <li>✅ Akses Video Edukasi Dasar</li>
+        </ul>
+
+        <a href="/index.html" class="btn btn-secondary" style="width: 100%;">Mulai Gratis Sekarang</a>
+      </div>
+
+      <div class="price-card featured">
+        <div class="price-badge">PALING POPULER</div>
+        <div class="price-title">Paket PREMIUM</div>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Untuk Usaha Lokal Siap Akselerasi</p>
+        <div class="price-amount">Rp 99.000 <span style="font-size: 0.9rem; color: var(--text-muted);">/bulan</span></div>
+
+        <ul class="price-features">
+          <li>✅ Seluruh Fitur Paket Gratis</li>
+          <li>✅ Custom Branded QR Review Standee</li>
+          <li>✅ AI Auto-Reply Review Google Maps</li>
+          <li>✅ Kasir POS Staf Tanpa Batas (Unlimited)</li>
+          <li>✅ Akses Semua Masterclass Edukasi</li>
+          <li>✅ Layanan Prioritas Pendamping Lapangan</li>
+        </ul>
+
+        <a href="/index.html" class="btn btn-primary" style="width: 100%;">Upgrade ke Premium</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Information Section -->
+  <section class="contact" id="kontak">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h3>Informasi Kontak & Layanan Konsultasi</h3>
+        <p>Tim Konsultan Wilayah SuperUMKM siap membantu usaha Anda mendominasi lokasi sekitar. Hubungi kami untuk jadwal pendampingan langsung.</p>
+
+        <div class="contact-card">
+          <div class="contact-card-icon">💬</div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">WhatsApp Official Consultant</div>
+            <a href="https://wa.me/6281234567890" target="_blank" style="font-weight: 700; color: #34d399; font-size: 1.05rem;">+62 812-3456-7890</a>
+          </div>
+        </div>
+
+        <div class="contact-card">
+          <div class="contact-card-icon">✉️</div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Email Support & Kerjasama</div>
+            <div style="font-weight: 700; color: #60a5fa; font-size: 1rem;">support@superumkm.id</div>
+          </div>
+        </div>
+
+        <div class="contact-card">
+          <div class="contact-card-icon">📍</div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Kantor Hub Pendampingan</div>
+            <div style="font-weight: 700; color: #ffffff; font-size: 0.95rem;">Jl. Senopati No. 45, Jakarta Selatan 12190</div>
+          </div>
+        </div>
+
+        <div class="contact-card">
+          <div class="contact-card-icon">⏰</div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Jam Operasional Konsultasi</div>
+            <div style="font-weight: 700; color: #ffffff; font-size: 0.95rem;">Senin - Sabtu (08.00 - 18.00 WIB)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Contact Form -->
+      <div>
+        <h3 style="font-family: 'Outfit'; font-size: 1.5rem; margin-bottom: 1.25rem;">Tanyakan ke Konsultan Wilayah</h3>
+        
+        <form onsubmit="handleContactSubmit(event)">
+          <div class="form-group">
+            <label>Nama Lengkap Anda</label>
+            <input type="text" id="contact-name" class="form-control" placeholder="Contoh: Budi Santoso" required>
+          </div>
+
+          <div class="form-group">
+            <label>Nomor WhatsApp Aktif</label>
+            <input type="tel" id="contact-phone" class="form-control" placeholder="Contoh: 081234567890" required>
+          </div>
+
+          <div class="form-group">
+            <label>Nama Toko / Jenis Usaha</label>
+            <input type="text" id="contact-biz" class="form-control" placeholder="Contoh: Warung Kelontong Berkah" required>
+          </div>
+
+          <div class="form-group">
+            <label>Pesan / Pertanyaan Konsultasi</label>
+            <textarea id="contact-msg" class="form-control" rows="3" placeholder="Tuliskan bantuan yang Anda perlukan..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            💬 Kirim Pesan Konsultasi via WhatsApp
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span>🚀</span>
+        <strong style="color: #ffffff;">SuperUMKM Platform Engine</strong> &copy; 2026. Hak Cipta Dilindungi.
+      </div>
+      <div style="display: flex; gap: 1.5rem;">
+        <a href="/home.html">Beranda</a>
+        <a href="/index.html">Dashboard App</a>
+        <a href="/kit-landing.html">Kit Public Checkup</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function handleContactSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('contact-name').value;
+      const phone = document.getElementById('contact-phone').value;
+      const biz = document.getElementById('contact-biz').value;
+      const msg = document.getElementById('contact-msg').value;
+
+      const text = `Halo Konsultan SuperUMKM,\nSaya *${name}* (${biz} - ${phone}).\nIngin berkonsultasi:\n"${msg}"`;
+      const waUrl = `https://wa.me/6281234567890?text=${encodeURIComponent(text)}`;
+      window.open(waUrl, '_blank');
+    }
+  </script>
+
+</body>
+</html>

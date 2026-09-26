@@ -16,6 +16,14 @@ class Database {
     this.posTransactions = [];
     this.userKits = {};
 
+    // 5 New Ecosystem Modules Persistence Tables
+    this.cashflowRecords = [];
+    this.customerContacts = [];
+    this.inventoryItems = [];
+    this.stockAlerts = [];
+    this.debtBooks = [];
+    this.qrisTransactions = [];
+
     this.seed();
   }
 
@@ -192,6 +200,138 @@ class Database {
       task_status: 'IN_PROGRESS',
       updated_at: new Date().toISOString()
     });
+
+    // Seed Cashflow Records
+    this.cashflowRecords = [
+      {
+        id: 'cf-001',
+        owner_id: userFreeId,
+        type: 'INCOME',
+        category: 'PENJUALAN_HARIAN',
+        amount: 450000,
+        notes: 'Penjualan Toko Kelontong Pagi',
+        date: new Date().toISOString().split('T')[0],
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'cf-002',
+        owner_id: userFreeId,
+        type: 'EXPENSE',
+        category: 'BAHAN_BAKU',
+        amount: 180000,
+        notes: 'Kulakan Minyak & Beras',
+        date: new Date().toISOString().split('T')[0],
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'cf-003',
+        owner_id: userFreeId,
+        type: 'EXPENSE',
+        category: 'UTILITAS',
+        amount: 50000,
+        notes: 'Token Listrik Toko',
+        date: new Date().toISOString().split('T')[0],
+        created_at: new Date().toISOString()
+      }
+    ];
+
+    // Seed Customer Contacts (Harvested from POS receipts & QR review scans)
+    this.customerContacts = [
+      {
+        id: 'cnt-001',
+        owner_id: userFreeId,
+        customer_name: 'Budi Raharjo',
+        phone_number: '081299887766',
+        source: 'POS_RECEIPT',
+        total_visits: 5,
+        total_spent: 320000,
+        last_visit_date: '2026-08-15T10:00:00.000Z', // Inactive > 30 days
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'cnt-002',
+        owner_id: userFreeId,
+        customer_name: 'Maya Indah',
+        phone_number: '089988776655',
+        source: 'QR_REVIEW_SCAN',
+        total_visits: 2,
+        total_spent: 95000,
+        last_visit_date: new Date().toISOString(),
+        created_at: new Date().toISOString()
+      }
+    ];
+
+    // Seed Inventory Items & Stock Alerts
+    this.inventoryItems = [
+      {
+        id: 'inv-001',
+        owner_id: userFreeId,
+        item_name: 'Beras Premium 5kg',
+        category: 'Sembako',
+        unit_price: 65000,
+        current_stock: 3,
+        min_stock: 5, // Low stock trigger!
+        supplier_name: 'CV Sembako Jaya',
+        supplier_phone: '081233445566',
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 'inv-002',
+        owner_id: userFreeId,
+        item_name: 'Minyak Goreng 1L',
+        category: 'Sembako',
+        unit_price: 18000,
+        current_stock: 12,
+        min_stock: 10,
+        supplier_name: 'Distributor Minyak Murah',
+        supplier_phone: '081999888777',
+        updated_at: new Date().toISOString()
+      }
+    ];
+
+    // Seed Debt Books (Buku Bon Utang-Piutang)
+    this.debtBooks = [
+      {
+        id: 'debt-001',
+        owner_id: userFreeId,
+        debtor_name: 'Pak Ahmad (Tetangga)',
+        phone_number: '085211223344',
+        type: 'RECEIVABLE', // Piutang (orang ngutang ke toko)
+        amount: 75000,
+        notes: 'Bon Beras & Gula Pasir',
+        recorder_name: 'Dewi (Kasir)',
+        due_date: '2026-10-01',
+        status: 'UNPAID',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'debt-002',
+        owner_id: userFreeId,
+        debtor_name: 'CV Agen Sembako Utama',
+        phone_number: '081233445566',
+        type: 'DEBT', // Utang toko ke agen
+        amount: 250000,
+        notes: 'Sisa Pembayaran Galon & Gas',
+        recorder_name: 'Budi Santoso (Owner)',
+        due_date: '2026-09-30',
+        status: 'UNPAID',
+        created_at: new Date().toISOString()
+      }
+    ];
+
+    // Seed QRIS Transactions
+    this.qrisTransactions = [
+      {
+        id: 'qris-1001',
+        owner_id: userFreeId,
+        amount: 101000,
+        qr_string: '00020101021126620016ID.CO.QRIS.WWW011893600911000000000052045411530336054061010005802ID5913SuperUMKM Shop6007Jakarta6304A1B2',
+        qr_code_svg: 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=QRIS_DEMO_101000',
+        status: 'SUCCESS', // PAID
+        paid_at: new Date().toISOString(),
+        created_at: new Date().toISOString()
+      }
+    ];
   }
 }
 

@@ -144,7 +144,11 @@ function switchTab(tabId, el) {
     'audit-tab': { title: 'AI Business Health Audit', subtitle: 'Diagnosis otomatis AI kesehatan digital usaha UMKM Anda dalam 5 menit' },
     'gmaps-tab': { title: 'Google Maps & AI Review Engine', subtitle: 'Cetak QR Code Review, balasan otomatis AI, dan kupon loyalitas' },
     'landing-tab': { title: 'Builder Website Sementara UMKM', subtitle: 'Buat katalog web instan dengan tautan WhatsApp & upload foto' },
-    'pos-tab': { title: 'Mesin Kasir & Kelola Anak Buah (Staf)', subtitle: 'Pencatatan transaksi instan, cetak struk, dan kelola staf kasir toko' },
+    'pos-tab': { title: 'Mesin Kasir & Integrasi QRIS', subtitle: 'Pencatatan transaksi instan, QRIS dinamis, cetak struk, dan kelola staf kasir toko' },
+    'cashflow-tab': { title: 'Modul Cashflow & P&L Saku', subtitle: 'Pencatatan pemasukan/pengeluaran harian, omzet bersih & export laporan WA' },
+    'loyalty-tab': { title: 'Smart WhatsApp Broadcast & Loyalty', subtitle: 'Himpunan kontak otomatis, deteksi pelanggan churn & template wa.me' },
+    'inventory-tab': { title: 'Manajemen Stok, Supplier & Buku Bon', subtitle: 'Monitoring stok kritis, draft order WA supplier & utang-piutang' },
+    'copywriting-tab': { title: 'AI Promo Generator & Data Poster', subtitle: 'Copywriting otomatis santai lokal & renderer visual poster promo' },
     'services-tab': { title: 'Jasa Pendampingan & Smart Route Dispatch', subtitle: 'Manajemen tiket pengerjaan verifikasi lokasi & rute efisien agen' },
     'learning-tab': { title: 'Video Micro-Course Edukasi', subtitle: 'Modul pelatihan strategi pemasaran digital & Google Maps' },
     'kit-tab': { title: 'Kit Lokal Naik Kelas', subtitle: 'Action kit interaktif untuk diagnosis & penanganan etalase digital UMKM' }
@@ -155,22 +159,35 @@ function switchTab(tabId, el) {
     document.getElementById('active-tab-subtitle').innerText = titles[tabId].subtitle;
   }
 
-  if (tabId === 'pos-tab') {
-    loadPOSData();
-  }
-  if (tabId === 'kit-tab') {
-    loadKitStateFromBackend();
-  }
+  if (tabId === 'pos-tab') loadPOSData();
+  if (tabId === 'kit-tab') loadKitStateFromBackend();
+  if (tabId === 'cashflow-tab') loadCashflowData();
+  if (tabId === 'loyalty-tab') loadLoyaltyData();
+  if (tabId === 'inventory-tab') loadInventoryData();
+}
+
+// Toggle Google Maps Audit Fields Visibility
+function toggleGmapsAuditFields() {
+  const gmapsSelect = document.getElementById('audit-gmaps');
+  const gmapsFields = document.getElementById('gmaps-audit-fields');
+  if (!gmapsSelect || !gmapsFields) return;
+  const isGmaps = gmapsSelect.value === 'true';
+  gmapsFields.style.display = isGmaps ? 'block' : 'none';
 }
 
 // Evaluate Audit Default
 async function handleAuditEvaluateDefault() {
+  toggleGmapsAuditFields();
   const payload = {
     has_gmaps_profile: true,
     gmaps_rating: 4.6,
     review_count: 15,
     has_website_or_catalog: false,
     has_whatsapp_business: true,
+    has_qris_payment: true,
+    has_physical_banner: true,
+    has_social_media: false,
+    has_promo_program: true,
     photos_count: 8,
     weekly_post_updates: false
   };
@@ -181,12 +198,18 @@ async function handleAuditEvaluateDefault() {
 async function handleAuditSubmit(e) {
   e.preventDefault();
   
+  const hasGmaps = document.getElementById('audit-gmaps').value === 'true';
+
   const payload = {
-    has_gmaps_profile: document.getElementById('audit-gmaps').value === 'true',
-    gmaps_rating: parseFloat(document.getElementById('audit-rating').value),
-    review_count: parseInt(document.getElementById('audit-reviews').value),
-    has_website_or_catalog: document.getElementById('audit-catalog').value === 'true',
-    has_whatsapp_business: document.getElementById('audit-wa').value === 'true',
+    has_gmaps_profile: hasGmaps,
+    gmaps_rating: hasGmaps && document.getElementById('audit-rating') ? parseFloat(document.getElementById('audit-rating').value) : 0,
+    review_count: hasGmaps && document.getElementById('audit-reviews') ? parseInt(document.getElementById('audit-reviews').value) : 0,
+    has_website_or_catalog: document.getElementById('audit-catalog') ? document.getElementById('audit-catalog').value === 'true' : false,
+    has_whatsapp_business: document.getElementById('audit-wa') ? document.getElementById('audit-wa').value === 'true' : false,
+    has_qris_payment: document.getElementById('audit-qris') ? document.getElementById('audit-qris').value === 'true' : false,
+    has_physical_banner: document.getElementById('audit-banner') ? document.getElementById('audit-banner').value === 'true' : false,
+    has_social_media: document.getElementById('audit-sosmed') ? document.getElementById('audit-sosmed').value === 'true' : false,
+    has_promo_program: document.getElementById('audit-promo') ? document.getElementById('audit-promo').value === 'true' : false,
     photos_count: 8,
     weekly_post_updates: false
   };
@@ -742,6 +765,8 @@ function renderCart() {
   totalDisplay.innerText = `Rp ${total.toLocaleString('id-ID')}`;
 }
 
+let activeQrisTransactionId = null;
+
 async function handlePOSCheckout() {
   if (cartItems.length === 0) {
     alert('Keranjang belanja masih kosong!');
@@ -749,7 +774,36 @@ async function handlePOSCheckout() {
   }
 
   const payMethod = document.getElementById('pos-pay-method').value;
+  const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
+  if (payMethod === 'QRIS') {
+    try {
+      const qrisRes = await fetch('/api/v1/qris/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        },
+        body: JSON.stringify({ amount: totalAmount, isDynamic: true })
+      });
+      const qrisData = await qrisRes.json();
+      if (qrisData.success) {
+        activeQrisTransactionId = qrisData.data.transaction_id;
+        document.getElementById('qris-svg-container').innerHTML = qrisData.data.qr_svg;
+        document.getElementById('qris-modal-amount').innerText = `Rp ${totalAmount.toLocaleString('id-ID')}`;
+        document.getElementById('qris-status-text').innerText = '⏳ Menunggu scan & konfirmasi bayar otomatis...';
+        document.getElementById('qris-modal').classList.add('active');
+        return;
+      }
+    } catch (e) {
+      console.error('QRIS error:', e);
+    }
+  }
+
+  executeFinalPOSCheckout(payMethod);
+}
+
+async function executeFinalPOSCheckout(payMethod) {
   try {
     const res = await fetch('/api/v1/pos/transactions', {
       method: 'POST',
@@ -776,6 +830,35 @@ async function handlePOSCheckout() {
   } catch (err) {
     console.error('POS Checkout error:', err);
     alert('Terjadi kesalahan koneksi server');
+  }
+}
+
+function closeQrisModal() {
+  const modal = document.getElementById('qris-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+async function triggerMockQrisVerify() {
+  if (!activeQrisTransactionId) return;
+  try {
+    const res = await fetch('/api/v1/qris/verify-mock', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify({ transaction_id: activeQrisTransactionId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('qris-status-text').innerText = '✅ Pembayaran QRIS Sukses Terverifikasi!';
+      setTimeout(() => {
+        closeQrisModal();
+        executeFinalPOSCheckout('QRIS');
+      }, 700);
+    }
+  } catch (e) {
+    console.error('Verify error:', e);
   }
 }
 
@@ -1050,21 +1133,29 @@ function showKitSubView(subView, stepNum) {
   if (stepNum) kitState.selectedStep = stepNum;
 
   document.querySelectorAll('.kit-nav-btn').forEach(btn => btn.classList.remove('active'));
-  const targetNav = document.getElementById(`kit-nav-${subView}`) || document.getElementById('kit-nav-steps');
+  const targetNav = document.getElementById(`kit-nav-${subView}`) || document.getElementById('kit-nav-ai');
   if (targetNav) targetNav.classList.add('active');
 
-  renderKitView();
+  const aiPanel = document.getElementById('audit-subview-ai');
+  const kitContainer = document.getElementById('kit-dynamic-view-container');
+
+  if (subView === 'ai') {
+    if (aiPanel) aiPanel.style.display = 'block';
+    if (kitContainer) kitContainer.style.display = 'none';
+  } else {
+    if (aiPanel) aiPanel.style.display = 'none';
+    if (kitContainer) kitContainer.style.display = 'block';
+    renderKitView();
+  }
 }
 
 function renderKitView() {
   const container = document.getElementById('kit-dynamic-view-container');
   if (!container) return;
 
-  const view = kitState.activeSubView || 'welcome';
+  const view = kitState.activeSubView || 'ai';
 
-  if (view === 'welcome') {
-    container.innerHTML = renderKitWelcomeHTML();
-  } else if (view === 'checkup') {
+  if (view === 'checkup') {
     container.innerHTML = renderKitCheckupHTML();
   } else if (view === 'result') {
     container.innerHTML = renderKitResultHTML();
@@ -1501,4 +1592,382 @@ function exportKitSummaryHTML() {
   a.download = `laporan-kit-lokal-naik-kelas-${Date.now()}.html`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 500);
+}
+
+/* ========================================================
+   MODULE 1: CASHFLOW & P&L SAKU
+======================================================== */
+async function loadCashflowData() {
+  try {
+    const [pnlRes, recordsRes] = await Promise.all([
+      fetch('/api/v1/cashflow/pnl', { headers: { 'Authorization': `Bearer ${userToken}` } }),
+      fetch('/api/v1/cashflow/records', { headers: { 'Authorization': `Bearer ${userToken}` } })
+    ]);
+
+    const pnlData = await pnlRes.json();
+    const recordsData = await recordsRes.json();
+
+    if (pnlData.success) {
+      const summary = pnlData.data.summary;
+      document.getElementById('pnl-income').innerText = `Rp ${summary.total_income.toLocaleString('id-ID')}`;
+      document.getElementById('pnl-expense').innerText = `Rp ${summary.total_expense.toLocaleString('id-ID')}`;
+      document.getElementById('pnl-net').innerText = `Rp ${summary.net_profit.toLocaleString('id-ID')}`;
+    }
+
+    if (recordsData.success) {
+      const container = document.getElementById('cashflow-list-container');
+      if (recordsData.data.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 1rem;">Belum ada catatan keuangan hari ini.</div>';
+      } else {
+        container.innerHTML = recordsData.data.map(rec => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <div>
+              <div style="font-weight: 700; color: ${rec.type === 'INCOME' ? '#4ade80' : '#f87171'};">
+                ${rec.type === 'INCOME' ? '💵' : '💸'} [${rec.category}] ${rec.notes || '-'}
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${new Date(rec.created_at).toLocaleTimeString('id-ID')}</div>
+            </div>
+            <div style="font-weight: 800; color: ${rec.type === 'INCOME' ? '#4ade80' : '#f87171'};">
+              ${rec.type === 'INCOME' ? '+' : '-'} Rp ${rec.amount.toLocaleString('id-ID')}
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+  } catch (err) {
+    console.error('loadCashflowData error:', err);
+  }
+}
+
+async function handleAddCashflow(e) {
+  e.preventDefault();
+  const type = document.getElementById('cf-type').value;
+  const category = document.getElementById('cf-category').value;
+  const amount = Number(document.getElementById('cf-amount').value);
+  const notes = document.getElementById('cf-notes').value;
+
+  try {
+    const res = await fetch('/api/v1/cashflow/records', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userToken}` },
+      body: JSON.stringify({ type, category, amount, notes })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('cf-amount').value = '';
+      document.getElementById('cf-notes').value = '';
+      loadCashflowData();
+    } else {
+      alert(data.error || 'Gagal menyimpan transaksi');
+    }
+  } catch (err) {
+    console.error('handleAddCashflow error:', err);
+  }
+}
+
+async function exportCashflowWA() {
+  try {
+    const res = await fetch('/api/v1/cashflow/export-wa', {
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const data = await res.json();
+    if (data.success && data.data.wa_link) {
+      window.open(data.data.wa_link, '_blank');
+    }
+  } catch (err) {
+    console.error('exportCashflowWA error:', err);
+  }
+}
+
+/* ========================================================
+   MODULE 2: SMART WA BROADCAST & LOYALTY ENGINE
+======================================================== */
+async function loadLoyaltyData() {
+  try {
+    const [contactsRes, churnRes] = await Promise.all([
+      fetch('/api/v1/loyalty/contacts', { headers: { 'Authorization': `Bearer ${userToken}` } }),
+      fetch('/api/v1/loyalty/churn-alerts', { headers: { 'Authorization': `Bearer ${userToken}` } })
+    ]);
+
+    const contactsData = await contactsRes.json();
+    const churnData = await churnRes.json();
+
+    if (contactsData.success) {
+      const container = document.getElementById('loyalty-contacts-list');
+      if (contactsData.data.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 1rem;">Belum ada kontak pelanggan.</div>';
+      } else {
+        container.innerHTML = contactsData.data.map(c => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <div>
+              <div style="font-weight: 700;">👤 ${c.name} (${c.phone})</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Sumber: ${c.source} | Kunjungan: ${c.total_visits}x</div>
+            </div>
+            <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="setWATarget('${c.phone}')">📢 Chat</button>
+          </div>
+        `).join('');
+      }
+    }
+
+    if (churnData.success) {
+      const churnBox = document.getElementById('churn-alert-list');
+      if (churnData.data.length === 0) {
+        churnBox.innerHTML = '<span style="color: #4ade80;">✓ Tidak ada pelanggan inactive (>14 hari).</span>';
+      } else {
+        churnBox.innerHTML = churnData.data.map(c => `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.35rem;">
+            <span>⚠️ <strong>${c.name}</strong> (${c.days_since_last_visit} hari tidak berkunjung)</span>
+            <button class="btn btn-primary" style="font-size: 0.7rem; padding: 0.2rem 0.4rem;" onclick="setWATarget('${c.phone}', 'churn')">Kirim Vouchers</button>
+          </div>
+        `).join('');
+      }
+    }
+  } catch (err) {
+    console.error('loadLoyaltyData error:', err);
+  }
+}
+
+function setWATarget(phone, templateKey = 'greetings') {
+  document.getElementById('wa-target-phone').value = phone;
+  applyWATemplate(templateKey);
+}
+
+function applyWATemplate(type) {
+  const select = document.getElementById('wa-template-select');
+  if (select) select.value = type;
+  const textarea = document.getElementById('wa-message-text');
+
+  if (type === 'churn') {
+    textarea.value = `Halo kak! Kami kangen nih di Warung Kelontong Berkah. Dapatkan DISKON 15% khusus kunjungan minggu ini. Tunjukkan WA ini ya! 🙌`;
+  } else if (type === 'greetings') {
+    textarea.value = `Halo kak! Terima kasih sudah menjadi pelanggan setia Warung Kelontong Berkah. Cek promo sembako hemat minggu ini ya! 🎉`;
+  } else if (type === 'custom') {
+    textarea.value = `Halo kak, ada penawaran spesial dari toko kami hari ini...`;
+  }
+}
+
+async function openWABroadcastLink() {
+  const phone = document.getElementById('wa-target-phone').value;
+  const message = document.getElementById('wa-message-text').value;
+
+  if (!phone || !message) {
+    alert('Harap isi nomor WA dan pesan promosi!');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/v1/loyalty/broadcast-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userToken}` },
+      body: JSON.stringify({ phone, message })
+    });
+    const data = await res.json();
+    if (data.success && data.data.wa_link) {
+      window.open(data.data.wa_link, '_blank');
+    }
+  } catch (err) {
+    console.error('openWABroadcastLink error:', err);
+  }
+}
+
+/* ========================================================
+   MODULE 3: MANAJEMEN STOK, BUKU BON & SUPPLIER ORDER
+======================================================== */
+async function loadInventoryData() {
+  try {
+    const [itemsRes, alertRes, debtRes] = await Promise.all([
+      fetch('/api/v1/inventory/items', { headers: { 'Authorization': `Bearer ${userToken}` } }),
+      fetch('/api/v1/inventory/low-stock-alerts', { headers: { 'Authorization': `Bearer ${userToken}` } }),
+      fetch('/api/v1/inventory/debt-books', { headers: { 'Authorization': `Bearer ${userToken}` } })
+    ]);
+
+    const itemsData = await itemsRes.json();
+    const alertData = await alertRes.json();
+    const debtData = await debtRes.json();
+
+    if (alertData.success) {
+      const banner = document.getElementById('low-stock-items-list');
+      if (alertData.data.length === 0) {
+        banner.innerHTML = '<span style="color: #4ade80;">✓ Semua stok aman di atas batas minimum.</span>';
+      } else {
+        banner.innerHTML = alertData.data.map(i => `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.35rem;">
+            <span>🚨 <strong>${i.item_name}</strong> (Sisa: ${i.quantity}, Min: ${i.min_threshold})</span>
+            <button class="btn btn-secondary" style="font-size: 0.7rem; padding: 0.2rem 0.4rem;" onclick="orderSupplierWA('${i.id}')">📲 Re-Order WA</button>
+          </div>
+        `).join('');
+      }
+    }
+
+    if (itemsData.success) {
+      const container = document.getElementById('inventory-table-container');
+      container.innerHTML = itemsData.data.map(i => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <div>
+            <div style="font-weight: 700;">📦 ${i.item_name}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Supplier: ${i.supplier_name || '-'} (${i.supplier_phone || '-'})</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-weight: 800; color: ${i.quantity <= i.min_threshold ? '#f87171' : '#4ade80'};">
+              ${i.quantity} / ${i.min_threshold} min
+            </div>
+            <button class="btn btn-secondary" style="font-size: 0.7rem; padding: 0.15rem 0.35rem;" onclick="orderSupplierWA('${i.id}')">WA Order</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    if (debtData.success) {
+      const debtContainer = document.getElementById('debt-list-container');
+      if (debtData.data.length === 0) {
+        debtContainer.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 1rem;">Belum ada catatan bon utang-piutang.</div>';
+      } else {
+        debtContainer.innerHTML = debtData.data.map(d => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <div>
+              <div style="font-weight: 700; color: ${d.type === 'RECEIVABLE' ? '#38bdf8' : '#fb923c'};">
+                ${d.type === 'RECEIVABLE' ? '📥 Piutang' : '📤 Utang'}: ${d.person_name}
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Pencatat: ${d.recorded_by} | Tempo: ${d.due_date || 'Tak terbatas'}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-weight: 800; color: ${d.status === 'PAID' ? '#4ade80' : '#f87171'};">
+                Rp ${d.amount.toLocaleString('id-ID')} (${d.status})
+              </div>
+              ${d.status === 'UNPAID' ? `<button class="btn btn-primary" style="font-size: 0.7rem; padding: 0.15rem 0.35rem;" onclick="payDebt('${d.id}')">✓ Lunas</button>` : ''}
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+  } catch (err) {
+    console.error('loadInventoryData error:', err);
+  }
+}
+
+async function handleSaveInventory(e) {
+  e.preventDefault();
+  const name = document.getElementById('inv-name').value;
+  const qty = Number(document.getElementById('inv-qty').value);
+  const min = Number(document.getElementById('inv-min').value);
+  const supplier = document.getElementById('inv-supplier').value;
+  const phone = document.getElementById('inv-supplier-phone').value;
+
+  try {
+    const res = await fetch('/api/v1/inventory/items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userToken}` },
+      body: JSON.stringify({ item_name: name, quantity: qty, min_threshold: min, supplier_name: supplier, supplier_phone: phone })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('inv-name').value = '';
+      document.getElementById('inv-qty').value = '';
+      loadInventoryData();
+    }
+  } catch (err) {
+    console.error('handleSaveInventory error:', err);
+  }
+}
+
+async function handleSaveDebt(e) {
+  e.preventDefault();
+  const type = document.getElementById('debt-type').value;
+  const person = document.getElementById('debt-person').value;
+  const amount = Number(document.getElementById('debt-amount').value);
+  const due = document.getElementById('debt-due').value;
+  const recorder = document.getElementById('debt-recorder').value;
+
+  try {
+    const res = await fetch('/api/v1/inventory/debt-books', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userToken}` },
+      body: JSON.stringify({ type, person_name: person, amount, due_date: due, recorded_by: recorder })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('debt-person').value = '';
+      document.getElementById('debt-amount').value = '';
+      loadInventoryData();
+    }
+  } catch (err) {
+    console.error('handleSaveDebt error:', err);
+  }
+}
+
+async function payDebt(id) {
+  try {
+    const res = await fetch(`/api/v1/inventory/debt-books/${id}/pay`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      loadInventoryData();
+    }
+  } catch (err) {
+    console.error('payDebt error:', err);
+  }
+}
+
+async function orderSupplierWA(itemId) {
+  try {
+    const res = await fetch(`/api/v1/inventory/supplier-order-draft?itemId=${itemId}`, {
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const data = await res.json();
+    if (data.success && data.data.wa_link) {
+      window.open(data.data.wa_link, '_blank');
+    }
+  } catch (err) {
+    console.error('orderSupplierWA error:', err);
+  }
+}
+
+/* ========================================================
+   MODULE 4: AI COPYWRITING & PROMO POSTER
+======================================================== */
+async function handleGenerateCopywriting() {
+  const productName = document.getElementById('copy-product').value;
+  const tone = document.getElementById('copy-tone').value;
+
+  try {
+    const res = await fetch('/api/v1/copywriting/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userToken}` },
+      body: JSON.stringify({ product_name: productName, tone })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('copy-output-text').value = data.data.generated_text;
+    }
+  } catch (err) {
+    console.error('handleGenerateCopywriting error:', err);
+  }
+}
+
+async function handleGeneratePromoPoster() {
+  const productName = document.getElementById('copy-product').value;
+  try {
+    const res = await fetch('/api/v1/copywriting/promo-poster', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userToken}` },
+      body: JSON.stringify({ menu_name: productName })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const poster = data.data;
+      document.getElementById('promo-poster-preview').innerHTML = `
+        <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 10px; text-align: left; border: 1px solid rgba(59, 130, 246, 0.3);">
+          <div style="font-size: 0.75rem; color: #38bdf8; font-weight: 700;">🏪 ${poster.store_name}</div>
+          <div style="font-size: 1.2rem; font-weight: 800; color: #ffffff; margin: 0.25rem 0;">${poster.headline}</div>
+          <img src="${poster.photo_url}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin: 0.5rem 0;">
+          <div style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 0.5rem;">📍 Lokasi Usaha: <a href="${poster.gmaps_url}" target="_blank" style="color: #60a5fa;">Buka Google Maps</a></div>
+          <button class="btn btn-success" style="width: 100%; font-size: 0.8rem;" onclick="navigator.clipboard.writeText('${poster.headline}'); alert('Teks poster disalin!')">📋 Salin Konten Poster</button>
+        </div>
+      `;
+    }
+  } catch (err) {
+    console.error('handleGeneratePromoPoster error:', err);
+  }
 }
