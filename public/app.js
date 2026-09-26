@@ -124,6 +124,7 @@ async function switchRole(roleKey) {
   loadTasks();
   loadCourses();
   loadPOSData();
+  loadKitStateFromBackend();
 }
 
 // Navigation Tabs
@@ -145,7 +146,8 @@ function switchTab(tabId, el) {
     'landing-tab': { title: 'Builder Website Sementara UMKM', subtitle: 'Buat katalog web instan dengan tautan WhatsApp & upload foto' },
     'pos-tab': { title: 'Mesin Kasir & Kelola Anak Buah (Staf)', subtitle: 'Pencatatan transaksi instan, cetak struk, dan kelola staf kasir toko' },
     'services-tab': { title: 'Jasa Pendampingan & Smart Route Dispatch', subtitle: 'Manajemen tiket pengerjaan verifikasi lokasi & rute efisien agen' },
-    'learning-tab': { title: 'Video Micro-Course Edukasi', subtitle: 'Modul pelatihan strategi pemasaran digital & Google Maps' }
+    'learning-tab': { title: 'Video Micro-Course Edukasi', subtitle: 'Modul pelatihan strategi pemasaran digital & Google Maps' },
+    'kit-tab': { title: 'Kit Lokal Naik Kelas', subtitle: 'Action kit interaktif untuk diagnosis & penanganan etalase digital UMKM' }
   };
 
   if (titles[tabId]) {
@@ -155,6 +157,9 @@ function switchTab(tabId, el) {
 
   if (tabId === 'pos-tab') {
     loadPOSData();
+  }
+  if (tabId === 'kit-tab') {
+    loadKitStateFromBackend();
   }
 }
 
@@ -944,4 +949,556 @@ async function loadPOSTransactionHistory() {
   } catch (err) {
     console.error('Load transaction history error:', err);
   }
+}
+
+// ==========================================
+// MODUL: KIT LOKAL NAIK KELAS (ACTION KIT V1)
+// ==========================================
+
+let kitState = {
+  version: 1,
+  answers: Array(12).fill(null),
+  baseline: null,
+  checkupComplete: false,
+  qIndex: 0,
+  recommended: 1,
+  route: [],
+  items: {},
+  status: {},
+  fields: {},
+  wait: {},
+  maintenance: { date: '', checks: {}, notes: '', next: '', person: '' },
+  after: {},
+  activeSubView: 'welcome',
+  selectedStep: 1
+};
+
+const kitStepsDefinition = [
+  { id: 1, badge: 'DITEMUKAN', verb: 'CEK', title: 'Cek & Telusuri Usaha Sendiri', result: 'Anda tahu apa yang pelanggan lihat sekarang.', why: 'Sebelum membetulkan apa pun, lihat dulu kondisi yang sebenarnya.', action: 'Cari seperti pelanggan, lalu simpan kondisi awal.' },
+  { id: 2, badge: 'DITEMUKAN', verb: 'KUASAI', title: 'Klaim & Amankan Profil Usaha', result: 'Anda tahu siapa yang mempunyai akses profil dan tindakan berikutnya.', why: 'Memastikan akses sebelum mengubah informasi.', action: 'Pilih jalur sesuai keadaan profil.' },
+  { id: 3, badge: 'DITEMUKAN', verb: 'BENAHI', title: 'Bereskan 7 Informasi Utama', result: 'Tujuh informasi penting sudah diperiksa.', why: 'Jam atau nomor yang salah membuat pelanggan salah lokasi/kontak.', action: 'Buka Edit profil. Periksa tiap bagian.' },
+  { id: 4, badge: 'DIPERCAYA', verb: 'TUNJUKKAN', title: 'Foto Penting & Kredibilitas Visual', result: 'Paket foto dasar usaha siap.', why: 'Foto nyata membantu pelanggan mengenali tempat dan hasil kerja.', action: 'Pilih foto yang mewakili kondisi usaha.' },
+  { id: 5, badge: 'DIPERCAYA', verb: 'MUDAHKAN', title: 'Membuat Jalur Pintar Ulasan', result: 'Direct Review Link tersedia dan sudah dites.', why: 'Memudahkan pelanggan menulis review.', action: 'Ambil link resmi & coba dari HP lain.' },
+  { id: 6, badge: 'DIPERCAYA', verb: 'RESPONS', title: 'Mengirim Undangan Ulasan & Cara Membalas', result: 'Cara meminta dan membalas review siap dipakai.', why: 'Memelihara hubungan dengan ulasan pelanggan.', action: 'Siapkan undangan & SOP balasan.' },
+  { id: 7, badge: 'DI-CHAT', verb: 'SIAPKAN CHAT', title: 'Merapikan Profil WhatsApp Business', result: 'Profil WhatsApp Business sudah diperiksa.', why: 'Memastikan profil WA profesional.', action: 'Periksa foto, deskripsi & jam.' },
+  { id: 8, badge: 'DI-CHAT', verb: 'PERCEPAT', title: 'Menyiapkan Balasan Cepat / Quick Replies', result: '3–5 jawaban berulang tersimpan & dicoba.', why: 'Jawaban sama tidak perlu diketik ulang.', action: 'Buat Quick Replies di WA Business.' }
+];
+
+const kitQuestions = [
+  "Ketika nama usaha dicari di Google/Maps, profil yang benar muncul?",
+  "Anda tahu akun Google yang mempunyai akses mengelola profil tersebut?",
+  "Nama, kategori, lokasi/area, jam dan nomor kontak sudah Anda cek baru-baru ini?",
+  "Foto yang tampil masih mewakili kondisi usaha sekarang?",
+  "Profil mempunyai foto nyata yang membantu pelanggan mengenali usaha?",
+  "Anda tahu jumlah review yang dimiliki dan sudah membaca review terbaru?",
+  "Anda sudah mempunyai link langsung untuk meminta review?",
+  "Review pelanggan yang perlu respons biasanya dibalas?",
+  "Anda sudah menggunakan WhatsApp Business untuk usaha?",
+  "Nama, foto, deskripsi dan jam di WhatsApp Business sudah diperiksa?",
+  "Anda tahu tiga pertanyaan yang paling sering ditanyakan pelanggan melalui WhatsApp?",
+  "Anda sudah mempunyai Quick Replies untuk pertanyaan yang berulang?"
+];
+
+async function loadKitStateFromBackend() {
+  try {
+    const res = await fetch('/api/v1/kit/state', {
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const result = await res.json();
+    if (result.success && result.data) {
+      kitState = { ...kitState, ...result.data };
+      updateKitProgressUI();
+      renderKitView();
+    }
+  } catch (err) {
+    console.error('Load kit state error:', err);
+  }
+}
+
+async function syncKitStateToBackend() {
+  try {
+    const statusEl = document.getElementById('kit-save-status');
+    if (statusEl) statusEl.innerText = '⏳ Menyimpan ke cloud...';
+
+    const res = await fetch('/api/v1/kit/state', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify(kitState)
+    });
+    const result = await res.json();
+    if (result.success && statusEl) {
+      statusEl.innerText = '✓ Tersimpan di Cloud Backend';
+    }
+  } catch (err) {
+    console.error('Sync kit state error:', err);
+  }
+}
+
+function updateKitProgressUI() {
+  const doneCount = Object.values(kitState.status || {}).filter(s => s === 'done').length;
+  const fillEl = document.getElementById('kit-progress-fill');
+  const labelEl = document.getElementById('kit-progress-label');
+  if (fillEl) fillEl.style.width = `${(doneCount / 8) * 100}%`;
+  if (labelEl) labelEl.innerText = `${doneCount} dari 8 langkah selesai`;
+}
+
+function showKitSubView(subView, stepNum) {
+  kitState.activeSubView = subView;
+  if (stepNum) kitState.selectedStep = stepNum;
+
+  document.querySelectorAll('.kit-nav-btn').forEach(btn => btn.classList.remove('active'));
+  const targetNav = document.getElementById(`kit-nav-${subView}`) || document.getElementById('kit-nav-steps');
+  if (targetNav) targetNav.classList.add('active');
+
+  renderKitView();
+}
+
+function renderKitView() {
+  const container = document.getElementById('kit-dynamic-view-container');
+  if (!container) return;
+
+  const view = kitState.activeSubView || 'welcome';
+
+  if (view === 'welcome') {
+    container.innerHTML = renderKitWelcomeHTML();
+  } else if (view === 'checkup') {
+    container.innerHTML = renderKitCheckupHTML();
+  } else if (view === 'result') {
+    container.innerHTML = renderKitResultHTML();
+  } else if (view === 'steps') {
+    container.innerHTML = renderKitStepsHTML();
+  } else if (view === 'compare') {
+    container.innerHTML = renderKitCompareHTML();
+  } else if (view === 'maintenance') {
+    container.innerHTML = renderKitMaintenanceHTML();
+  }
+}
+
+function renderKitWelcomeHTML() {
+  return `
+    <div class="card" style="background: rgba(18, 25, 41, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 16px;">
+      <span class="role-badge free" style="margin-bottom: 0.75rem;">DIGITAL ACTION KIT</span>
+      <h2 style="font-family: 'Outfit'; font-size: 1.8rem; margin-bottom: 0.75rem; color: #ffffff;">Kalau pelanggan mencari usaha Anda hari ini, apa yang mereka lihat?</h2>
+      <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
+        Cek dulu kondisi Google Maps, ulasan, dan WhatsApp usaha Anda. Setelah itu, tentukan bagian mana yang paling perlu dibereskan terlebih dahulu.
+      </p>
+      
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+        <button class="btn btn-primary" onclick="showKitSubView('checkup')">🚀 MULAI CEK KONDISI USAHA (12 SOAL)</button>
+        <button class="btn btn-secondary" onclick="showKitSubView('steps')">📱 KELOLA 8 LANGKAH EKSEKUSI</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 12px;">
+          <div style="font-size: 0.8rem; color: #60a5fa; font-weight: 700;">01. DITEMUKAN</div>
+          <div style="font-weight: 700; margin: 0.25rem 0;">Informasi Usaha Jelas</div>
+          <div style="font-size: 0.8rem; color: #94a3b8;">Cek profil Maps, klaim akses pengelola & 7 info utama.</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 12px;">
+          <div style="font-size: 0.8rem; color: #34d399; font-weight: 700;">02. DIPERCAYA</div>
+          <div style="font-weight: 700; margin: 0.25rem 0;">Foto & Ulasan Nyata</div>
+          <div style="font-size: 0.8rem; color: #94a3b8;">Upload foto kredibel, buat link review & siapkan balasan.</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 12px;">
+          <div style="font-size: 0.8rem; color: #f59e0b; font-weight: 700;">03. DI-CHAT</div>
+          <div style="font-weight: 700; margin: 0.25rem 0;">Jawaban WA Siap</div>
+          <div style="font-size: 0.8rem; color: #94a3b8;">Rapikan WA Business & simpan 3-5 Quick Replies.</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderKitCheckupHTML() {
+  const idx = kitState.qIndex || 0;
+  const currentAnswer = kitState.answers[idx];
+  const answeredCount = kitState.answers.filter(Boolean).length;
+
+  return `
+    <div class="card" style="background: rgba(18, 25, 41, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 16px;">
+      <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.5rem;">
+        <span>Pertanyaan ${idx + 1} dari 12</span>
+        <span>${answeredCount} / 12 Terjawab</span>
+      </div>
+      
+      <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; margin-bottom: 1.25rem;">
+        <div style="height: 100%; width: ${(answeredCount / 12) * 100}%; background: #3b82f6; transition: width 0.3s ease;"></div>
+      </div>
+
+      <h3 style="font-family: 'Outfit'; font-size: 1.35rem; color: #ffffff; margin-bottom: 1.25rem;">
+        ${kitQuestions[idx]}
+      </h3>
+
+      <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+        <button class="btn ${currentAnswer === 'yes' ? 'btn-primary' : 'btn-secondary'}" style="text-align: left; padding: 0.85rem 1.25rem;" onclick="answerKitQuestion('yes')">
+          ✅ Sudah (Sudah dilakukan / siap)
+        </button>
+        <button class="btn ${currentAnswer === 'no' ? 'btn-primary' : 'btn-secondary'}" style="text-align: left; padding: 0.85rem 1.25rem;" onclick="answerKitQuestion('no')">
+          ❌ Belum (Belum dikerjakan / butuh penanganan)
+        </button>
+        <button class="btn ${currentAnswer === 'unknown' ? 'btn-primary' : 'btn-secondary'}" style="text-align: left; padding: 0.85rem 1.25rem;" onclick="answerKitQuestion('unknown')">
+          ❓ Tidak Tahu (Belum yakin / perlu dicek dulu)
+        </button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between;">
+        <button class="btn btn-secondary" ${idx === 0 ? 'disabled' : ''} onclick="prevKitQuestion()">← Sebelumnya</button>
+        <button class="btn btn-primary" ${!currentAnswer ? 'disabled' : ''} onclick="nextKitQuestion()">
+          ${idx === 11 ? '🎯 Lihat Hasil Checkup' : 'Lanjut →'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function answerKitQuestion(val) {
+  const idx = kitState.qIndex || 0;
+  kitState.answers[idx] = val;
+  syncKitStateToBackend();
+  renderKitView();
+}
+
+function prevKitQuestion() {
+  if (kitState.qIndex > 0) {
+    kitState.qIndex--;
+    renderKitView();
+  }
+}
+
+function nextKitQuestion() {
+  const idx = kitState.qIndex || 0;
+  if (idx < 11) {
+    kitState.qIndex++;
+    renderKitView();
+  } else {
+    evaluateKitCheckupResult();
+  }
+}
+
+async function evaluateKitCheckupResult() {
+  try {
+    const res = await fetch('/api/v1/kit/checkup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify({ answers: kitState.answers })
+    });
+    const result = await res.json();
+    if (result.success) {
+      kitState.checkupComplete = true;
+      kitState.route = result.data.route;
+      kitState.recommended = result.data.recommended_step;
+      showKitSubView('result');
+    }
+  } catch (err) {
+    console.error('Evaluate checkup error:', err);
+  }
+}
+
+function renderKitResultHTML() {
+  const answers = kitState.answers || Array(12).fill(null);
+  const ready = answers.filter(a => a === 'yes').length;
+  const needsWork = answers.filter(a => a === 'no').length;
+  const unknown = answers.filter(a => a === 'unknown').length;
+  const recommendedStepId = kitState.recommended || 1;
+  const recommendedStep = kitStepsDefinition.find(s => s.id === recommendedStepId) || kitStepsDefinition[0];
+
+  return `
+    <div class="card" style="background: rgba(18, 25, 41, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 16px;">
+      <span class="role-badge premium" style="margin-bottom: 0.5rem;">HASIL DIAGNOSIS ETALASE DIGITAL</span>
+      <h2 style="font-family: 'Outfit'; font-size: 1.5rem; color: #ffffff; margin-bottom: 1rem;">Ringkasan Checkup Usaha Anda</h2>
+
+      <!-- Tally Box -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; text-align: center;">
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1rem; border-radius: 12px;">
+          <div style="font-size: 2rem; font-weight: 800; color: #34d399;">${ready}</div>
+          <div style="font-size: 0.8rem; color: #94a3b8;">Bagian Sudah Siap</div>
+        </div>
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 1rem; border-radius: 12px;">
+          <div style="font-size: 2rem; font-weight: 800; color: #fbbf24;">${needsWork}</div>
+          <div style="font-size: 0.8rem; color: #94a3b8;">Perlu Dibereskan</div>
+        </div>
+        <div style="background: rgba(148, 163, 184, 0.1); border: 1px solid rgba(148, 163, 184, 0.3); padding: 1rem; border-radius: 12px;">
+          <div style="font-size: 2rem; font-weight: 800; color: #cbd5e1;">${unknown}</div>
+          <div style="font-size: 0.8rem; color: #94a3b8;">Perlu Dicek Kuis</div>
+        </div>
+      </div>
+
+      <!-- Recommended Step Box -->
+      <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%); border: 1px solid rgba(99, 102, 241, 0.4); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem;">
+        <div style="font-size: 0.8rem; color: #60a5fa; font-weight: 700; text-transform: uppercase;">🎯 REKOMENDASI UTAMA TERDEPAN</div>
+        <h3 style="font-size: 1.2rem; color: #ffffff; margin: 0.25rem 0;">Langkah ${recommendedStep.id}: ${recommendedStep.title}</h3>
+        <p style="font-size: 0.88rem; color: #cbd5e1; margin-bottom: 0.75rem;">${recommendedStep.result}</p>
+        <button class="btn btn-primary" onclick="showKitSubView('steps', ${recommendedStep.id})">🚀 Buka Pekerjaan Ini Sekarang →</button>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <button class="btn btn-secondary" onclick="showKitSubView('checkup')">🔄 Periksa Ulang Jawaban</button>
+        <button class="btn btn-primary" onclick="showKitSubView('steps')">📱 Kelola 8 Langkah Eksekusi</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderKitStepsHTML() {
+  const selectedId = kitState.selectedStep || 1;
+  const step = kitStepsDefinition.find(s => s.id === selectedId) || kitStepsDefinition[0];
+  const stepStatus = kitState.status[selectedId] || 'idle';
+  const stepFields = kitState.fields[selectedId] || {};
+
+  const statusBadgeColor = {
+    idle: '#64748b',
+    working: '#60a5fa',
+    waiting: '#fbbf24',
+    done: '#34d399'
+  };
+
+  return `
+    <div style="display: grid; grid-template-columns: 240px 1fr; gap: 1.25rem;">
+      <!-- Step Sidebar List -->
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        ${kitStepsDefinition.map(s => {
+          const st = kitState.status[s.id] || 'idle';
+          const isSelected = s.id === selectedId;
+          return `
+            <button class="btn ${isSelected ? 'btn-primary' : 'btn-secondary'}" style="text-align: left; padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center;" onclick="showKitSubView('steps', ${s.id})">
+              <span><strong>0${s.id}.</strong> ${s.verb}</span>
+              <span style="font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 99px; background: rgba(0,0,0,0.3); color: ${statusBadgeColor[st]}; font-weight: 700;">
+                ${st.toUpperCase()}
+              </span>
+            </button>
+          `;
+        }).join('')}
+      </div>
+
+      <!-- Step Content Box -->
+      <div class="card" style="background: rgba(18, 25, 41, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <div>
+            <span class="role-badge free">LANGKAH ${step.id} / 8 · ${step.badge}</span>
+            <h2 style="font-family: 'Outfit'; font-size: 1.4rem; color: #ffffff; margin-top: 0.25rem;">${step.title}</h2>
+          </div>
+          <span style="font-size: 0.8rem; font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 20px; background: rgba(255,255,255,0.06); color: ${statusBadgeColor[stepStatus]}; border: 1px solid rgba(255,255,255,0.1);">
+            STATUS: ${stepStatus.toUpperCase()}
+          </span>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); border-left: 3px solid #3b82f6; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.25rem;">
+          <div style="font-size: 0.75rem; color: #60a5fa; font-weight: 700;">HASIL LANGKAH INI:</div>
+          <div style="font-size: 0.95rem; color: #f8fafc; font-weight: 600;">${step.result}</div>
+        </div>
+
+        <div style="margin-bottom: 1.25rem;">
+          <h4 style="color: #ffffff; margin-bottom: 0.35rem;">Kenapa ini penting?</h4>
+          <p style="font-size: 0.88rem; color: #94a3b8; line-height: 1.5;">${step.why}</p>
+        </div>
+
+        <div style="margin-bottom: 1.5rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+          <h4 style="color: #60a5fa; margin-bottom: 0.5rem;">💡 Aksi Cepat & Kartu Catatan</h4>
+          
+          <div class="form-group" style="margin-bottom: 0.75rem;">
+            <label style="font-size: 0.8rem; color: #cbd5e1;">Catatan Evidence / Hasil Pengerjaan:</label>
+            <textarea class="form-control" rows="2" id="kit-step-notes-${step.id}" placeholder="Tuliskan catatan hasil pemeriksaan atau link..." onchange="saveKitStepField(${step.id}, 'notes', this.value)">${stepFields.notes || ''}</textarea>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="setKitStepStatus(${step.id}, 'done')">✅ Tandai Langkah Selesai</button>
+          <button class="btn btn-secondary" onclick="setKitStepStatus(${step.id}, 'working')">⏳ Simpan Sedang Dikerjakan</button>
+          <button class="btn btn-secondary" onclick="setKitStepStatus(${step.id}, 'waiting')">⏸️ Status Menunggu Proses</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function saveKitStepField(stepId, key, val) {
+  kitState.fields[stepId] = { ...(kitState.fields[stepId] || {}), [key]: val };
+  syncKitStateToBackend();
+}
+
+async function setKitStepStatus(stepId, status) {
+  try {
+    const res = await fetch('/api/v1/kit/step-status', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify({
+        step_id: stepId,
+        status,
+        fields: kitState.fields[stepId] || {}
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      kitState.status[stepId] = status;
+      updateKitProgressUI();
+      renderKitView();
+    }
+  } catch (err) {
+    console.error('Set step status error:', err);
+  }
+}
+
+function renderKitCompareHTML() {
+  const afterData = kitState.after || {};
+
+  return `
+    <div class="card" style="background: rgba(18, 25, 41, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 16px;">
+      <span class="role-badge premium" style="margin-bottom: 0.5rem;">PERBANDINGAN HASIL KERJA</span>
+      <h2 style="font-family: 'Outfit'; font-size: 1.5rem; color: #ffffff; margin-bottom: 1rem;">Sebelum vs Sesudah Dikerjakan</h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 12px;">
+          <div style="font-size: 0.75rem; color: #f87171; font-weight: 700;">SEBELUM (KONDISI AWAL)</div>
+          <p style="font-size: 0.85rem; color: #cbd5e1; margin-top: 0.5rem;">
+            Informasi belum terverifikasi, ulasan belum dikelola, dan WhatsApp belum memiliki Quick Replies.
+          </p>
+        </div>
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1rem; border-radius: 12px;">
+          <div style="font-size: 0.75rem; color: #34d399; font-weight: 700;">SESUDAH (HASIL KERJA)</div>
+          <p style="font-size: 0.85rem; color: #e2e8f0; margin-top: 0.5rem;">
+            ${Object.values(kitState.status || {}).filter(s => s === 'done').length} dari 8 langkah eksekusi telah selesai diverifikasi & rapi.
+          </p>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label style="font-size: 0.85rem; color: #cbd5e1;">Catatan Perubahan yang Terlihat Faktual:</label>
+        <textarea class="form-control" rows="3" placeholder="Tuliskan bukti perubahan faktual setelah perbaikan..." onchange="saveKitAfterField('changes', this.value)">${afterData.changes || ''}</textarea>
+      </div>
+
+      <button class="btn btn-primary" onclick="exportKitSummaryHTML()">📥 Download Laporan Hasil HTML / PDF</button>
+    </div>
+  `;
+}
+
+function saveKitAfterField(key, val) {
+  kitState.after = { ...(kitState.after || {}), [key]: val };
+  syncKitStateToBackend();
+}
+
+function renderKitMaintenanceHTML() {
+  const maint = kitState.maintenance || {};
+  const checks = maint.checks || {};
+
+  const maintItems = [
+    'Jam operasional toko masih sesuai keadaan nyata',
+    'Nomor kontak WhatsApp Business aktif & dapat dihubungi',
+    'Foto diperiksa; tambahkan foto baru bila ada promo',
+    'Ulasan terbaru pelanggan Google Maps sudah dibaca',
+    'Setiap ulasan atau keluhan pelanggan sudah dibalas ramah',
+    'Pertanyaan berulang pelanggan dicatat ke daftar Quick Replies',
+    'Informasi profil bisnis diupdate secara berkala'
+  ];
+
+  return `
+    <div class="card" style="background: rgba(18, 25, 41, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 16px;">
+      <span class="role-badge free" style="margin-bottom: 0.5rem;">MAINTENANCE 15 MENIT SEMINGGU</span>
+      <h2 style="font-family: 'Outfit'; font-size: 1.5rem; color: #ffffff; margin-bottom: 1rem;">Checklist Perawatan Rutin Usaha</h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+        <div class="form-group">
+          <label style="font-size: 0.8rem; color: #cbd5e1;">Tanggal Pemeriksaan Minggu Ini:</label>
+          <input type="date" class="form-control" value="${maint.date || ''}" onchange="saveKitMaintField('date', this.value)">
+        </div>
+        <div class="form-group">
+          <label style="font-size: 0.8rem; color: #cbd5e1;">Petugas / PIC yang Bertugas:</label>
+          <input type="text" class="form-control" placeholder="Nama PIC..." value="${maint.person || ''}" onchange="saveKitMaintField('person', this.value)">
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 1.5rem;">
+        ${maintItems.map((itemText, idx) => `
+          <label style="display: flex; align-items: center; gap: 0.75rem; background: rgba(0,0,0,0.2); padding: 0.75rem 1rem; border-radius: 8px; cursor: pointer;">
+            <input type="checkbox" ${checks[idx] ? 'checked' : ''} onchange="toggleKitMaintCheck(${idx}, this.checked)" style="width: 18px; height: 18px;">
+            <span style="font-size: 0.9rem; color: #f1f5f9;">${itemText}</span>
+          </label>
+        `).join('')}
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label style="font-size: 0.8rem; color: #cbd5e1;">Catatan Pembaruan Minggu Ini:</label>
+        <textarea class="form-control" rows="2" placeholder="Catat perubahan promo atau ulasan..." onchange="saveKitMaintField('notes', this.value)">${maint.notes || ''}</textarea>
+      </div>
+
+      <button class="btn btn-secondary" onclick="resetKitMaintenanceWeek()">🔄 Mulai Minggu Baru (Reset Checklist)</button>
+    </div>
+  `;
+}
+
+function saveKitMaintField(key, val) {
+  kitState.maintenance = { ...(kitState.maintenance || {}), [key]: val };
+  syncKitStateToBackend();
+}
+
+function toggleKitMaintCheck(idx, checked) {
+  kitState.maintenance = kitState.maintenance || {};
+  kitState.maintenance.checks = kitState.maintenance.checks || {};
+  kitState.maintenance.checks[idx] = checked;
+  syncKitStateToBackend();
+}
+
+function resetKitMaintenanceWeek() {
+  if (confirm('Mulai minggu baru? Centang pemeriksaan minggu ini akan dikosongkan.')) {
+    kitState.maintenance = {
+      date: new Date().toISOString().split('T')[0],
+      person: kitState.maintenance ? kitState.maintenance.person : '',
+      checks: {},
+      notes: '',
+      next: ''
+    };
+    syncKitStateToBackend();
+    renderKitView();
+  }
+}
+
+function exportKitSummaryHTML() {
+  const doneCount = Object.values(kitState.status || {}).filter(s => s === 'done').length;
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="id">
+    <head>
+      <meta charset="utf-8">
+      <title>Laporan Kit Lokal Naik Kelas — SuperUMKM</title>
+      <style>
+        body { font-family: system-ui, sans-serif; max-width: 800px; margin: auto; padding: 2rem; color: #1e293b; line-height: 1.6; }
+        h1, h2 { color: #0f172a; }
+        .box { border: 1px solid #cbd5e1; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: #f8fafc; }
+        .badge { display: inline-block; padding: 0.2rem 0.6rem; background: #3b82f6; color: #fff; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+      </style>
+    </head>
+    <body>
+      <h1>🚀 Laporan Kit Lokal Naik Kelas V1</h1>
+      <p><strong>Tanggal Laporan:</strong> ${new Date().toLocaleDateString('id-ID')}</p>
+      <div class="box">
+        <span class="badge">PROGRES PEKERJAAN</span>
+        <h2>${doneCount} dari 8 Langkah Eksekusi Selesai</h2>
+      </div>
+      <h2>Detail Status Langkah:</h2>
+      ${kitStepsDefinition.map(s => `
+        <div class="box">
+          <h3>Langkah ${s.id}: ${s.title} (${(kitState.status[s.id] || 'IDLE').toUpperCase()})</h3>
+          <p><strong>Hasil:</strong> ${s.result}</p>
+          <p><strong>Catatan:</strong> ${(kitState.fields[s.id] && kitState.fields[s.id].notes) || '-'}</p>
+        </div>
+      `).join('')}
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `laporan-kit-lokal-naik-kelas-${Date.now()}.html`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 500);
 }

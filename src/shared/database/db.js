@@ -14,6 +14,7 @@ class Database {
     this.waNotifications = [];
     this.posStaff = [];
     this.posTransactions = [];
+    this.userKits = {};
 
     this.seed();
   }
