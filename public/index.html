@@ -440,6 +440,112 @@
             </div>
           </div>
 
+        <!-- Modul Lanjutan Local SEO & Optimasi Google Maps -->
+        <div style="margin-top: 1.5rem;" class="grid-2">
+          
+          <!-- 1. Pandoman Kata Kunci Lokal (Local Keyword Injector) -->
+          <div class="card">
+            <div class="card-title">🔍 Pandoman Kata Kunci Lokal</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Buat nama & deskripsi Google Business yang mudah ditemukan pembeli di sekitar lokasi usaha Anda:
+            </p>
+            <form onsubmit="handleGenerateLocalKeywords(event)">
+              <div class="form-group">
+                <label>Nama Usaha / Toko</label>
+                <input type="text" id="kw-biz-name" class="form-control" value="Warung Sate Bu Siti">
+              </div>
+              <div class="form-group">
+                <label>Produk / Layanan Utama</label>
+                <input type="text" id="kw-core-product" class="form-control" value="Sate Kambing Muda">
+              </div>
+              <div class="form-group">
+                <label>Jalan / Kelurahan / Kecamatan Toko</label>
+                <input type="text" id="kw-location" class="form-control" value="Antasari">
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%;">
+                ✨ Buat Judul & Deskripsi Optimal
+              </button>
+            </form>
+            <div id="kw-result-box" style="margin-top: 1rem; display: none; background: rgba(0,0,0,0.4); padding: 1rem; border-radius: var(--radius-md); border-left: 3px solid #60a5fa;">
+              <div style="font-size: 0.75rem; color: #60a5fa; font-weight: 700;">REKOMENDASI JUDUL PROFIL GOOGLE:</div>
+              <div id="kw-suggested-title" style="font-weight: 800; font-size: 0.95rem; color: #ffffff; margin: 0.3rem 0;"></div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">REKOMENDASI DESKRIPSI USANA:</div>
+              <div id="kw-suggested-desc" style="font-size: 0.85rem; color: #cbd5e1; font-style: italic;"></div>
+            </div>
+          </div>
+
+          <!-- 2. Suluh Kategori Bisnis (Category Optimizer) -->
+          <div class="card">
+            <div class="card-title">🕯️ Suluh Kategori Bisnis (Category Optimizer)</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Pilih 1 Kategori Utama & maksimal 3 Kategori Pendukung agar Google mengenali jenis usaha Anda:
+            </p>
+            <form onsubmit="handleSaveGMBSubCategories(event)">
+              <div class="form-group">
+                <label>Kategori Utama Google Business (Wajib)</label>
+                <input type="text" id="gmb-primary-cat" class="form-control" value="Grocery Store" readonly style="background: rgba(255,255,255,0.05); font-weight: 700; color: #34d399;">
+              </div>
+              <div class="form-group">
+                <label>Pilih Maksimal 3 Kategori Pendukung Sekunder:</label>
+                <div id="gmb-secondary-options-box" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.4rem;">
+                  <!-- Checkboxes populated via JS -->
+                </div>
+              </div>
+              <button type="submit" class="btn btn-secondary" style="width: 100%;">
+                💾 Simpan Pilihan Kategori Bisnis
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+        <div style="margin-top: 1.5rem;" class="grid-2">
+          
+          <!-- 3. Pengingat Posting Rutin (Google Posts Scheduler) -->
+          <div class="card">
+            <div class="card-title">📅 Pengingat Posting Rutin (Google Posts Scheduler)</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Monitoring keaktifan postingan foto & promo Google Maps setiap 7 hari:
+            </p>
+            <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08); margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.82rem; color: var(--text-muted);">Status Keaktifan Post:</span>
+                <span id="post-status-badge" style="font-size: 0.75rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 99px; background: rgba(34, 197, 94, 0.2); color: #4ade80;">AKTIF & SEGAR</span>
+              </div>
+              <div id="post-reminder-msg" style="font-size: 0.85rem; color: #cbd5e1; margin-top: 0.75rem; line-height: 1.4;">
+                Postingan Google Maps Anda masih segar (diperbarui 2 hari yang lalu).
+              </div>
+            </div>
+            <button type="button" onclick="handleRecordPostUpdate()" class="btn btn-primary" style="width: 100%;">
+              📸 Unggah / Catat Posting Foto Baru Hari Ini
+            </button>
+          </div>
+
+          <!-- 4. Panduan Foto & Video (Visual Standardization Checklist) -->
+          <div class="card">
+            <div class="card-title">📷 Panduan Foto & Video Visual Toko</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Standar visual Google Maps untuk menaikkan kepercayaan calon pembeli:
+            </p>
+            <div id="visual-checklist-box" style="display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 0.6rem 0.85rem; border-radius: 8px;">
+                <span style="font-size: 0.85rem;">[✓] 2 Foto Tampak Depan Toko</span>
+                <span style="font-size: 0.75rem; color: #34d399; font-weight: 700;">Lengkap (2/2)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 0.6rem 0.85rem; border-radius: 8px;">
+                <span style="font-size: 0.85rem;">[✓] 3 Foto Interior / Area Usaha</span>
+                <span style="font-size: 0.75rem; color: #34d399; font-weight: 700;">Lengkap (3/3)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 0.6rem 0.85rem; border-radius: 8px;">
+                <span style="font-size: 0.85rem;">[✓] 5 Foto Produk Utama</span>
+                <span style="font-size: 0.75rem; color: #34d399; font-weight: 700;">Lengkap (5/5)</span>
+              </div>
+            </div>
+            <button type="button" onclick="handleUpdateVisualChecklist()" class="btn btn-secondary" style="width: 100%;">
+              🔄 Update Status Foto Visual Toko
+            </button>
+          </div>
+
         </div>
       </section>
 

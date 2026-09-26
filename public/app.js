@@ -296,6 +296,7 @@ function switchTab(tabId, el) {
     document.getElementById('active-tab-subtitle').innerText = titles[tabId].subtitle;
   }
 
+  if (tabId === 'gmaps-tab') loadGMapsData();
   if (tabId === 'pos-tab') loadPOSData();
   if (tabId === 'staff-tab') loadStaffData();
   if (tabId === 'learning-tab') loadCourses();
@@ -2688,5 +2689,181 @@ function copyQrisPayloadString() {
   if (payloadStr && payloadStr.innerText) {
     navigator.clipboard.writeText(payloadStr.innerText);
     alert('📋 String Payload QRIS disalin ke clipboard!');
+  }
+}
+
+// Local SEO & Google Maps Advanced Client Handlers
+async function loadGMapsData() {
+  loadGMBCategories();
+  loadGMBPostsStatus();
+  loadVisualChecklist();
+}
+
+// 1. Pandoman Kata Kunci Lokal (Local Keyword Injector)
+async function handleGenerateLocalKeywords(e) {
+  e.preventDefault();
+  const name = document.getElementById('kw-biz-name').value;
+  const product = document.getElementById('kw-core-product').value;
+  const location = document.getElementById('kw-location').value;
+
+  try {
+    const res = await fetch('/api/v1/gmaps/keyword-optimizer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify({ business_name: name, core_product: product, location_street_or_district: location })
+    });
+    const result = await res.json();
+    if (result.success) {
+      document.getElementById('kw-result-box').style.display = 'block';
+      document.getElementById('kw-suggested-title').innerText = result.data.suggested_title;
+      document.getElementById('kw-suggested-desc').innerText = `"${result.data.suggested_description}"`;
+    }
+  } catch (err) {
+    alert('Gagal generate kata kunci lokal: ' + err.message);
+  }
+}
+
+// 2. Suluh Kategori Bisnis (Category Optimizer)
+async function loadGMBCategories() {
+  if (!userToken) return;
+  try {
+    const res = await fetch('/api/v1/gmaps/categories', {
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const result = await res.json();
+    if (result.success) {
+      const data = result.data;
+      const primaryInput = document.getElementById('gmb-primary-cat');
+      if (primaryInput) primaryInput.value = data.primary_gmb_category;
+
+      const secondaryContainer = document.getElementById('gmb-secondary-options-box');
+      if (secondaryContainer) {
+        const mapping = data.all_mappings[data.user_category] || { secondary_options: ['General Store', 'Merchant'] };
+        const savedSecondaries = data.secondary_gmb_categories || [];
+
+        secondaryContainer.innerHTML = mapping.secondary_options.map(opt => `
+          <label style="font-size: 0.8rem; background: rgba(255,255,255,0.04); padding: 0.3rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; gap: 0.4rem;">
+            <input type="checkbox" class="gmb-sec-chk" value="${opt}" ${savedSecondaries.includes(opt) ? 'checked' : ''}>
+            <span>${opt}</span>
+          </label>
+        `).join('');
+      }
+    }
+  } catch (err) {
+    console.error('loadGMBCategories error:', err);
+  }
+}
+
+async function handleSaveGMBSubCategories(e) {
+  e.preventDefault();
+  const primary = document.getElementById('gmb-primary-cat').value;
+  const checkboxes = document.querySelectorAll('.gmb-sec-chk:checked');
+  const secondaries = Array.from(checkboxes).map(c => c.value);
+
+  try {
+    const res = await fetch('/api/v1/gmaps/categories', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify({ primary_gmb_category: primary, secondary_gmb_categories: secondaries })
+    });
+    const result = await res.json();
+    if (result.success) {
+      alert('Kategori Google Business Profile berhasil diperbarui!');
+    }
+  } catch (err) {
+    alert('Gagal simpan kategori: ' + err.message);
+  }
+}
+
+// 3. Pengingat Posting Rutin (Google Posts Scheduler)
+async function loadGMBPostsStatus() {
+  if (!userToken) return;
+  try {
+    const res = await fetch('/api/v1/gmaps/posts-status', {
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const result = await res.json();
+    if (result.success) {
+      const data = result.data;
+      const badge = document.getElementById('post-status-badge');
+      const msg = document.getElementById('post-reminder-msg');
+
+      if (badge) {
+        badge.innerText = data.status_label;
+        badge.style.background = data.post_reminder_due ? 'rgba(239, 68, 68, 0.2)' : 'rgba(34, 197, 94, 0.2)';
+        badge.style.color = data.post_reminder_due ? '#f87171' : '#4ade80';
+      }
+      if (msg) msg.innerText = data.reminder_message;
+    }
+  } catch (err) {
+    console.error('loadGMBPostsStatus error:', err);
+  }
+}
+
+async function handleRecordPostUpdate() {
+  try {
+    const res = await fetch('/api/v1/gmaps/posts-update', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const result = await res.json();
+    if (result.success) {
+      alert('Berhasil mencatat postingan foto baru! Status Google Maps Anda kembali AKTIF & SEGAR.');
+      loadGMBPostsStatus();
+    }
+  } catch (err) {
+    alert('Gagal catat postingan: ' + err.message);
+  }
+}
+
+// 4. Panduan Foto & Video (Visual Standardization Checklist)
+async function loadVisualChecklist() {
+  if (!userToken) return;
+  try {
+    const res = await fetch('/api/v1/gmaps/visual-checklist', {
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const result = await res.json();
+    if (result.success) {
+      const box = document.getElementById('visual-checklist-box');
+      if (box && result.data.items) {
+        box.innerHTML = result.data.items.map(item => `
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 0.6rem 0.85rem; border-radius: 8px;">
+            <span style="font-size: 0.85rem;">${item.completed ? '[✓]' : '[ ]'} ${item.label}</span>
+            <span style="font-size: 0.75rem; color: ${item.completed ? '#34d399' : '#fde047'}; font-weight: 700;">
+              ${item.completed ? 'Lengkap' : 'Belum Lengkap'} (${item.current}/${item.required})
+            </span>
+          </div>
+        `).join('');
+      }
+    }
+  } catch (err) {
+    console.error('loadVisualChecklist error:', err);
+  }
+}
+
+async function handleUpdateVisualChecklist() {
+  try {
+    const res = await fetch('/api/v1/gmaps/visual-checklist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify({ front_photos_count: 2, interior_photos_count: 3, product_photos_count: 5 })
+    });
+    const result = await res.json();
+    if (result.success) {
+      alert('Status checklist visual foto & video toko berhasil diperbarui ke 100% LENGKAP!');
+      loadVisualChecklist();
+    }
+  } catch (err) {
+    alert('Gagal update checklist visual: ' + err.message);
   }
 }

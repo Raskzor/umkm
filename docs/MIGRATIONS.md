@@ -51,6 +51,15 @@ CREATE TABLE IF NOT EXISTS business_profiles (
     longitude DECIMAL(11, 8),
     gmaps_url VARCHAR(255),
     landing_page_slug VARCHAR(128) UNIQUE,
+    -- Local SEO & Google Maps Optimization Columns
+    last_post_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    primary_gmb_category VARCHAR(100),
+    secondary_gmb_categories JSONB DEFAULT '[]'::jsonb,
+    gmaps_phone_number VARCHAR(32),
+    gmaps_address_text TEXT,
+    front_photos_count INT DEFAULT 0,
+    interior_photos_count INT DEFAULT 0,
+    product_photos_count INT DEFAULT 0,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

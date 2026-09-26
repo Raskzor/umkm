@@ -9,6 +9,7 @@ Dokumentasi lengkap HTTP Endpoints, Request Body, dan Response Samples untuk mod
 6. Modul Generator Promosi & AI Copywriting Lokal (`/api/v1/copywriting`)
 7. Modul Integrasi QRIS Kasir (`/api/v1/qris`)
 8. Modul Staf Kasir & Hak Akses Menu (`/api/v1/pos` & `/api/v1/users`)
+9. Modul Local SEO & Google Maps Optimization (`/api/v1/gmaps`)
 
 ---
 
@@ -212,12 +213,78 @@ Dokumentasi lengkap HTTP Endpoints, Request Body, dan Response Samples untuk mod
 - **Route**: `/api/v1/pos/staff`
 - **Headers**: `Authorization: Bearer <token>`
 - **Request Body**:
+---
+
+## 8. Modul Local SEO & Google Maps Optimization (`/api/v1/gmaps`)
+
+### 8.1. Pandoman Kata Kunci Lokal (Local Keyword Injector)
+- **HTTP Method**: `POST`
+- **Route**: `/api/v1/gmaps/keyword-optimizer`
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Body**:
   ```json
   {
-    "full_name": "Siti Aminah",
-    "phone_number": "081234567890",
-    "home_address": "Jl. Kamboja No. 15",
-    "pin_code": "123456",
-    "allowed_menu_tabs": ["pos-tab", "qris-tab"]
+    "business_name": "Warung Sate Bu Siti",
+    "core_product": "Sate Kambing Muda",
+    "location_street_or_district": "Antasari"
   }
   ```
+- **Response Sample**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "suggested_title": "Warung Sate Bu Siti - Sate Kambing Muda Antasari",
+      "suggested_description": "Warung Sate Bu Siti menyediakan Sate Kambing Muda berkualitas dan harga terjangkau di Antasari. Siap melayani pelanggan lokal dengan pengiriman cepat dan pemesanan instan via WhatsApp.",
+      "keywords": [
+        "Sate Kambing Muda Antasari",
+        "Warung Sate Bu Siti Antasari",
+        "Toko Sate Kambing Muda Terdekat Antasari"
+      ]
+    }
+  }
+  ```
+
+### 8.2. Suluh Kategori Bisnis (Category Optimizer)
+- **HTTP Method**: `GET` / `POST`
+- **Route**: `/api/v1/gmaps/categories`
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Body (POST)**:
+  ```json
+  {
+    "primary_gmb_category": "Restaurant",
+    "secondary_gmb_categories": ["Cafe", "Indonesian Restaurant", "Caterer"]
+  }
+  ```
+
+### 8.3. Pengingat Posting Rutin (Google Posts Scheduler)
+- **HTTP Method**: `GET` (`/api/v1/gmaps/posts-status`) / `POST` (`/api/v1/gmaps/posts-update`)
+- **Headers**: `Authorization: Bearer <token>`
+
+### 8.4. Deteksi Inkonsistensi NAP (Name, Address, Phone Check)
+- **HTTP Method**: `POST`
+- **Route**: `/api/v1/gmaps/nap-check`
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Body**:
+  ```json
+  {
+    "local_phone": "081234567890",
+    "local_address": "Jl. Melati No. 12",
+    "gmaps_phone": "089999999999",
+    "gmaps_address": "Jl. Sudirman No. 99"
+  }
+  ```
+
+### 8.5. Panduan Foto & Video (Visual Standardization Checklist)
+- **HTTP Method**: `GET` / `POST`
+- **Route**: `/api/v1/gmaps/visual-checklist`
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Body (POST)**:
+  ```json
+  {
+    "front_photos_count": 2,
+    "interior_photos_count": 3,
+    "product_photos_count": 5
+  }
+  ```
+

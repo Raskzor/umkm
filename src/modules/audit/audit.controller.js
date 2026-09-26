@@ -4,6 +4,8 @@ const db = require('../../shared/database/db');
 const { authenticate, authorizeRoles } = require('../../shared/utils/rbac');
 const { generateBusinessAuditDiagnosis } = require('../../shared/utils/ai.service');
 
+const { calculateNAPConsistency } = require('../../shared/utils/localSeoHelpers');
+
 // Execute AI-Powered Business Health Check Evaluation (Deterministic 100-Point Engine)
 router.post('/evaluate', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'FIELD_AGENT', 'SUPER_ADMIN'), async (req, res) => {
   const {
@@ -19,12 +21,24 @@ router.post('/evaluate', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_O
     has_qris_payment = false,
     has_operational_hours = false,
     has_promo_program = false,
-    has_social_media = false
+    has_social_media = false,
+    local_phone = '',
+    local_address = '',
+    gmaps_phone = '',
+    gmaps_address = ''
   } = req.body;
 
   let totalScore = 0;
   const breakdown = [];
   const recommendations = [];
+
+  // Check NAP Consistency
+  const napResult = calculateNAPConsistency({
+    localPhone: local_phone || req.user.phone_number || '081234567890',
+    localAddress: local_address || 'Jl. Melati No. 12',
+    gmapsPhone: gmaps_phone || '081234567890',
+    gmapsAddress: gmaps_address || 'Jl. Melati No. 12'
+  });
 
   // 1. Google Business Presence (20%) - Max 20 Poin
   let gmapsEarned = 0;
@@ -35,6 +49,27 @@ router.post('/evaluate', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_O
       gmapsEarned += 10;
     } else {
       gmapsGap = 'Titik lokasi Google Maps belum terverifikasi instan';
+    }
+
+    // NAP mismatch penalty (> 20% mismatch)
+    if (!napResult.is_consistent) {
+      gmapsEarned = Math.max(0, gmapsEarned - 5);
+      gmapsGap = (gmapsGap ? `${gmapsGap}. ` : '') + (napResult.mismatch_reason || 'Inkonsistensi data NAP toko (Nama, Alamat, No HP).');
+
+      recommendations.push({
+        id: 'rec-nap-fix',
+        title: 'Perbaiki Inkonsistensi Data NAP Toko',
+        text: napResult.mismatch_reason || 'Samakan data Nama, Alamat, dan No HP di database dengan profil Google Maps.',
+        impact_points: 5,
+        category: 'Local SEO NAP Optimization',
+        action_tab_id: 'gmaps-tab',
+        action_button_label: '⚠️ Perbaiki Data NAP Sekarang',
+        steps: [
+          'Langkah 1: Periksa nomor HP & alamat lengkap toko di database SuperUMKM.',
+          'Langkah 2: Samakan dengan informasi kontak di Google Business Profile.',
+          'Langkah 3: Simpan dan verifikasi kembali status konsistensi NAP.'
+        ]
+      });
     }
   } else {
     gmapsGap = 'Belum mendaftarkan lokasi toko di Google Maps';
