@@ -119,12 +119,92 @@ async function switchRole(roleKey) {
   badgeEl.className = `role-badge ${user.badge}`;
   badgeEl.innerText = user.badgeText;
 
+  // Toggle Visibility of System Admin Exclusive Documentation Menu
+  const docsMenuEl = document.getElementById('menu-item-docs');
+  if (docsMenuEl) {
+    if (roleKey === 'SUPER_ADMIN') {
+      docsMenuEl.style.display = 'flex';
+    } else {
+      docsMenuEl.style.display = 'none';
+      const docsTabEl = document.getElementById('docs-tab');
+      if (docsTabEl && docsTabEl.classList.contains('active')) {
+        switchTab('audit-tab');
+      }
+    }
+  }
+
+  // Fetch and Render Dynamic Role-Based Navigation Menu
+  await loadDynamicNavigationMenu();
+
   // Initial load
   handleAuditEvaluateDefault();
   loadTasks();
   loadCourses();
   loadPOSData();
   loadKitStateFromBackend();
+}
+
+// Dynamic Navigation Resolver Client Functions
+async function loadDynamicNavigationMenu() {
+  if (!userToken) return;
+
+  try {
+    const res = await fetch('/api/v1/users/navigation-menus', {
+      headers: {
+        'Authorization': `Bearer ${userToken}`
+      }
+    });
+    const data = await res.json();
+    if (data.success) {
+      renderDynamicNavigationSidebar(data.data);
+    }
+  } catch (err) {
+    console.error('loadDynamicNavigationMenu error:', err);
+  }
+}
+
+function renderDynamicNavigationSidebar(resolvedData) {
+  const container = document.getElementById('sidebar-menu-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const activeTabId = document.querySelector('.tab-content.active') ? document.querySelector('.tab-content.active').id : 'audit-tab';
+
+  Object.keys(resolvedData.grouped_menus).forEach(catKey => {
+    const catGroup = resolvedData.grouped_menus[catKey];
+
+    const catHeader = document.createElement('div');
+    catHeader.style.cssText = 'font-size: 0.68rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 0.85rem 0 0.35rem 0.5rem; display: flex; align-items: center; gap: 0.4rem;';
+    catHeader.innerHTML = `<span>${catGroup.icon}</span> <span>${catGroup.title}</span>`;
+    container.appendChild(catHeader);
+
+    catGroup.items.forEach(item => {
+      const a = document.createElement('a');
+      a.className = `menu-item ${item.tabId === activeTabId ? 'active' : ''}`;
+      a.setAttribute('onclick', `switchTab('${item.tabId}', this)`);
+
+      let badgeHtml = item.badgeLabel ? `<span style="font-size: 0.65rem; background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.15rem 0.4rem; border-radius: 4px; margin-left: auto;">${item.badgeLabel}</span>` : '';
+
+      a.innerHTML = `<span>${item.icon}</span> <span>${item.title}</span> ${badgeHtml}`;
+      container.appendChild(a);
+    });
+  });
+
+  // Update Quota Badge in POS Tab if element exists
+  const staffQuotaBadge = document.getElementById('staff-quota-badge');
+  if (staffQuotaBadge) {
+    if (resolvedData.metadata.staff_limit === 1) {
+      staffQuotaBadge.innerText = 'Paket GRATIS: Max 1 Kasir';
+      staffQuotaBadge.style.cssText = 'font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 9999px; font-weight: 700; background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.3);';
+    } else if (resolvedData.metadata.staff_limit === -1) {
+      staffQuotaBadge.innerText = 'Paket PREMIUM: Unlimited Kasir';
+      staffQuotaBadge.style.cssText = 'font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 9999px; font-weight: 700; background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3);';
+    } else {
+      staffQuotaBadge.innerText = 'Staf Kasir Mode';
+      staffQuotaBadge.style.cssText = 'font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 9999px; font-weight: 700; background: rgba(148, 163, 184, 0.2); color: #cbd5e1;';
+    }
+  }
 }
 
 // Navigation Tabs
@@ -151,7 +231,8 @@ function switchTab(tabId, el) {
     'copywriting-tab': { title: 'AI Promo Generator & Data Poster', subtitle: 'Copywriting otomatis santai lokal & renderer visual poster promo' },
     'services-tab': { title: 'Jasa Pendampingan & Smart Route Dispatch', subtitle: 'Manajemen tiket pengerjaan verifikasi lokasi & rute efisien agen' },
     'learning-tab': { title: 'Video Micro-Course Edukasi', subtitle: 'Modul pelatihan strategi pemasaran digital & Google Maps' },
-    'kit-tab': { title: 'Kit Lokal Naik Kelas', subtitle: 'Action kit interaktif untuk diagnosis & penanganan etalase digital UMKM' }
+    'kit-tab': { title: 'Kit Lokal Naik Kelas', subtitle: 'Action kit interaktif untuk diagnosis & penanganan etalase digital UMKM' },
+    'docs-tab': { title: 'Dokumentasi Sistem IT (System Admin)', subtitle: 'Spesifikasi arsitektur, registry REST API, SQL DDL PostgreSQL, matriks RBAC, dan sequence diagram' }
   };
 
   if (titles[tabId]) {
@@ -164,6 +245,7 @@ function switchTab(tabId, el) {
   if (tabId === 'cashflow-tab') loadCashflowData();
   if (tabId === 'loyalty-tab') loadLoyaltyData();
   if (tabId === 'inventory-tab') loadInventoryData();
+  if (tabId === 'docs-tab') loadITAdminDocsBackend();
 }
 
 // Toggle Google Maps Audit Fields Visibility
@@ -1970,4 +2052,97 @@ async function handleGeneratePromoPoster() {
   } catch (err) {
     console.error('handleGeneratePromoPoster error:', err);
   }
+}
+
+/* ========================================================
+   SYSTEM ADMIN EXCLUSIVE: DOKUMENTASI SISTEM (IT & DEV)
+======================================================== */
+let loadedSystemDocsData = null;
+let currentDocsKey = 'architecture';
+
+async function loadITAdminDocsBackend() {
+  const contentBox = document.getElementById('docs-viewer-content');
+  if (!contentBox) return;
+
+  contentBox.innerHTML = '⏳ Menghubungi API Backend (/api/v1/docs)... Menerapkan Verifikasi Role System Admin...';
+
+  try {
+    const res = await fetch('/api/v1/docs', {
+      headers: {
+        'Authorization': `Bearer ${userToken}`
+      }
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      loadedSystemDocsData = data.data;
+      showDocsView(currentDocsKey);
+    } else {
+      contentBox.innerHTML = `
+        <div style="color: #f87171; font-weight: bold; font-size: 1rem;">⛔ AKSES DITOLAK (403 FORBIDDEN)</div>
+        <div style="margin-top: 0.5rem; color: #cbd5e1;">${data.error || 'Anda tidak memiliki hak akses (Responsibility System Admin) untuk melihat dokumentasi teknis ini.'}</div>
+        <div style="margin-top: 1rem; font-size: 0.8rem; color: #94a3b8;">Petunjuk: Gunakan simulasi peran RBAC di sidebar kiri dan pilih <strong>Super Admin Platform</strong> untuk melihat dokumen ini.</div>
+      `;
+    }
+  } catch (err) {
+    console.error('loadITAdminDocsBackend error:', err);
+    contentBox.innerHTML = '<div style="color: #f87171;">Terjadi kesalahan koneksi server saat mengambil berkas dokumentasi. Pastikan server aktif.</div>';
+  }
+}
+
+function showDocsView(docKey, btnEl) {
+  if (docKey) currentDocsKey = docKey;
+
+  if (btnEl) {
+    document.querySelectorAll('.docs-nav-btn').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+  }
+
+  const contentBox = document.getElementById('docs-viewer-content');
+  const titleEl = document.getElementById('docs-viewer-title');
+  const tagEl = document.getElementById('docs-viewer-tag');
+
+  if (!loadedSystemDocsData || !loadedSystemDocsData.files) {
+    if (contentBox) contentBox.innerHTML = '⏳ Memuat data dokumentasi dari server...';
+    loadITAdminDocsBackend();
+    return;
+  }
+
+  const fileMap = {
+    architecture: {
+      title: '⚙️ Spesifikasi Arsitektur Sistem & Technology Stack',
+      tag: 'BERKAS: docs/ARCHITECTURE.md',
+      content: loadedSystemDocsData.files.architecture
+    },
+    api: {
+      title: '🛠️ REST API Registry & Spesifikasi Endpoints',
+      tag: 'BERKAS: docs/MODULES_API.md',
+      content: loadedSystemDocsData.files.modules_api
+    },
+    migrations: {
+      title: '🗄️ Database PostgreSQL SQL DDL Migration Script',
+      tag: 'BERKAS: docs/MIGRATIONS.md',
+      content: loadedSystemDocsData.files.migrations_sql
+    },
+    rbac: {
+      title: '🔐 Matriks Peran & Hak Akses (RBAC Permission Matrix)',
+      tag: 'BERKAS: docs/RBAC_MATRIX.md',
+      content: loadedSystemDocsData.files.rbac_matrix
+    },
+    user_flows: {
+      title: '🔀 User Flow Sequence & Software Requirement Specs',
+      tag: 'BERKAS: USER_FLOW_SPEC.md & docs/USER_FLOWS.md',
+      content: (loadedSystemDocsData.files.user_flow_spec || '') + '\n\n=======================================================\n' + (loadedSystemDocsData.files.user_flows || '')
+    },
+    readme: {
+      title: '📘 Overview Platform & Modul List Repository',
+      tag: 'BERKAS: README.md',
+      content: loadedSystemDocsData.files.readme
+    }
+  };
+
+  const selected = fileMap[currentDocsKey] || fileMap.architecture;
+  if (titleEl) titleEl.innerText = selected.title;
+  if (tagEl) tagEl.innerText = selected.tag;
+  if (contentBox) contentBox.innerText = selected.content || 'Berkas dokumentasi belum ditemukan.';
 }

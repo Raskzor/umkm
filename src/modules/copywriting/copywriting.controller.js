@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../../shared/database/db');
-const { authenticate } = require('../../shared/utils/rbac');
+const { authenticate, authorizeRoles } = require('../../shared/utils/rbac');
 
 /**
  * @route POST /api/v1/copywriting/generate
  * @desc AI prompt wrapper endpoint for generating promotional copy tailored for local UMKM
  */
-router.post('/generate', authenticate, async (req, res) => {
+router.post('/generate', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'SUPER_ADMIN'), async (req, res) => {
   const { promo_target, target_audience, tone_style, product_name, discount_price } = req.body;
 
   const ownerId = req.user.role_code === 'CASHIER' ? (req.user.owner_id || req.user.id) : req.user.id;
@@ -71,7 +71,7 @@ router.post('/generate', authenticate, async (req, res) => {
  * @route POST /api/v1/copywriting/promo-poster
  * @desc Data generator template for visual promo poster linking product photo, business name, and Google Maps URL
  */
-router.post('/promo-poster', authenticate, (req, res) => {
+router.post('/promo-poster', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'SUPER_ADMIN'), (req, res) => {
   const { product_name, promo_headline, discount_text, product_image_url } = req.body;
 
   const ownerId = req.user.role_code === 'CASHIER' ? (req.user.owner_id || req.user.id) : req.user.id;

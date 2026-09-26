@@ -5,7 +5,7 @@ const { authenticate, authorizeRoles } = require('../../shared/utils/rbac');
 const { generateBusinessAuditDiagnosis } = require('../../shared/utils/ai.service');
 
 // Execute AI-Powered Business Health Check Evaluation
-router.post('/evaluate', authenticate, async (req, res) => {
+router.post('/evaluate', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'FIELD_AGENT', 'SUPER_ADMIN'), async (req, res) => {
   const {
     has_gmaps_profile,
     gmaps_rating,

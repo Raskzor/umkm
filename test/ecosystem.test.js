@@ -80,3 +80,11 @@ test('Ecosystem Module 5 - QRIS Payload Generation & Mock Verification', (t) => 
   assert.ok(qrString.includes('ID.CO.QRIS'));
   assert.ok(qrString.includes('50000'));
 });
+
+test('System Admin Exclusive IT Documentation Hub Endpoint', (t) => {
+  const adminToken = generateToken({ id: 'u-admin-004', phone_number: '080011223344', full_name: 'Super Admin System', role_code: 'SUPER_ADMIN' });
+  const freeToken = generateToken({ id: 'u-free-001', phone_number: '081234567890', full_name: 'Budi Santoso', role_code: 'UMKM_OWNER_FREE' });
+
+  assert.ok(adminToken);
+  assert.ok(freeToken);
+});

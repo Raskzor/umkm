@@ -22,8 +22,9 @@ router.post('/staff', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_OWNE
 
   // Enforce Freemium Limit: Free Plan allows max 1 cashier staff
   if (isFreePlan && activeStaff.length >= 1) {
-    return res.status(400).json({
+    return res.status(403).json({
       success: false,
+      error_code: 'TIER_QUOTA_EXCEEDED',
       error: 'Batas maksimum Paket GRATIS adalah 1 Anak Buah / Kasir. Upgrade ke Paket PREMIUM untuk menambahkan Kasir tanpa batas!',
       limit_reached: true,
       max_allowed: 1,

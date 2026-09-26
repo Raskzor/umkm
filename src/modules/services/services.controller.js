@@ -4,7 +4,7 @@ const db = require('../../shared/database/db');
 const { authenticate, authorizeRoles } = require('../../shared/utils/rbac');
 
 // Order Field Service Ticket (UMKM Owner)
-router.post('/order', authenticate, (req, res) => {
+router.post('/order', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'FIELD_AGENT', 'SUPER_ADMIN'), (req, res) => {
   const { service_type, requirement_notes } = req.body;
 
   if (!service_type) {

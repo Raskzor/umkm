@@ -15,6 +15,8 @@ const loyaltyRoutes = require('./modules/loyalty/loyalty.controller');
 const inventoryRoutes = require('./modules/inventory/inventory.controller');
 const copywritingRoutes = require('./modules/copywriting/copywriting.controller');
 const qrisRoutes = require('./modules/qris/qris.controller');
+const docsRoutes = require('./modules/docs/docs.controller');
+const usersRoutes = require('./modules/users/users.controller');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,6 +43,8 @@ app.use('/api/v1/loyalty', loyaltyRoutes);
 app.use('/api/v1/inventory', inventoryRoutes);
 app.use('/api/v1/copywriting', copywritingRoutes);
 app.use('/api/v1/qris', qrisRoutes);
+app.use('/api/v1/docs', docsRoutes);
+app.use('/api/v1/users', usersRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../../shared/database/db');
-const { authenticate } = require('../../shared/utils/rbac');
+const { authenticate, authorizeRoles } = require('../../shared/utils/rbac');
 
 const STEPS_DATA = [
   {
@@ -163,7 +163,7 @@ router.get('/state', authenticate, (req, res) => {
  * @route POST /api/v1/kit/state
  * @desc Save/update full Kit Lokal Naik Kelas state
  */
-router.post('/state', authenticate, (req, res) => {
+router.post('/state', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'FIELD_AGENT', 'SUPER_ADMIN'), (req, res) => {
   const userId = req.user.id;
   const newState = req.body;
 
