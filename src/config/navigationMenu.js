@@ -210,7 +210,7 @@ function resolveNavigationMenu(userRole, userTier) {
 
   if (role === 'UMKM_OWNER_PREMIUM') {
     metadata = {
-      staff_limit: -1, // Unlimited
+      staff_limit: 5, // Default Premium Quota: 5 Staff (Extra staff requires Add-On)
       qris_type: 'DYNAMIC',
       max_landing_pages: -1, // Unlimited
       video_access_tier: 'ALL',

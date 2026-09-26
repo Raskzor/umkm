@@ -21,7 +21,7 @@ test('Navigation Config - Grouped Categories & 14 Modules Resolution', (t) => {
 
   // Quota Limit Assertions
   assert.strictEqual(freeMenu.metadata.staff_limit, 1);
-  assert.strictEqual(premMenu.metadata.staff_limit, -1);
+  assert.strictEqual(premMenu.metadata.staff_limit, 5);
   assert.strictEqual(cashierMenu.metadata.staff_limit, 0);
 
   // Cashier Role Menu Filtering Assertions (Staff management, AI copywriting excluded)

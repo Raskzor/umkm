@@ -16,20 +16,29 @@ router.post('/staff', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_OWNE
 
   const ownerId = req.user.id;
   const isFreePlan = req.user.role_code === 'UMKM_OWNER_FREE';
+  const isSuperAdmin = req.user.role_code === 'SUPER_ADMIN';
 
   // Count existing active staff assigned to this owner
   const activeStaff = db.posStaff.filter(s => s.owner_id === ownerId && s.status === 'ACTIVE');
 
-  // Enforce Freemium Limit: Free Plan allows max 1 cashier staff
-  if (isFreePlan && activeStaff.length >= 1) {
+  // Calculate staff limits: Free = 1, Premium = 5 + extra_staff_quota
+  const baseLimit = isFreePlan ? 1 : 5;
+  const extraQuota = req.user.extra_staff_quota || 0;
+  const maxStaffAllowed = isSuperAdmin ? 999 : (baseLimit + extraQuota);
+
+  if (activeStaff.length >= maxStaffAllowed) {
+    const isPremium = req.user.role_code === 'UMKM_OWNER_PREMIUM';
     return res.status(403).json({
       success: false,
       error_code: 'TIER_QUOTA_EXCEEDED',
-      error: 'Batas maksimum Paket GRATIS adalah 1 Anak Buah / Kasir. Upgrade ke Paket PREMIUM untuk menambahkan Kasir tanpa batas!',
+      error: isFreePlan
+        ? 'Batas Paket GRATIS adalah 1 Staf Kasir. Upgrade ke Paket PREMIUM untuk kuota 5 Staf Kasir!'
+        : `Batas Paket PREMIUM adalah ${maxStaffAllowed} Staf Kasir. Beli Add-On Staf Kasir (Rp 10.000/staf/bulan) untuk menambah kuota kasir!`,
       limit_reached: true,
-      max_allowed: 1,
+      max_allowed: maxStaffAllowed,
       current_assigned: activeStaff.length,
-      current_tier: 'UMKM_OWNER_FREE'
+      current_tier: req.user.role_code,
+      add_on_available: isPremium
     });
   }
 
@@ -87,18 +96,24 @@ router.get('/staff', authenticate, (req, res) => {
   const ownerId = req.user.role_code === 'CASHIER' ? (req.user.owner_id || req.user.id) : req.user.id;
   const ownerUser = db.users.find(u => u.id === ownerId) || req.user;
   const isFreePlan = ownerUser.role_code === 'UMKM_OWNER_FREE';
+  const isSuperAdmin = ownerUser.role_code === 'SUPER_ADMIN';
+  const baseLimit = isFreePlan ? 1 : 5;
+  const extraQuota = ownerUser.extra_staff_quota || 0;
+  const maxStaffAllowed = isSuperAdmin ? 999 : (baseLimit + extraQuota);
 
   let staffList = db.posStaff.filter(s => s.owner_id === ownerId || req.user.role_code === 'SUPER_ADMIN');
+  const activeCount = staffList.filter(s => s.status === 'ACTIVE').length;
 
   return res.json({
     success: true,
     data: {
       staff_list: staffList,
       quota_summary: {
-        assigned_count: staffList.filter(s => s.status === 'ACTIVE').length,
-        max_allowed: isFreePlan ? 1 : 'UNLIMITED',
+        assigned_count: activeCount,
+        max_allowed: maxStaffAllowed,
         is_free_tier: isFreePlan,
-        can_add_more: !isFreePlan || staffList.filter(s => s.status === 'ACTIVE').length < 1
+        can_add_more: activeCount < maxStaffAllowed,
+        add_on_available: ownerUser.role_code === 'UMKM_OWNER_PREMIUM'
       }
     }
   });

@@ -49,7 +49,7 @@ Platform SuperUMKM beralih dari "kumpulan tools terpisah" menjadi **"AI Business
 - **Frontend Layer**: Modern HTML5, Custom Vanilla CSS (Glassmorphism & Action Center Cards), Vanilla JS Async Engine
 - **Database Engine**: PostgreSQL Schema (DDL SQL compatibility) / Shared Persistence Layer (`db.js`)
 - **Authentication & Security**: JWT (JSON Web Tokens) with granular Role & Tier Guards
-- **Testing Framework**: Native `node --test` runner (30 tests passing 100%)
+- **Testing Framework**: Native `node --test` runner (35 tests passing 100%)
 
 ## 3. Deterministic Health Score Engine Architecture
 Diagnosis kesehatan usaha menggunakan rule-engine deterministik 100 poin (bukan prompt AI acak):
@@ -178,3 +178,24 @@ erDiagram
 - `services` - Field Service Ticket Assignment & Pusat Rute Pendampingan Agen
 - `docs` - System Admin exclusive documentation hub (Matriks Hak Akses Staf, REST Registry, DDL SQL)
 - `users` - Dynamic role-based navigation menu resolver
+
+## 7. System Infrastructure Specification & Cost Model (1,000 Active Merchants)
+
+### 🚀 Capacity & Sizing Baseline
+* **Active Merchants Target**: 1,000 UMKM Users
+* **Peak Load**: 50–100 API Requests/sec (POS Cashier peak hours & WA notifications)
+* **Storage Growth**: ~50 GB Database Storage per year (Transaction logs, Audit reports, Stock, Customer Contacts)
+
+### 🛠️ Infrastructure Component Breakdown
+
+| Layer / Service | Hardware / Service Specification | Usage Volume / Month | Monthly Cost (IDR) | Annual Cost Excl. Tax (IDR) |
+|---|---|---|---|---|
+| **App Server Node.js** | 4 vCPU, 8 GB RAM, 100 GB NVMe SSD Cloud VPS (Biznet Gio / AWS Lightsail) | 24/7 Uptime (Node Cluster Mode) | Rp 750.000 | Rp 9.000.000 |
+| **Database Server** | Managed PostgreSQL (2 vCPU, 4 GB RAM, 50 GB Storage + Auto Backup) | 5.000.000 DB records/year | Rp 800.000 | Rp 9.600.000 |
+| **Domain & Security** | `.id` Domain + Cloudflare Pro WAF, SSL, & Edge CDN Acceleration | Unlimited Traffic | Rp 340.833 | Rp 4.090.000 |
+| **AI LLM Engine** | Gemini 1.5 Flash / OpenAI GPT-4o-mini API (Audit, Review Reply, Copygen) | ~27.000 Requests/month (~20M Tokens) | Rp 2.400.000 | Rp 28.800.000 |
+| **WhatsApp Gateway** | Official WhatsApp Business API / Vendor Gateway (Fonnte/Wablas) | ~50.000 Messages/month (Churn alert + Struk WA) | Rp 4.000.000 | Rp 48.000.000 |
+| **Payment Gateway Maintenance** | QRIS Dynamic API & Webhook Settlement Gateway | Multi-Bank QRIS Engine | Rp 300.000 | Rp 3.600.000 |
+| **SUBTOTAL BIAYA INFRASTRUKTUR & SERVICE** | | | **Rp 8.590.833** | **Rp 103.090.000** |
+| **PPN TAX (11%)** | *Pajak Pertambahan Nilai UU Harmonisasi Peraturan Perpajakan* | | **Rp 945.000** | **Rp 11.339.900** |
+| **TOTAL BIAYA PEMBIAYAAN INFRASTRUKTUR 1 TAHUN (INC. TAX 11%)** | | | **Rp 9.535.833 / bln** | **Rp 114.429.900 / thn** |

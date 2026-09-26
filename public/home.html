@@ -3,18 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SuperUMKM - Platform Pendampingan & Konsultasi Digital UMKM Indonesia</title>
-  <meta name="description" content="Platform pendampingan digital UMKM segmen menengah-bawah. Optimasi Google Maps, AI Auto-Reply Ulasan, Builder Katalog WhatsApp, Kasir QRIS, & Edukasi Usaha.">
+  <title>SuperUMKM - Platform Pendampingan & Operating System Usaha Lokal</title>
+  <meta name="description" content="Platform pendampingan digital UMKM segmen menengah-bawah. Audit kesehatan usaha AI 8-dimensi, Pandoman Kata Kunci Google Maps, Builder Toko Instan, Kasir QRIS Staf, & Agen Pendamping Lapangan.">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap">
   <style>
     :root {
       --bg-dark: #0b0f19;
       --bg-card: rgba(18, 25, 41, 0.85);
-      --bg-card-hover: rgba(30, 41, 69, 0.9);
+      --bg-card-hover: rgba(30, 41, 69, 0.95);
       --primary: #3b82f6;
       --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-      --accent-teal: #10b981;
+      --accent-emerald: #10b981;
       --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --border-light: rgba(255, 255, 255, 0.1);
@@ -148,7 +149,7 @@
       background: rgba(59, 130, 246, 0.15);
       border: 1px solid rgba(59, 130, 246, 0.3);
       color: #60a5fa;
-      padding: 0.4rem 1rem;
+      padding: 0.4rem 1.2rem;
       border-radius: 30px;
       font-size: 0.85rem;
       font-weight: 700;
@@ -157,7 +158,7 @@
 
     .hero-title {
       font-family: 'Outfit', sans-serif;
-      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-size: clamp(2.3rem, 5vw, 3.8rem);
       font-weight: 800;
       line-height: 1.15;
       margin-bottom: 1.5rem;
@@ -169,7 +170,7 @@
     .hero-subtitle {
       font-size: 1.15rem;
       color: var(--text-muted);
-      max-width: 800px;
+      max-width: 840px;
       margin: 0 auto 2.5rem;
       line-height: 1.7;
     }
@@ -179,7 +180,7 @@
       justify-content: center;
       gap: 1rem;
       flex-wrap: wrap;
-      margin-bottom: 3rem;
+      margin-bottom: 3.5rem;
     }
 
     /* Stats Banner */
@@ -187,7 +188,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1.5rem;
-      max-width: 1000px;
+      max-width: 1050px;
       margin: 0 auto;
       background: var(--bg-card);
       border: 1px solid var(--border-light);
@@ -208,8 +209,8 @@
       color: var(--text-muted);
     }
 
-    /* Features Grid */
-    section.features {
+    /* Pillar Workflow Section (CHECK -> FIX -> GROW) */
+    section.pillars {
       max-width: 1200px;
       margin: 6rem auto;
       padding: 0 1.5rem;
@@ -222,7 +223,7 @@
 
     .section-header h2 {
       font-family: 'Outfit', sans-serif;
-      font-size: 2.2rem;
+      font-size: 2.3rem;
       font-weight: 800;
       margin-bottom: 0.75rem;
     }
@@ -230,6 +231,66 @@
     .section-header p {
       color: var(--text-muted);
       font-size: 1rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .pillar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .pillar-card:hover {
+      transform: translateY(-6px);
+      background: var(--bg-card-hover);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+
+    .pillar-tag {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+
+    .tag-check { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .tag-fix { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .tag-grow { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    .pillar-card h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #ffffff;
+    }
+
+    .pillar-card p {
+      font-size: 0.93rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* Features Grid */
+    section.features {
+      max-width: 1200px;
+      margin: 6rem auto;
+      padding: 0 1.5rem;
     }
 
     .grid-3 {
@@ -279,14 +340,14 @@
 
     /* Pricing Section */
     section.pricing {
-      max-width: 1000px;
+      max-width: 1150px;
       margin: 6rem auto;
       padding: 0 1.5rem;
     }
 
     .pricing-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
       gap: 2rem;
     }
 
@@ -296,28 +357,32 @@
       border-radius: var(--radius-lg);
       padding: 2.5rem 2rem;
       position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     .price-card.featured {
       border: 2px solid #3b82f6;
-      background: linear-gradient(135deg, rgba(30, 41, 69, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
-      box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.3);
+      background: linear-gradient(135deg, rgba(30, 41, 69, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+      box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.35);
     }
 
     .price-badge {
       position: absolute;
-      top: -12px;
+      top: -14px;
       right: 20px;
       background: var(--primary-gradient);
       color: #ffffff;
       font-size: 0.75rem;
       font-weight: 800;
-      padding: 0.3rem 0.85rem;
+      padding: 0.35rem 0.9rem;
       border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(59, 130, 246, 0.5);
     }
 
-    .price-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem; }
-    .price-amount { font-family: 'Outfit', sans-serif; font-size: 2.5rem; font-weight: 800; color: #34d399; margin-bottom: 1.5rem; }
+    .price-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .price-amount { font-family: 'Outfit', sans-serif; font-size: 2.4rem; font-weight: 800; color: #34d399; margin-bottom: 1.5rem; }
 
     .price-features {
       list-style: none;
@@ -327,10 +392,10 @@
     .price-features li {
       font-size: 0.9rem;
       color: #cbd5e1;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.8rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
     }
 
     /* Contact Section */
@@ -434,11 +499,12 @@
         <div class="brand-icon">🚀</div>
         <div>
           <div class="brand-title">SuperUMKM</div>
-          <div style="font-size: 0.7rem; color: var(--text-muted);">Consultant Platform</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted);">AI Operating System Pendamping Usaha</div>
         </div>
       </div>
 
       <ul class="nav-menu">
+        <li><a href="#pilar" class="nav-link">Siklus Pendampingan</a></li>
         <li><a href="#fitur" class="nav-link">Fitur Utama</a></li>
         <li><a href="#action-kit" class="nav-link">Action Kit</a></li>
         <li><a href="#paket" class="nav-link">Paket Harga</a></li>
@@ -454,11 +520,11 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-badge">
-      <span>✨ Platform Pendampingan Digital UMKM Indonesia #1</span>
+      <span>✨ Operating System & Pendamping Digital Usaha Lokal #1</span>
     </div>
-    <h1 class="hero-title">Bantu Usaha Lokal Anda Mendominasi Pasar Digital & Google Maps</h1>
+    <h1 class="hero-title">Bantu Usaha Lokal Anda Mendominasi Google Maps & Pasar Digital</h1>
     <p class="hero-subtitle">
-      Diagnosis kesehatan usaha via AI, otomatisasi ulasan bintang-5, kasir digital QRIS, katalog WhatsApp instan dalam 3 menit, serta panduan 8 langkah eksekusi etalase digital.
+      Beralih dari kumpulan aplikasi terpisah ke **Siklus Pendampingan CHECK → FIX → GROW**. Diagnosis kesehatan usaha 8-dimensi via AI, tuntaskan masalah dengan Pusat Aksi 1-Klik, dan kuasai pencarian lokal radius 3KM.
     </p>
 
     <div class="hero-actions">
@@ -473,20 +539,48 @@
     <!-- Stats Bar -->
     <div class="hero-stats">
       <div class="stat-item">
-        <h3>100%</h3>
-        <p>Khusus Segmen UMKM Lokal</p>
+        <h3>8 Dimensi</h3>
+        <p>Analisis Kesehatan Usaha AI</p>
+      </div>
+      <div class="stat-item">
+        <h3>Top 3 Task</h3>
+        <p>Pusat Aksi Prioritas 1-Klik</p>
       </div>
       <div class="stat-item">
         <h3>3 Menit</h3>
         <p>Setup Katalog Web WhatsApp</p>
       </div>
       <div class="stat-item">
-        <h3>8 Langkah</h3>
-        <p>Eksekusi Etalase Digital</p>
+        <h3>Local SEO</h3>
+        <p>Pandoman Kata Kunci Google</p>
       </div>
-      <div class="stat-item">
-        <h3>AI Powered</h3>
-        <p>Auto-Reply Ulasan & Diagnosis</p>
+    </div>
+  </section>
+
+  <!-- Pillars Section (CHECK -> FIX -> GROW) -->
+  <section class="pillars" id="pilar">
+    <div class="section-header">
+      <h2>3 Pilar Pendampingan Usaha (CHECK → FIX → GROW)</h2>
+      <p>Sistem otomatis yang mengarahkan langkah pemilik usaha dari diagnosis masalah hingga peningkatan omset.</p>
+    </div>
+
+    <div class="pillars-grid">
+      <div class="pillar-card">
+        <span class="pillar-tag tag-check">1. CHECK (Diagnosis Usaha)</span>
+        <h3>Analisis Kesehatan Usaha AI</h3>
+        <p>Engine evaluasi 8 dimensi (0–100 poin) secara presisi: keberadaan Google Maps, ulasan bintang-5, kesesuaian Nama-Alamat-Telepon (NAP), katalog web, & kesiapan kasir.</p>
+      </div>
+
+      <div class="pillar-card">
+        <span class="pillar-tag tag-fix">2. FIX (Pusat Aksi 1-Klik)</span>
+        <h3>Top 3 Fokus Tugas Prioritas</h3>
+        <p>Sistem menyaring masalah paling mendesak bagi toko Anda dan menyediakan tombol eksekusi 1-Klik tanpa perlu ribet belajar teknik marketing atau coding.</p>
+      </div>
+
+      <div class="pillar-card">
+        <span class="pillar-tag tag-grow">3. GROW (Akselerasi Omset)</span>
+        <h3>Dominasi Pasar & Retensi</h3>
+        <p>Gunakan Pandoman Kata Kunci Lokal Google Maps, alert otomatis WhatsApp untuk pelanggan lama (churn prevention), serta pendampingan langsung Agen Lapangan.</p>
       </div>
     </div>
   </section>
@@ -494,57 +588,69 @@
   <!-- Features Section -->
   <section class="features" id="fitur">
     <div class="section-header">
-      <h2>6 Modul Utama Pendampingan SuperUMKM</h2>
-      <p>Solusi terpadu dan praktis yang dirancang khusus untuk pemilik toko, kafe, retail, dan jasa lokal.</p>
+      <h2>Modul Pendampingan Terpadu SuperUMKM</h2>
+      <p>Fitur praktis tanpa jargon teknis yang dirancang khusus untuk pemilik toko, kafe, kuliner, retail, dan jasa lokal.</p>
     </div>
 
     <div class="grid-3">
       <div class="feature-card">
         <div class="feature-icon">📊</div>
-        <h3>AI Health Check & Action Kit</h3>
-        <p>Diagnosis kesehatan digital usaha otomatis via AI dan 8 langkah eksekusi "Kit Lokal Naik Kelas" lengkap dengan checklist bukti sebelum/sesudah.</p>
+        <h3>Analisis Kesehatan Usaha AI</h3>
+        <p>Pemeriksaan kesehatan usaha 8 dimensi deterministik lengkap dengan deteksi konsistensi Nama, Alamat, & Telepon (NAP) di Google Maps.</p>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon">📍</div>
-        <h3>Google Maps & AI Review Engine</h3>
-        <p>Cetak QR Standee ulasan akrilik meja kasir, balasan ulasan otomatis berbasis AI, dan pembuat kupon loyalitas diskon pelanggan.</p>
+        <h3>Google Maps & Local SEO Injector</h3>
+        <p>Rekomendasi nama & deskripsi usaha optimal pencarian lokal, pemetaan kategori GMB, serta cetak Akrilik Meja Standee QR Review.</p>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon">🌐</div>
-        <h3>Builder Website Sementara</h3>
-        <p>Terbitkan katalog online usaha instan dalam 3 menit yang terhubung langsung ke WhatsApp Business resmi tanpa perlu paham coding/SEO.</p>
+        <h3>Website Instan Toko Kami</h3>
+        <p>Terbitkan katalog produk digital usaha Anda (`/toko/:slug`) dalam 3 menit yang terhubung langsung ke order WhatsApp Business resmi.</p>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon">📱</div>
-        <h3>Kasir POS Digital & Staf</h3>
-        <p>Pencatatan transaksi penjualan instan, cetak struk belanja digital, dan manajemen batas staf kasir toko (Freemium Quota Control).</p>
+        <h3>Mesin Kasir POS & Hak Akses Staf</h3>
+        <p>Pencatatan penjualan cepat, cetak/kirim struk digital, QRIS terintegrasi, serta pengaturan Hak Akses Staf Kasir via PIN terpisah.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3>Pembukuan P&L Saku & Buku Bon</h3>
+        <p>Pantau untung-rugi harian usaha secara riil, terima peringatan otomatis stok barang tipis, dan catat utang-piutang pelanggan rapi.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3>WA Loyalty & Alert Pelanggan Churn</h3>
+        <p>Kirim kupon diskon ulasan otomatis dan pengingat WA ramah untuk mengajak pelanggan lama belanja kembali ke toko Anda.</p>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon">🛠️</div>
-        <h3>Jasa Pendamping & Smart Route</h3>
-        <p>Pengajuan tiket pendampingan fisik agen wilayah (foto geotag & verifikasi lokasi) serta optimasi rute kunjungan lapangan efisien.</p>
+        <h3>Pusat Rute Pendampingan Agen</h3>
+        <p>Tim Agen Lapangan wilayah siap berkunjung langsung ke toko Anda untuk verifikasi tempat, foto geotag, dan penataan etalase.</p>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon">🎓</div>
         <h3>Video Micro-Course Edukasi</h3>
-        <p>Modul pelatihan video singkat strategi promosi lokal radius 3KM, trik 100+ review bintang 5, dan otorisasi kelas sesuai tier paket.</p>
+        <p>Modul pelatihan video singkat YouTube & Google Drive langkah demi langkah khusus Pemilik Usaha untuk raih 100+ ulasan bintang 5.</p>
       </div>
     </div>
   </section>
 
   <!-- Action Kit Preview Banner -->
   <section id="action-kit" style="max-width: 1200px; margin: 6rem auto; padding: 0 1.5rem;">
-    <div style="background: linear-gradient(135deg, rgba(30, 41, 69, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-lg); padding: 3rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2rem;">
-      <div style="max-width: 650px;">
-        <span class="hero-badge" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #34d399;">📋 ACTION KIT V1 INTEGRATED</span>
-        <h2 style="font-family: 'Outfit'; font-size: 2.2rem; margin: 0.75rem 0; color: #ffffff;">Kit Lokal Naik Kelas — 8 Langkah Praktis</h2>
+    <div style="background: linear-gradient(135deg, rgba(30, 41, 69, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-lg); padding: 3rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2rem;">
+      <div style="max-width: 680px;">
+        <span class="hero-badge" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #34d399;">📋 ACTION KIT INTEGRATED</span>
+        <h2 style="font-family: 'Outfit'; font-size: 2.2rem; margin: 0.75rem 0; color: #ffffff;">Kit Lokal Naik Kelas — Panduan 8 Langkah Faktual</h2>
         <p style="color: var(--text-muted); font-size: 1rem;">
-          Cek kondisi Google Maps, ulasan, dan WhatsApp usaha Anda. Ikuti 8 langkah penanganan faktual: Cek, Kuasai, Benahi, Tunjukkan, Mudahkan, Respons, Siapkan Chat, dan Percepat.
+          Ikuti 8 langkah eksekusi sederhana: <em>Cek, Kuasai, Benahi, Tunjukkan, Mudahkan, Respons, Siapkan Chat, dan Percepat</em> untuk memastikan toko lokal Anda tampil maksimal di pencarian sekitar.
         </p>
       </div>
       <div>
@@ -559,42 +665,69 @@
   <section class="pricing" id="paket">
     <div class="section-header">
       <h2>Paket Layanan SuperUMKM</h2>
-      <p>Pilih paket pendampingan yang sesuai dengan skala usaha Anda.</p>
+      <p>Pilih paket pendampingan yang sesuai dengan kebutuhan dan skala usaha Anda.</p>
     </div>
 
     <div class="pricing-grid">
+      <!-- Paket Gratis -->
       <div class="price-card">
-        <div class="price-title">Paket GRATIS</div>
-        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Untuk UMKM Pemula / Rintisan</p>
-        <div class="price-amount">Rp 0 <span style="font-size: 0.9rem; color: var(--text-muted);">/selamanya</span></div>
-        
-        <ul class="price-features">
-          <li>✅ AI Health Audit & Action Kit</li>
-          <li>✅ Generator QR Code Standard</li>
-          <li>✅ 1 Katalog Mini Website</li>
-          <li>✅ Maksimal 1 Staf Kasir POS</li>
-          <li>✅ Akses Video Edukasi Dasar</li>
-        </ul>
+        <div>
+          <div class="price-title">Paket GRATIS</div>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Untuk UMKM Pemula / Rintisan</p>
+          <div class="price-amount">Rp 0 <span style="font-size: 0.9rem; color: var(--text-muted);">/selamanya</span></div>
+          
+          <ul class="price-features">
+            <li>✅ Analisis Kesehatan Usaha AI (8 Dimensi)</li>
+            <li>✅ Pusat Aksi 1-Klik Top 3 Task</li>
+            <li>✅ 1 Katalog Website Instan (`/toko/:slug`)</li>
+            <li>✅ 1 Hak Akses Staf Kasir POS</li>
+            <li>✅ Dynamic QRIS Generator Standard</li>
+            <li>✅ Akses Video Edukasi Dasar</li>
+          </ul>
+        </div>
 
-        <a href="/index.html" class="btn btn-secondary" style="width: 100%;">Mulai Gratis Sekarang</a>
+        <a href="/index.html" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">Mulai Gratis Sekarang</a>
       </div>
 
+      <!-- Paket SaaS Premium -->
       <div class="price-card featured">
         <div class="price-badge">PALING POPULER</div>
-        <div class="price-title">Paket PREMIUM</div>
-        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Untuk Usaha Lokal Siap Akselerasi</p>
-        <div class="price-amount">Rp 99.000 <span style="font-size: 0.9rem; color: var(--text-muted);">/bulan</span></div>
+        <div>
+          <div class="price-title">Paket SAAS PREMIUM</div>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Untuk Usaha Siap Akselerasi Omset</p>
+          <div class="price-amount">Rp 49.000 <span style="font-size: 0.9rem; color: var(--text-muted);">/bulan</span></div>
 
-        <ul class="price-features">
-          <li>✅ Seluruh Fitur Paket Gratis</li>
-          <li>✅ Custom Branded QR Review Standee</li>
-          <li>✅ AI Auto-Reply Review Google Maps</li>
-          <li>✅ Kasir POS Staf Tanpa Batas (Unlimited)</li>
-          <li>✅ Akses Semua Masterclass Edukasi</li>
-          <li>✅ Layanan Prioritas Pendamping Lapangan</li>
-        </ul>
+          <ul class="price-features">
+            <li>✅ Seluruh Fitur Paket Gratis</li>
+            <li>✅ Pandoman Kata Kunci Lokal Google Maps</li>
+            <li>✅ Multi Hak Akses Staf Kasir (Unlimited)</li>
+            <li>✅ AI Auto-Reply Ulasan Google Maps</li>
+            <li>✅ Alert Otomatis WA Pelanggan Churn</li>
+            <li>✅ Custom Branded Standee QR Review</li>
+            <li>✅ Akses Seluruh Masterclass Video</li>
+          </ul>
+        </div>
 
-        <a href="/index.html" class="btn btn-primary" style="width: 100%;">Upgrade ke Premium</a>
+        <a href="/index.html" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Coba Premium 14 Hari</a>
+      </div>
+
+      <!-- Paket Pendampingan Lapangan -->
+      <div class="price-card">
+        <div>
+          <div class="price-title">PENDAMPINGAN LAPANGAN</div>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Layanan Fisik Agen Wilayah (Done-For-You)</p>
+          <div class="price-amount">Rp 99.000 <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: normal;">- 250rb /tugas</span></div>
+
+          <ul class="price-features">
+            <li>✅ Kunjungan Fisik Agen Pendamping Wilayah</li>
+            <li>✅ Verifikasi Lokasi Fisik & Foto Geotag</li>
+            <li>✅ Setup Akrilik Kasir & Poster QR Review</li>
+            <li>✅ Pengambilan Foto Produk Etalase Jernih</li>
+            <li>✅ Garansi Profil Google Maps Terverifikasi</li>
+          </ul>
+        </div>
+
+        <a href="#kontak" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">Pesan Agen Pendamping</a>
       </div>
     </div>
   </section>
@@ -604,7 +737,7 @@
     <div class="contact-grid">
       <div class="contact-info">
         <h3>Informasi Kontak & Layanan Konsultasi</h3>
-        <p>Tim Konsultan Wilayah SuperUMKM siap membantu usaha Anda mendominasi lokasi sekitar. Hubungi kami untuk jadwal pendampingan langsung.</p>
+        <p>Tim Konsultan & Agen Wilayah SuperUMKM siap membantu usaha Anda mendominasi lokasi sekitar. Hubungi kami untuk konsultasi atau jadwal kunjungan langsung.</p>
 
         <div class="contact-card">
           <div class="contact-card-icon">💬</div>
@@ -661,7 +794,7 @@
 
           <div class="form-group">
             <label>Pesan / Pertanyaan Konsultasi</label>
-            <textarea id="contact-msg" class="form-control" rows="3" placeholder="Tuliskan bantuan yang Anda perlukan..." required></textarea>
+            <textarea id="contact-msg" class="form-control" rows="3" placeholder="Tuliskan bantuan atau kendala yang Anda perlukan..." required></textarea>
           </div>
 
           <button type="submit" class="btn btn-primary" style="width: 100%;">
