@@ -139,7 +139,7 @@ router.post('/export-wa', authenticate, (req, res) => {
     `🔴 Total Pengeluaran: Rp ${totalExpense.toLocaleString('id-ID')}\n` +
     `----------------------------------------\n` +
     `💰 *LABA BERSIH*: Rp ${netProfit.toLocaleString('id-ID')} (${netProfit >= 0 ? 'UNTUNG ✅' : 'DEFISIT ⚠️'})\n\n` +
-    `_Diproses via SuperUMKM Cashflow Engine_`;
+    `_Diproses via BenPayu.com Cashflow Engine_`;
 
   const waShareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
 

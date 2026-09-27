@@ -12,11 +12,11 @@ test('Navigation Config - Grouped Categories & 14 Modules Resolution', (t) => {
   const agentMenu = resolveNavigationMenu('FIELD_AGENT', 'FREE');
   const adminMenu = resolveNavigationMenu('SUPER_ADMIN', 'PREMIUM');
 
-  // Verify all 5 categories exist
-  assert.ok(freeMenu.categories.store_operations);
-  assert.ok(freeMenu.categories.finance);
-  assert.ok(freeMenu.categories.marketing);
-  assert.ok(freeMenu.categories.consulting);
+  // Verify 3 Core Hooks categories exist
+  assert.ok(freeMenu.categories.core_hook_1);
+  assert.ok(freeMenu.categories.core_hook_2);
+  assert.ok(freeMenu.categories.core_hook_3);
+  assert.ok(freeMenu.categories.deferred_v2);
   assert.ok(freeMenu.categories.education_admin);
 
   // Quota Limit Assertions
@@ -24,16 +24,21 @@ test('Navigation Config - Grouped Categories & 14 Modules Resolution', (t) => {
   assert.strictEqual(premMenu.metadata.staff_limit, 5);
   assert.strictEqual(cashierMenu.metadata.staff_limit, 0);
 
-  // Cashier Role Menu Filtering Assertions (Staff management, AI copywriting excluded)
-  const cashierFlatIds = cashierMenu.flat_menus.map(m => m.id);
-  assert.strictEqual(cashierFlatIds.includes('staff_management'), false);
-  assert.strictEqual(cashierFlatIds.includes('ai_copywriting'), false);
-  assert.strictEqual(cashierFlatIds.includes('audit_kit'), false);
-  assert.strictEqual(cashierFlatIds.includes('consultation_services'), false);
-  assert.strictEqual(cashierFlatIds.includes('pos_instant'), true);
+  // V1 Core Modules Assertion (Landing Builder & Consultation Services present in Free Menu)
+  const freeFlatIds = freeMenu.flat_menus.map(m => m.id);
+  assert.strictEqual(freeFlatIds.includes('landing_builder'), true);
+  assert.strictEqual(freeFlatIds.includes('consultation_services'), true);
 
-  // Super Admin receives all 14 ecosystem navigation menu items
+  // V2 Deferred Modules Assertion (Restricted to SUPER_ADMIN only)
+  assert.strictEqual(freeFlatIds.includes('wa_loyalty'), false);
+  assert.strictEqual(freeFlatIds.includes('ai_copywriting'), false);
+  assert.strictEqual(freeFlatIds.includes('inventory_stok_bon'), false);
+  assert.strictEqual(freeFlatIds.includes('marketplace_community'), false);
+
+  // Super Admin receives all 14 ecosystem navigation menu items including V2 Deferred
+  const adminFlatIds = adminMenu.flat_menus.map(m => m.id);
   assert.strictEqual(adminMenu.flat_menus.length, 14);
+  assert.strictEqual(adminFlatIds.includes('wa_loyalty'), true);
 });
 
 test('Navigation API - GET /api/v1/users/navigation-menus per Role Token', async (t) => {

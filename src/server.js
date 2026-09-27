@@ -78,7 +78,7 @@ app.get('*', (req, res) => {
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`=======================================================`);
-    console.log(`🚀 SuperUMKM Platform Server running on http://localhost:${PORT}`);
+    console.log(`🚀 BenPayu Platform (benpayu.com) Server running on http://localhost:${PORT}`);
     console.log(`=======================================================`);
   });
 }

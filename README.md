@@ -1,4 +1,4 @@
-# SuperUMKM Platform - AI Business Consultant & Operating System Pendamping Usaha
+# BenPayu.com Platform - AI Business Consultant & Operating System Pendamping Usaha
 
 Platform pendampingan, konsultasi, dan operasional digital terpadu untuk UMKM segmen Menengah-Bawah Indonesia berbasis siklus **CHECK → FIX → GROW** (Deterministic Audit Engine 8 Dimensi, Action Center "Fokus Minggu Ini", Google Maps Optimization, Mini Website & Toko Online Instan, POS Instant & QRIS, Pembukuan P&L, WA Loyalty Engine, Stok & Buku Bon, AI Promo Generator, Marketplace & Komunitas UMKM).
 

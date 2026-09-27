@@ -492,3 +492,262 @@ table.data-table th {
 .tab-content.active {
   display: block;
 }
+
+/* ==========================================================================
+   MOBILE UX & RESPONSIVE ENGINE (Tuned for 360px Android Viewports)
+   ========================================================================== */
+
+/* Touch Target Minimum Height & Safe Ergonomics */
+.btn, .menu-item, .kit-nav-btn, .form-control, select, input {
+  min-height: 44px;
+}
+
+/* Horizontal Scroll Container for Sub-navigation Pills on Mobile */
+.kit-nav-container, .sub-nav-pills {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  scrollbar-width: none;
+}
+.kit-nav-container::-webkit-scrollbar, .sub-nav-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.kit-nav-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Responsive Table Wrapper */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+
+/* Mobile Sidebar Backdrop Drawer Overlay */
+.sidebar-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(11, 15, 25, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 99;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.sidebar-backdrop.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Mobile Floating Bottom Bar for 3 Core Hooks */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: rgba(18, 25, 41, 0.95);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  z-index: 90;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 0.25rem;
+  box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+}
+
+.mobile-bottom-nav .nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.68rem;
+  font-weight: 600;
+  flex: 1;
+  height: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.mobile-bottom-nav .nav-item.active,
+.mobile-bottom-nav .nav-item:active {
+  color: #60a5fa;
+}
+
+.mobile-bottom-nav .nav-item .nav-icon {
+  font-size: 1.15rem;
+}
+
+/* Responsive Breakpoints for Tablet & Mobile (360px Screen Support) */
+@media (max-width: 768px) {
+  body {
+    display: block;
+    overflow-x: hidden;
+  }
+
+  #app-container {
+    flex-direction: column;
+    width: 100vw;
+    overflow-x: hidden;
+  }
+
+  aside.sidebar {
+    position: fixed;
+    top: 0;
+    left: -310px;
+    bottom: 0;
+    width: 280px !important;
+    height: 100vh;
+    z-index: 100;
+    transition: left 0.3s ease;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.7);
+    padding: 1.25rem 1rem;
+  }
+
+  aside.sidebar.mobile-open {
+    left: 0 !important;
+  }
+
+  aside.sidebar.collapsed {
+    width: 280px !important;
+  }
+
+  aside.sidebar.collapsed .brand-text,
+  aside.sidebar.collapsed .role-switcher-card,
+  aside.sidebar.collapsed .menu-title-text,
+  aside.sidebar.collapsed .menu-badge {
+    display: block !important;
+  }
+
+  main.content-area {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 1rem 0.75rem 4.5rem 0.75rem !important;
+    overflow-x: hidden;
+  }
+
+  header.topbar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.85rem;
+  }
+
+  .page-title h1 {
+    font-size: 1.35rem !important;
+  }
+
+  .page-title p {
+    font-size: 0.8rem !important;
+  }
+
+  .mobile-only {
+    display: inline-flex !important;
+  }
+
+  .mobile-bottom-nav {
+    display: flex !important;
+  }
+
+  .grid-2, .grid-3 {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .card {
+    padding: 1.1rem 0.85rem !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .score-number {
+    font-size: 2.75rem !important;
+  }
+
+  .form-control, select, input, button {
+    font-size: 0.88rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  main.content-area {
+    padding: 0.85rem 0.5rem 4.5rem 0.5rem !important;
+  }
+
+  .page-title h1 {
+    font-size: 1.15rem !important;
+  }
+
+  .brand-title {
+    font-size: 1.1rem !important;
+  }
+
+  .score-display-box {
+    padding: 1.25rem 0.75rem !important;
+  }
+
+  .score-number {
+    font-size: 2.25rem !important;
+  }
+
+  .role-switcher-card {
+    padding: 0.75rem !important;
+  }
+
+  .btn {
+    padding: 0.65rem 1rem !important;
+    font-size: 0.82rem !important;
+  }
+}
+
+/* Print Styles Engine for Thermal Struk POS */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #receipt-modal, #receipt-modal .modal-content, #receipt-modal .modal-content * {
+    visibility: visible !important;
+  }
+  #receipt-modal {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+  #receipt-modal .modal-content {
+    border: none !important;
+    box-shadow: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #000000 !important;
+  }
+  .no-print, .close-modal-btn, .mobile-bottom-nav, aside.sidebar, header.topbar {
+    display: none !important;
+  }
+}
+

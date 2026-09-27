@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const { generateSecret, generateURI, verifySync } = require('otplib');
+const qrcode = require('qrcode');
 const db = require('../../shared/database/db');
 const { generateToken, verifyToken } = require('../../shared/utils/jwt');
 const { authenticate, PERMISSION_MATRIX } = require('../../shared/utils/rbac');
@@ -28,6 +30,8 @@ router.post('/register', (req, res) => {
     phone_number,
     full_name,
     role_code: assignedRole,
+    two_factor_enabled: false,
+    subscription_tier: assignedRole === 'UMKM_OWNER_PREMIUM' ? 'PREMIUM' : 'FREE',
     status: 'ACTIVE',
     created_at: new Date().toISOString()
   };
@@ -85,12 +89,189 @@ router.post('/login', (req, res) => {
     return res.status(403).json({ success: false, error: 'Akun Anda sedang tidak aktif' });
   }
 
+  // 2FA Google Authenticator Check
+  if (user.two_factor_enabled && user.two_factor_secret) {
+    return res.json({
+      success: true,
+      requires_2fa: true,
+      phone_number: user.phone_number,
+      message: '🔑 Verifikasi 2FA Google Authenticator Diperlukan. Masukkan Kode 6-Digit.'
+    });
+  }
+
   const token = generateToken({ id: user.id, role_code: user.role_code });
   const permissions = PERMISSION_MATRIX[user.role_code] || [];
 
   return res.json({
     success: true,
     message: 'Login berhasil',
+    data: {
+      user,
+      token,
+      permissions
+    }
+  });
+});
+
+/**
+ * @route POST /api/v1/auth/google
+ * @desc Login or Register via Google OAuth
+ */
+router.post('/google', async (req, res) => {
+  const { email, full_name, google_id } = req.body;
+
+  if (!email && !google_id) {
+    return res.status(400).json({ success: false, error: 'Email atau Google Account wajib diisi' });
+  }
+
+  const userEmail = email || `google_${Date.now()}@gmail.com`;
+  const name = full_name || 'Pengguna Google';
+
+  // Check if user exists by phone or email or id
+  let user = db.users.find(u => u.email === userEmail || u.phone_number === userEmail);
+
+  if (!user) {
+    user = {
+      id: `u-google-${Date.now()}`,
+      phone_number: userEmail,
+      email: userEmail,
+      full_name: name,
+      role_code: 'UMKM_OWNER_FREE',
+      two_factor_enabled: false,
+      subscription_tier: 'FREE',
+      status: 'ACTIVE',
+      created_at: new Date().toISOString()
+    };
+    db.users.push(user);
+
+    if (db.isSupabaseConfigured) {
+      await db.insertToSupabase('users', user);
+    }
+  }
+
+  const token = generateToken({ id: user.id, role_code: user.role_code });
+  const permissions = PERMISSION_MATRIX[user.role_code] || [];
+
+  return res.json({
+    success: true,
+    message: '🔑 Login Google Berhasil',
+    data: {
+      user,
+      token,
+      permissions
+    }
+  });
+});
+
+/**
+ * @route GET /api/v1/auth/me
+ * @desc Verify session & ensure user exists in Table User
+ */
+router.get('/me', authenticate, (req, res) => {
+  const user = db.users.find(u => u.id === req.user.id);
+  if (!user) {
+    return res.status(404).json({ success: false, error: 'User tidak ditemukan di Table User' });
+  }
+
+  return res.json({
+    success: true,
+    data: {
+      user,
+      permissions: PERMISSION_MATRIX[user.role_code] || []
+    }
+  });
+});
+
+/**
+ * @route POST /api/v1/auth/2fa/generate
+ * @desc Generate Google 2FA Secret & QR Code for Authenticator App
+ */
+router.post('/2fa/generate', authenticate, async (req, res) => {
+  try {
+    const secret = generateSecret();
+    const otpauthUrl = generateURI({
+      label: req.user.phone_number || req.user.full_name,
+      issuer: 'BenPayu SuperUMKM',
+      secret
+    });
+    const qrCodeDataUrl = await qrcode.toDataURL(otpauthUrl);
+    req.user.two_factor_temp_secret = secret;
+
+    return res.json({
+      success: true,
+      message: 'QR Code 2FA berhasil dibuat',
+      data: {
+        secret,
+        otpauth_url: otpauthUrl,
+        qr_code_url: qrCodeDataUrl
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: 'Gagal membuat QR Code 2FA: ' + err.message });
+  }
+});
+
+/**
+ * @route POST /api/v1/auth/2fa/verify-setup
+ * @desc Verify initial TOTP 6-digit code to enable 2FA
+ */
+router.post('/2fa/verify-setup', authenticate, async (req, res) => {
+  const { token_code } = req.body;
+  const secret = req.user.two_factor_temp_secret || req.user.two_factor_secret;
+
+  if (!secret || !token_code) {
+    return res.status(400).json({ success: false, error: 'Kode 2FA 6-digit wajib diisi' });
+  }
+
+  const result = verifySync({ token: token_code, secret });
+  if (!result || !result.valid) {
+    return res.status(400).json({ success: false, error: 'Kode 2FA Google Authenticator tidak valid atau kadaluarsa' });
+  }
+
+  req.user.two_factor_secret = secret;
+  req.user.two_factor_enabled = true;
+  delete req.user.two_factor_temp_secret;
+
+  if (db.isSupabaseConfigured) {
+    await db.updateInSupabase('users', req.user.id, {
+      two_factor_secret: secret,
+      two_factor_enabled: true
+    });
+  }
+
+  return res.json({
+    success: true,
+    message: '🎉 Google 2FA Authenticator Berhasil Diaktifkan!'
+  });
+});
+
+/**
+ * @route POST /api/v1/auth/2fa/verify-login
+ * @desc Verify 6-digit 2FA code during login
+ */
+router.post('/2fa/verify-login', async (req, res) => {
+  const { phone_number, token_code } = req.body;
+
+  if (!phone_number || !token_code) {
+    return res.status(400).json({ success: false, error: 'Nomor WhatsApp dan Kode 2FA wajib diisi' });
+  }
+
+  const user = db.users.find(u => u.phone_number === phone_number);
+  if (!user || !user.two_factor_secret) {
+    return res.status(404).json({ success: false, error: 'Pengguna tidak ditemukan atau 2FA belum aktif' });
+  }
+
+  const result = verifySync({ token: token_code, secret: user.two_factor_secret });
+  if (!result || !result.valid) {
+    return res.status(401).json({ success: false, error: 'Kode 2FA Google Authenticator salah atau kadaluarsa' });
+  }
+
+  const token = generateToken({ id: user.id, role_code: user.role_code });
+  const permissions = PERMISSION_MATRIX[user.role_code] || [];
+
+  return res.json({
+    success: true,
+    message: 'Verifikasi 2FA berhasil! Selamat datang kembali',
     data: {
       user,
       token,

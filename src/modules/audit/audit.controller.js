@@ -65,7 +65,7 @@ router.post('/evaluate', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_O
         action_tab_id: 'gmaps-tab',
         action_button_label: '⚠️ Perbaiki Data NAP Sekarang',
         steps: [
-          'Langkah 1: Periksa nomor HP & alamat lengkap toko di database SuperUMKM.',
+          'Langkah 1: Periksa nomor HP & alamat lengkap toko di database BenPayu.com.',
           'Langkah 2: Samakan dengan informasi kontak di Google Business Profile.',
           'Langkah 3: Simpan dan verifikasi kembali status konsistensi NAP.'
         ]
@@ -94,7 +94,7 @@ router.post('/evaluate', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_O
       steps: [
         'Langkah 1: Buka aplikasi Google Maps, cari nama toko Anda lalu klik "Klaim Bisnis Ini".',
         'Langkah 2: Lakukan verifikasi via SMS/WA ke nomor HP toko.',
-        'Langkah 3: Cetak QR Code Ulasan dari SuperUMKM dan letakkan di meja kasir.'
+        'Langkah 3: Cetak QR Code Ulasan dari BenPayu.com dan letakkan di meja kasir.'
       ]
     });
   }
@@ -230,7 +230,7 @@ router.post('/evaluate', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_O
       action_button_label: '💬 Tautkan WhatsApp Business',
       steps: [
         'Langkah 1: Unduh aplikasi WhatsApp Business gratis di smartphone.',
-        'Langkah 2: Masukkan nomor WA toko Anda ke form Toko Online SuperUMKM.',
+        'Langkah 2: Masukkan nomor WA toko Anda ke form Toko Online BenPayu.com.',
         'Langkah 3: Atur salam otomatis di WA Business untuk menyapa pembeli.'
       ]
     });
@@ -268,7 +268,7 @@ router.post('/evaluate', authenticate, authorizeRoles('UMKM_OWNER_FREE', 'UMKM_O
       action_tab_id: 'pos-tab',
       action_button_label: '📱 Buka Mesin Kasir & QRIS',
       steps: [
-        'Langkah 1: Buka modul Mesin Kasir & QRIS di SuperUMKM.',
+        'Langkah 1: Buka modul Mesin Kasir & QRIS di BenPayu.com.',
         'Langkah 2: Pilih pembayaran QRIS saat checkout kasir.',
         'Langkah 3: Tampilkan QR Code di layar HP/tablet agar di-scan pelanggan.'
       ]

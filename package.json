@@ -1,7 +1,7 @@
 {
-  "name": "super-umkm-platform",
+  "name": "benpayu-platform",
   "version": "1.0.0",
-  "description": "Platform Pendampingan dan Konsultasi Digital UMKM Segmen Menengah-Bawah",
+  "description": "Platform Pendampingan dan Konsultasi Digital UMKM Segmen Menengah-Bawah - BenPayu.com",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -9,11 +9,22 @@
     "test": "node --test"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "@supabase/supabase-js": "^2.117.2",
     "cors": "^2.8.5",
-    "jsonwebtoken": "^9.0.2"
+    "dotenv": "^18.0.4",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "otplib": "^13.5.0",
+    "qrcode": "^1.5.4"
   },
-  "keywords": ["umkm", "gmaps", "qr-review", "landing-builder", "consultant"],
-  "author": "Antigravity SuperUMKM Team",
+  "keywords": [
+    "benpayu",
+    "umkm",
+    "gmaps",
+    "qr-review",
+    "landing-builder",
+    "consultant"
+  ],
+  "author": "BenPayu Team",
   "license": "MIT"
 }

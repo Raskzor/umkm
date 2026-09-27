@@ -20,7 +20,7 @@ router.get('/', authenticate, authorizeRoles('SUPER_ADMIN'), (req, res) => {
 
     const docsData = {
       system_overview: {
-        title: 'SuperUMKM Platform Architecture & Tech Stack',
+        title: 'BenPayu.com Platform Architecture & Tech Stack',
         runtime: 'Node.js (v18+), Express.js REST Framework',
         frontend: 'HTML5, Glassmorphism CSS System, Vanilla JS Async Engine',
         database: 'PostgreSQL Compatible Schema (Knex / DDL SQL)',

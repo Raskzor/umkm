@@ -75,7 +75,7 @@ router.post('/courses', authenticate, authorizeRoles('SUPER_ADMIN'), (req, res) 
   if (formattedSteps.length === 0) {
     formattedSteps = [
       'Langkah 1: Tonton video panduan sampai selesai.',
-      'Langkah 2: Buka menu modul terkait pada sistem SuperUMKM.',
+      'Langkah 2: Buka menu modul terkait pada sistem BenPayu.com.',
       'Langkah 3: Praktikkan panduan pada bisnis UMKM Anda.'
     ];
   }
@@ -83,7 +83,7 @@ router.post('/courses', authenticate, authorizeRoles('SUPER_ADMIN'), (req, res) 
   const newTutorial = {
     id: `tut-${Date.now()}`,
     title,
-    description: description || 'Tutorial strategi & tips praktis ekosistem SuperUMKM.',
+    description: description || 'Tutorial strategi & tips praktis ekosistem BenPayu.com.',
     module_category: module_category || 'Strategi Usaha',
     video_url,
     embed_url,

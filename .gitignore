@@ -1,3 +1,14 @@
+# Dependency directories
 node_modules/
+
+# Logs & Environment files (SECURITY CRITICAL: NEVER COMMIT ACTIVE .env FILES)
 *.log
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# System files
 .DS_Store
+Thumbs.db

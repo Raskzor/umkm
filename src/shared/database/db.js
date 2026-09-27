@@ -340,7 +340,7 @@ class Database {
         id: 'qris-1001',
         owner_id: userFreeId,
         amount: 101000,
-        qr_string: '00020101021126620016ID.CO.QRIS.WWW011893600911000000000052045411530336054061010005802ID5913SuperUMKM Shop6007Jakarta6304A1B2',
+        qr_string: '00020101021126620016ID.CO.QRIS.WWW011893600911000000000052045411530336054061010005802ID5911BenPayu Shop6007Jakarta6304A1B2',
         qr_code_svg: 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=QRIS_DEMO_101000',
         status: 'SUCCESS', // PAID
         paid_at: new Date().toISOString(),
@@ -348,7 +348,30 @@ class Database {
       }
     ];
   }
+
+  // Supabase Async CRUD Helpers
+  async findInSupabase(tableName, query = {}) {
+    return await supabaseDb.selectAll(tableName, query);
+  }
+
+  async insertToSupabase(tableName, data) {
+    return await supabaseDb.insert(tableName, data);
+  }
+
+  async updateInSupabase(tableName, id, updates) {
+    return await supabaseDb.update(tableName, id, updates);
+  }
+
+  async deleteFromSupabase(tableName, id) {
+    return await supabaseDb.delete(tableName, id);
+  }
 }
 
 const db = new Database();
+const { supabase, supabaseDb, isSupabaseConfigured } = require('./supabaseClient');
+
+db.supabase = supabase;
+db.supabaseDb = supabaseDb;
+db.isSupabaseConfigured = isSupabaseConfigured;
+
 module.exports = db;

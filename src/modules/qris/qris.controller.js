@@ -16,7 +16,7 @@ router.post('/generate', authenticate, (req, res) => {
 
   const ownerId = req.user.role_code === 'CASHIER' ? (req.user.owner_id || req.user.id) : req.user.id;
   const business = db.businessProfiles.find(b => b.user_id === ownerId);
-  const bizName = business ? business.business_name : 'SuperUMKM Merchant';
+  const bizName = business ? business.business_name : 'BenPayu Merchant';
 
   const txId = transaction_id || `qris-${Date.now()}`;
   const totalAmount = Number(amount) || 0;

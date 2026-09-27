@@ -118,7 +118,7 @@ router.post('/tasks/:id/evidence', authenticate, authorizeRoles('FIELD_AGENT', '
     return res.status(404).json({ success: false, error: 'Task pendampingan tidak ditemukan' });
   }
 
-  task.proof_evidence_url = proof_evidence_url || `https://geotag-evidence.superumkm.id/proof-${Date.now()}.jpg`;
+  task.proof_evidence_url = proof_evidence_url || `https://geotag-evidence.benpayu.com/proof-${Date.now()}.jpg`;
   task.geotag_location = {
     latitude: latitude || -6.2088,
     longitude: longitude || 106.8456,

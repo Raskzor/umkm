@@ -1,4 +1,4 @@
-// SuperUMKM Client Portal & Interactive Engine
+// BenPayu.com Client Portal & Interactive Engine
 let currentRole = 'UMKM_OWNER_FREE';
 let userToken = '';
 let currentRecommendations = [];
@@ -13,82 +13,276 @@ const roleUsers = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  switchRole('UMKM_OWNER_FREE');
   initProductInputs();
+  checkAuthSession();
 });
 
-function initProductInputs() {
-  const container = document.getElementById('product-inputs-container');
-  if (!container) return;
-  container.innerHTML = '';
-  addNewProductInput('Minyak Goreng 2L', 'Rp 34.000', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400', 'Kemasan hemat & original');
-  addNewProductInput('Beras Premium 5kg', 'Rp 72.000', 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400', 'Beras putih pulen pilihan');
-}
+async function checkAuthSession() {
+  const savedToken = localStorage.getItem('benpayu_token');
+  const savedUser = localStorage.getItem('benpayu_user');
 
-function addNewProductInput(name = '', price = '', img = '', desc = '') {
-  const container = document.getElementById('product-inputs-container');
-  if (!container) return;
+  if (!savedToken || !savedUser) {
+    window.location.href = '/login.html';
+    return;
+  }
 
-  const itemIndex = container.children.length + 1;
-  const row = document.createElement('div');
-  row.className = 'product-input-row';
-  row.style.cssText = 'background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.15); padding: 0.85rem; border-radius: 10px; margin-bottom: 0.75rem;';
-  
-  row.innerHTML = `
-    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.5rem;">
-      <span>Produk #${itemIndex}</span>
-      ${itemIndex > 1 ? `<span style="color: #f87171; cursor: pointer;" onclick="this.parentElement.parentElement.remove()">✕ Hapus Produk</span>` : ''}
-    </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem;">
-      <input type="text" class="form-control prod-name" placeholder="Nama Produk" value="${name}">
-      <input type="text" class="form-control prod-price" placeholder="Harga (Contoh: Rp 25.000)" value="${price}">
-    </div>
-    <div style="margin-bottom: 0.5rem;">
-      <label style="font-size: 0.75rem; color: #94a3b8;">📷 Upload Foto Produk dari HP / Galeri:</label>
-      <input type="file" accept="image/*" class="form-control" style="margin-top: 0.2rem; font-size: 0.8rem;" onchange="handleProductFileUpload(this)">
-    </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-      <input type="text" class="form-control prod-img" placeholder="URL Foto / Result Data" value="${img}">
-      <input type="text" class="form-control prod-desc" placeholder="Deskripsi Singkat" value="${desc}">
-    </div>
-  `;
-  container.appendChild(row);
-}
+  try {
+    userToken = savedToken;
+    const parsedUser = JSON.parse(savedUser);
+    
+    // Verify session token against backend Table User
+    const res = await fetch('/api/v1/auth/me', {
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const data = await res.json();
 
-// Handle Direct File Upload for Banner
-function handleBannerFileUpload(input) {
-  if (input.files && input.files[0]) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const dataUrl = e.target.result;
-      document.getElementById('landing-banner').value = dataUrl;
-      const preview = document.getElementById('preview-banner-box');
-      if (preview) preview.style.backgroundImage = `url('${dataUrl}')`;
-    };
-    reader.readAsDataURL(input.files[0]);
+    if (data.success && data.data.user) {
+      currentRole = data.data.user.role_code || 'UMKM_OWNER_FREE';
+      localStorage.setItem('benpayu_user', JSON.stringify(data.data.user));
+      localStorage.setItem('benpayu_role', currentRole);
+      await applyUserSession(data.data.user);
+      hideAuthGate();
+    } else {
+      // User not in Table User -> clear session & redirect to login page
+      localStorage.removeItem('benpayu_token');
+      localStorage.removeItem('benpayu_user');
+      localStorage.removeItem('benpayu_role');
+      window.location.href = '/login.html';
+    }
+  } catch (e) {
+    console.error('Session validation fallback:', e);
+    try {
+      const parsedUser = JSON.parse(savedUser);
+      applyUserSession(parsedUser);
+      hideAuthGate();
+    } catch (err) {
+      window.location.href = '/login.html';
+    }
   }
 }
 
-// Handle Direct File Upload for Product Photo
-function handleProductFileUpload(input) {
-  if (input.files && input.files[0]) {
-    const row = input.closest('.product-input-row');
-    if (!row) return;
-    const urlInput = row.querySelector('.prod-img');
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const dataUrl = e.target.result;
-      if (urlInput) urlInput.value = dataUrl;
-    };
-    reader.readAsDataURL(input.files[0]);
+function showAuthGate() {
+  const modal = document.getElementById('auth-gate-modal');
+  if (modal) modal.classList.add('active');
+}
+
+function hideAuthGate() {
+  const modal = document.getElementById('auth-gate-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+function switchAuthGateTab(tab) {
+  const loginForm = document.getElementById('auth-gate-login-form');
+  const regForm = document.getElementById('auth-gate-register-form');
+  const loginBtn = document.getElementById('gate-tab-login-btn');
+  const regBtn = document.getElementById('gate-tab-register-btn');
+
+  if (!loginForm || !regForm) return;
+
+  if (tab === 'login') {
+    loginForm.style.display = 'block';
+    regForm.style.display = 'none';
+    loginBtn.style.background = 'var(--primary)';
+    loginBtn.style.color = '#fff';
+    regBtn.style.background = 'rgba(255,255,255,0.08)';
+    regBtn.style.color = '#cbd5e1';
+  } else {
+    loginForm.style.display = 'none';
+    regForm.style.display = 'block';
+    regBtn.style.background = 'var(--primary)';
+    regBtn.style.color = '#fff';
+    loginBtn.style.background = 'rgba(255,255,255,0.08)';
+    loginBtn.style.color = '#cbd5e1';
   }
 }
 
-function setBannerPreset(url) {
-  const input = document.getElementById('landing-banner');
-  if (input) input.value = url;
-  const preview = document.getElementById('preview-banner-box');
-  if (preview) preview.style.backgroundImage = `url('${url}')`;
+async function handleGateLogin(e) {
+  if (e) e.preventDefault();
+  const phone = document.getElementById('gate-login-phone').value.trim();
+  if (!phone) return alert('Masukkan nomor WhatsApp / HP terdaftar');
+
+  try {
+    const res = await fetch('/api/v1/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone_number: phone })
+    });
+    const data = await res.json();
+    if (!data.success) {
+      return alert(data.error || 'Login gagal. Silakan daftar jika belum memiliki akun.');
+    }
+
+    if (data.requires_2fa) {
+      pending2FAPhone = data.phone_number;
+      document.getElementById('two-factor-login-modal').classList.add('active');
+      return;
+    }
+
+    userToken = data.data.token;
+    const user = data.data.user;
+    localStorage.setItem('benpayu_token', userToken);
+    localStorage.setItem('benpayu_user', JSON.stringify(user));
+    localStorage.setItem('benpayu_role', user.role_code);
+
+    await applyUserSession(user);
+    hideAuthGate();
+  } catch (err) {
+    console.error('Gate Login Error:', err);
+    alert('Terjadi kesalahan koneksi server');
+  }
+}
+
+async function handleGateRegister(e) {
+  if (e) e.preventDefault();
+  const fullName = document.getElementById('gate-reg-name').value.trim();
+  const phone = document.getElementById('gate-reg-phone').value.trim();
+  const businessName = document.getElementById('gate-reg-business').value.trim();
+  const category = document.getElementById('gate-reg-category').value;
+
+  if (!fullName || !phone || !businessName) {
+    return alert('Mohon lengkapi Nama, Nomor HP, dan Nama Usaha Anda');
+  }
+
+  try {
+    const res = await fetch('/api/v1/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        full_name: fullName,
+        phone_number: phone,
+        business_name: businessName,
+        category: category,
+        role_code: 'UMKM_OWNER_FREE'
+      })
+    });
+    const data = await res.json();
+    if (!data.success) {
+      return alert(data.error || 'Pendaftaran gagal');
+    }
+
+    userToken = data.data.token;
+    const user = data.data.user;
+    localStorage.setItem('benpayu_token', userToken);
+    localStorage.setItem('benpayu_user', JSON.stringify(user));
+    localStorage.setItem('benpayu_role', user.role_code);
+
+    alert(`Selamat Datang, ${user.full_name}! Pendaftaran berhasil.`);
+    await applyUserSession(user);
+    hideAuthGate();
+  } catch (err) {
+    console.error('Gate Register Error:', err);
+    alert('Terjadi kesalahan koneksi server');
+  }
+}
+
+async function quickGateLogin(roleKey) {
+  await switchRole(roleKey);
+  hideAuthGate();
+}
+
+function handleLogout() {
+  localStorage.removeItem('benpayu_token');
+  localStorage.removeItem('benpayu_user');
+  localStorage.removeItem('benpayu_role');
+  userToken = '';
+  window.location.href = '/login.html';
+}
+
+function openSubscriptionModal() {
+  const modal = document.getElementById('subscription-modal');
+  if (modal) modal.classList.add('active');
+}
+
+function closeSubscriptionModal() {
+  const modal = document.getElementById('subscription-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+async function handleSubscribePremium() {
+  if (!userToken) {
+    alert('Silakan login terlebih dahulu');
+    showAuthGate();
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/v1/users/subscribe', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify({ plan_tier: 'PREMIUM', payment_method: 'QRIS' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      userToken = data.data.token;
+      const user = data.data.user;
+      localStorage.setItem('benpayu_token', userToken);
+      localStorage.setItem('benpayu_user', JSON.stringify(user));
+      localStorage.setItem('benpayu_role', user.role_code);
+
+      alert(data.message || '🎉 Upgrade SaaS PREMIUM Berhasil!');
+      closeSubscriptionModal();
+      await applyUserSession(user);
+    } else {
+      alert(data.error || 'Upgrade gagal');
+    }
+  } catch (err) {
+    console.error('Subscribe error:', err);
+    alert('Terjadi kesalahan koneksi server');
+  }
+}
+
+async function applyUserSession(user) {
+  currentRole = user.role_code || 'UMKM_OWNER_FREE';
+
+  // Update role select dropdown if present
+  const roleSelect = document.getElementById('role-select');
+  if (roleSelect) roleSelect.value = currentRole;
+
+  // Update header user display
+  const nameEl = document.getElementById('user-display-name');
+  const phoneEl = document.getElementById('user-display-phone');
+  if (nameEl) nameEl.innerText = user.full_name || user.name || 'User';
+  if (phoneEl) phoneEl.innerText = user.phone_number || user.phone || '-';
+
+  // Update role badge
+  const badgeEl = document.getElementById('role-badge-display');
+  if (badgeEl) {
+    const badgeInfo = roleUsers[currentRole] || { badge: 'free', badgeText: currentRole };
+    badgeEl.className = `role-badge ${badgeInfo.badge}`;
+    badgeEl.innerText = badgeInfo.badgeText;
+  }
+
+  // Toggle "Upgrade Premium" button: ONLY visible if user role is UMKM_OWNER_FREE or tier is FREE
+  const upgradeBtn = document.getElementById('topbar-upgrade-btn');
+  if (upgradeBtn) {
+    const isFreeUser = (currentRole === 'UMKM_OWNER_FREE') || (user.subscription_tier === 'FREE');
+    upgradeBtn.style.display = isFreeUser ? 'inline-flex' : 'none';
+  }
+
+  // Toggle IT System Admin documentation menu
+  const docsMenuEl = document.getElementById('menu-item-docs');
+  if (docsMenuEl) {
+    if (currentRole === 'SUPER_ADMIN') {
+      docsMenuEl.style.display = 'flex';
+    } else {
+      docsMenuEl.style.display = 'none';
+      const docsTabEl = document.getElementById('docs-tab');
+      if (docsTabEl && docsTabEl.classList.contains('active')) {
+        switchTab('audit-tab');
+      }
+    }
+  }
+
+  // Fetch dynamic navigation menu & load module data
+  await loadDynamicNavigationMenu();
+  handleAuditEvaluateDefault();
+  loadTasks();
+  loadCourses();
+  loadPOSData();
+  loadKitStateFromBackend();
 }
 
 // Role Switcher for Interactive Testing
@@ -105,11 +299,146 @@ async function switchRole(roleKey) {
     });
     const data = await res.json();
     if (data.success) {
+      if (data.requires_2fa) {
+        pending2FAPhone = data.phone_number;
+        document.getElementById('two-factor-login-modal').classList.add('active');
+        return;
+      }
       userToken = data.data.token;
+      const apiUser = data.data.user;
+      localStorage.setItem('benpayu_token', userToken);
+      localStorage.setItem('benpayu_user', JSON.stringify(apiUser));
+      localStorage.setItem('benpayu_role', apiUser.role_code);
+      await applyUserSession(apiUser);
+      return;
     }
   } catch (err) {
     console.error('Login error:', err);
   }
+
+  // Fallback if offline/mock
+  const localUserObj = {
+    full_name: user.name,
+    phone_number: user.phone,
+    role_code: user.role,
+    subscription_tier: roleKey === 'UMKM_OWNER_PREMIUM' ? 'PREMIUM' : 'FREE'
+  };
+  localStorage.setItem('benpayu_role', roleKey);
+  localStorage.setItem('benpayu_user', JSON.stringify(localUserObj));
+  await applyUserSession(localUserObj);
+}
+
+// Google 2FA Authenticator Setup & Login Handlers
+let pending2FAPhone = '';
+
+async function open2FASetupModal() {
+  if (!userToken) return alert('Silakan login terlebih dahulu');
+  try {
+    const res = await fetch('/api/v1/auth/2fa/generate', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${userToken}` }
+    });
+    const result = await res.json();
+    if (result.success) {
+      document.getElementById('2fa-qr-container').innerHTML = `<img src="${result.data.qr_code_url}" style="width: 180px; height: 180px;">`;
+      document.getElementById('2fa-secret-text').innerText = result.data.secret;
+      document.getElementById('2fa-setup-modal').classList.add('active');
+    } else {
+      alert(result.error || 'Gagal membuat QR Code 2FA');
+    }
+  } catch (err) {
+    console.error('2FA setup error:', err);
+  }
+}
+
+function close2FASetupModal() {
+  const modal = document.getElementById('2fa-setup-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+async function handleVerify2FASetup(e) {
+  e.preventDefault();
+  const tokenCode = document.getElementById('2fa-setup-code-input').value.trim();
+  try {
+    const res = await fetch('/api/v1/auth/2fa/verify-setup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify({ token_code: tokenCode })
+    });
+    const result = await res.json();
+    if (result.success) {
+      alert(result.message);
+      close2FASetupModal();
+    } else {
+      alert(`⚠️ ${result.error}`);
+    }
+  } catch (err) {
+    console.error('Verify 2FA setup error:', err);
+  }
+}
+
+async function handleVerify2FALogin(e) {
+  e.preventDefault();
+  const tokenCode = document.getElementById('2fa-login-code-input').value.trim();
+  try {
+    const res = await fetch('/api/v1/auth/2fa/verify-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone_number: pending2FAPhone, token_code: tokenCode })
+    });
+    const result = await res.json();
+    if (result.success) {
+      userToken = result.data.token;
+      document.getElementById('two-factor-login-modal').classList.remove('active');
+      alert('🔓 Login 2FA Berhasil! Selamat datang di Dashboard.');
+      loadDynamicNavigationMenu();
+    } else {
+      alert(`⚠️ ${result.error}`);
+    }
+  } catch (err) {
+    console.error('Verify 2FA login error:', err);
+  }
+}
+
+// Subscription Plan & Upgrade Handlers
+function openSubscriptionModal() {
+  const modal = document.getElementById('subscription-modal');
+  if (modal) modal.classList.add('active');
+}
+
+function closeSubscriptionModal() {
+  const modal = document.getElementById('subscription-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+async function handleSubscribePremium() {
+  if (!userToken) return alert('Silakan login terlebih dahulu');
+  try {
+    const res = await fetch('/api/v1/users/subscribe', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
+      },
+      body: JSON.stringify({ plan_tier: 'PREMIUM', payment_method: 'QRIS' })
+    });
+    const result = await res.json();
+    if (result.success) {
+      userToken = result.data.token;
+      currentRole = 'UMKM_OWNER_PREMIUM';
+      alert(result.message);
+      closeSubscriptionModal();
+      switchRole('UMKM_OWNER_PREMIUM');
+    } else {
+      alert(result.error || 'Gagal melakukan upgrade langganan');
+    }
+  } catch (err) {
+    console.error('Subscribe error:', err);
+  }
+}
 
   // Update Header UI
   document.getElementById('user-display-name').innerText = user.name;
@@ -165,6 +494,24 @@ async function loadDynamicNavigationMenu() {
 
 let isSidebarCollapsed = false;
 let collapsedCategories = {};
+let isMobileSidebarOpen = false;
+
+function toggleMobileSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!sidebar) return;
+  isMobileSidebarOpen = !isMobileSidebarOpen;
+  sidebar.classList.toggle('mobile-open', isMobileSidebarOpen);
+  if (backdrop) backdrop.classList.toggle('active', isMobileSidebarOpen);
+}
+
+function closeMobileSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  isMobileSidebarOpen = false;
+  if (sidebar) sidebar.classList.remove('mobile-open');
+  if (backdrop) backdrop.classList.remove('active');
+}
 
 function toggleSidebarCollapse() {
   const sidebar = document.querySelector('.sidebar');
@@ -257,8 +604,31 @@ function renderDynamicNavigationSidebar(resolvedData) {
 
 // Navigation Tabs
 function switchTab(tabId, el) {
+  closeMobileSidebar();
+
+  // RBAC Protection: Deferred V2 Modules accessible by Super Admin only
+  const deferredV2Tabs = ['loyalty-tab', 'copywriting-tab', 'inventory-tab'];
+  if (deferredV2Tabs.includes(tabId) && currentRole !== 'SUPER_ADMIN') {
+    alert('🔒 Modul Lanjutan (v2.0) ini ditunda untuk perilisan awal dan hanya dapat diakses oleh Super Admin.');
+    switchTab('audit-tab');
+    return;
+  }
+
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+
+  // Sync Mobile Bottom Nav active state
+  document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(item => item.classList.remove('active'));
+  if (tabId === 'audit-tab' || tabId === 'gmaps-tab' || tabId === 'landing-tab') {
+    const mob = document.getElementById('mob-nav-audit');
+    if (mob) mob.classList.add('active');
+  } else if (tabId === 'pos-tab' || tabId === 'staff-tab') {
+    const mob = document.getElementById('mob-nav-pos');
+    if (mob) mob.classList.add('active');
+  } else if (tabId === 'cashflow-tab' || tabId === 'loyalty-tab') {
+    const mob = document.getElementById('mob-nav-cashflow');
+    if (mob) mob.classList.add('active');
+  }
 
   const targetTab = document.getElementById(tabId);
   if (targetTab) {
@@ -531,7 +901,7 @@ function openCourseDetailByIndex(index) {
   // Render Step-by-Step Action Guide Cards
   const stepsBox = document.getElementById('modal-steps-container');
   const steps = rec.steps || [
-    { num: 1, title: 'Buka Fitur Terkait', desc: 'Akses menu fitur di platform SuperUMKM.' },
+    { num: 1, title: 'Buka Fitur Terkait', desc: 'Akses menu fitur di platform BenPayu.com.' },
     { num: 2, title: 'Masukkan Data Toko', desc: 'Isi informasi toko Anda dengan teliti.' },
     { num: 3, title: 'Simpan & Publikasikan', desc: 'Selesaikan dan terbitkan perubahan Anda.' }
   ];
@@ -575,7 +945,7 @@ function openCourseDetail(courseId, title, description) {
       <div style="width: 28px; height: 28px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; color: #ffffff;">2</div>
       <div>
         <div style="font-weight: 700; font-size: 0.9rem; color: #ffffff;">Praktekkan Pada Toko Anda</div>
-        <div style="font-size: 0.82rem; color: #94a3b8;">Gunakan alat bantu generator di SuperUMKM untuk mempermudah pengerjaan.</div>
+        <div style="font-size: 0.82rem; color: #94a3b8;">Gunakan alat bantu generator di BenPayu.com untuk mempermudah pengerjaan.</div>
       </div>
     </div>
   `;
@@ -929,7 +1299,7 @@ async function loadCourses() {
         const embedUrl = course.embed_url || course.video_url || 'https://www.youtube.com/embed/dQw4w9WgXcQ';
         const steps = course.steps || [
           'Langkah 1: Tonton video panduan sampai selesai.',
-          'Langkah 2: Buka menu modul terkait pada sistem SuperUMKM.',
+          'Langkah 2: Buka menu modul terkait pada sistem BenPayu.com.',
           'Langkah 3: Praktikkan panduan pada bisnis UMKM Anda.'
         ];
 
@@ -951,7 +1321,7 @@ async function loadCourses() {
                 <span class="role-badge ${course.minimum_tier === 'PREMIUM' ? 'admin' : 'free'}" style="font-size: 0.65rem;">${course.minimum_tier}</span>
               </div>
               <div style="font-size: 0.95rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.3rem;">${course.title}</div>
-              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">${course.description || 'Tutorial strategi & tips praktis ekosistem SuperUMKM.'}</p>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">${course.description || 'Tutorial strategi & tips praktis ekosistem BenPayu.com.'}</p>
               
               <!-- Step-By-Step Action Guidelines for Owners -->
               <div style="background: rgba(15, 23, 42, 0.9); padding: 0.75rem; border-radius: 8px; border: 1px dashed rgba(59, 130, 246, 0.3); margin-bottom: 0.75rem;">
@@ -1371,6 +1741,11 @@ async function triggerMockQrisVerify() {
   }
 }
 
+function setReceiptText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = text;
+}
+
 function showReceiptModal(receipt) {
   const modal = document.getElementById('receipt-modal');
   if (!modal) return;
@@ -1379,25 +1754,16 @@ function showReceiptModal(receipt) {
   const dateStr = createdDate.toISOString().split('T')[0];
   const timeStr = createdDate.toTimeString().split(' ')[0];
 
-  document.getElementById('receipt-biz-name').innerText = receipt.business_name || 'Karis Jaya Shop';
-  const bizAddrEl = document.getElementById('receipt-biz-addr');
-  if (bizAddrEl) bizAddrEl.innerText = receipt.business_address || 'Jl. Dr. Ir. H. Soekarno No.19,Medokan Semampir Surabaya';
-  const bizPhoneEl = document.getElementById('receipt-biz-phone');
-  if (bizPhoneEl) bizPhoneEl.innerText = `No. Telp ${receipt.business_phone || '0812345678'}`;
-  document.getElementById('receipt-tx-id').innerText = receipt.receipt_no || receipt.id || '16413520230802084636';
-
-  const dateDateEl = document.getElementById('receipt-date-date');
-  if (dateDateEl) dateDateEl.innerText = dateStr;
-  const dateTimeEl = document.getElementById('receipt-date-time');
-  if (dateTimeEl) dateTimeEl.innerText = timeStr;
-
-  document.getElementById('receipt-cashier-name').innerText = receipt.cashier_name || 'karis';
-  const custNameEl = document.getElementById('receipt-customer-name');
-  if (custNameEl) custNameEl.innerText = receipt.customer_name || 'Sheila';
-  const custAddrEl = document.getElementById('receipt-customer-addr');
-  if (custAddrEl) custAddrEl.innerText = receipt.customer_address || 'Jl. Diponegoro 1, Sby';
-  const queueNoEl = document.getElementById('receipt-queue-no');
-  if (queueNoEl) queueNoEl.innerText = receipt.queue_no || 'No.0-3';
+  setReceiptText('receipt-biz-name', receipt.business_name || 'Karis Jaya Shop');
+  setReceiptText('receipt-biz-addr', receipt.business_address || 'Jl. Dr. Ir. H. Soekarno No.19,Medokan Semampir Surabaya');
+  setReceiptText('receipt-biz-phone', `No. Telp ${receipt.business_phone || '0812345678'}`);
+  setReceiptText('receipt-tx-id', receipt.receipt_no || receipt.id || '16413520230802084636');
+  setReceiptText('receipt-date-date', dateStr);
+  setReceiptText('receipt-date-time', timeStr);
+  setReceiptText('receipt-cashier-name', receipt.cashier_name || 'karis');
+  setReceiptText('receipt-customer-name', receipt.customer_name || 'Pelanggan Toko');
+  setReceiptText('receipt-customer-addr', receipt.customer_address || 'Toko Umum');
+  setReceiptText('receipt-queue-no', receipt.queue_no || 'No.0-1');
 
   const itemsContainer = document.getElementById('receipt-items-container');
   if (itemsContainer) {
@@ -1413,22 +1779,12 @@ function showReceiptModal(receipt) {
   }
 
   const totalQty = receipt.total_qty || (receipt.items || []).reduce((acc, i) => acc + (i.qty || 1), 0);
-  const totalQtyEl = document.getElementById('receipt-total-qty');
-  if (totalQtyEl) totalQtyEl.innerText = totalQty;
-
-  const subtotalValEl = document.getElementById('receipt-subtotal-val');
-  if (subtotalValEl) subtotalValEl.innerText = `Rp ${(receipt.subtotal || receipt.total_amount || 0).toLocaleString('id-ID')}`;
-  
-  const totalValEl = document.getElementById('receipt-total-val');
-  if (totalValEl) totalValEl.innerText = `Rp ${(receipt.total_amount || 0).toLocaleString('id-ID')}`;
-
-  document.getElementById('receipt-pay-method').innerText = receipt.payment_method || 'Cash';
-
-  const paidValEl = document.getElementById('receipt-paid-val');
-  if (paidValEl) paidValEl.innerText = `Rp ${(receipt.paid_amount || receipt.total_amount || 0).toLocaleString('id-ID')}`;
-
-  const changeValEl = document.getElementById('receipt-change-val');
-  if (changeValEl) changeValEl.innerText = `Rp ${(receipt.change_amount || 0).toLocaleString('id-ID')}`;
+  setReceiptText('receipt-total-qty', totalQty);
+  setReceiptText('receipt-subtotal-val', `Rp ${(receipt.subtotal || receipt.total_amount || 0).toLocaleString('id-ID')}`);
+  setReceiptText('receipt-total-val', `Rp ${(receipt.total_amount || 0).toLocaleString('id-ID')}`);
+  setReceiptText('receipt-pay-method', receipt.payment_method || 'Cash');
+  setReceiptText('receipt-paid-val', `Rp ${(receipt.paid_amount || receipt.total_amount || 0).toLocaleString('id-ID')}`);
+  setReceiptText('receipt-change-val', `Rp ${(receipt.change_amount || 0).toLocaleString('id-ID')}`);
 
   modal.classList.add('active');
 }
@@ -2107,7 +2463,7 @@ function exportKitSummaryHTML() {
     <html lang="id">
     <head>
       <meta charset="utf-8">
-      <title>Laporan Kit Lokal Naik Kelas — SuperUMKM</title>
+      <title>Laporan Kit Lokal Naik Kelas — BenPayu.com</title>
       <style>
         body { font-family: system-ui, sans-serif; max-width: 800px; margin: auto; padding: 2rem; color: #1e293b; line-height: 1.6; }
         h1, h2 { color: #0f172a; }

@@ -4,168 +4,187 @@
  */
 
 const NAVIGATION_CATEGORIES = {
-  store_operations: {
-    id: 'store_operations',
-    title: 'Operasional Toko & Kasir',
+  core_hook_1: {
+    id: 'core_hook_1',
+    title: '1. Audit & Optimasi Google Maps (Pintu Masuk)',
+    icon: '🎯'
+  },
+  core_hook_2: {
+    id: 'core_hook_2',
+    title: '2. Kasir POS & QRIS Instan (Transaksi)',
     icon: '🛒'
   },
-  finance: {
-    id: 'finance',
-    title: 'Keuangan & Laba Rugi',
+  core_hook_3: {
+    id: 'core_hook_3',
+    title: '3. Keuangan & Laba Rugi Saku (Retensi)',
     icon: '💰'
   },
-  marketing: {
-    id: 'marketing',
-    title: 'Pemasaran & Promosi Digital',
-    icon: '📢'
-  },
-  consulting: {
-    id: 'consulting',
-    title: 'Pendampingan & Ekosistem',
-    icon: '📊'
+  deferred_v2: {
+    id: 'deferred_v2',
+    title: 'Modul Lanjutan (Ditunda v2.0)',
+    icon: '⏳'
   },
   education_admin: {
     id: 'education_admin',
-    title: 'Edukasi & Administrasi System',
+    title: 'Edukasi & Admin System',
     icon: '🎓'
   }
 };
 
 const NAVIGATION_MENU = [
-  // 1. Store Operations (POS, QRIS, Inventory, Staff)
-  {
-    id: 'pos_instant',
-    title: 'Mesin Kasir & QRIS Kasir',
-    category: 'store_operations',
-    tabId: 'pos-tab',
-    path: '/dashboard#pos-tab',
-    icon: '📱',
-    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'CASHIER', 'SUPER_ADMIN'],
-    allowedTiers: ['FREE', 'PREMIUM'],
-    badgeLabel: 'Kasir & QRIS'
-  },
-  {
-    id: 'inventory_stok_bon',
-    title: 'Stok, Bon & Supplier Order',
-    category: 'store_operations',
-    tabId: 'inventory-tab',
-    path: '/dashboard#inventory-tab',
-    icon: '📦',
-    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'CASHIER', 'SUPER_ADMIN'],
-    allowedTiers: ['FREE', 'PREMIUM']
-  },
-  {
-    id: 'staff_management',
-    title: 'Manajemen Anak Buah (Kasir)',
-    category: 'store_operations',
-    tabId: 'staff-tab',
-    path: '/dashboard#staff-tab',
-    icon: '👥',
-    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'SUPER_ADMIN'],
-    allowedTiers: ['FREE', 'PREMIUM'],
-    badgeLabel: 'Hak Akses Staf'
-  },
-
-  // 2. Finance (Cashflow & P&L Saku)
-  {
-    id: 'cashflow_pnl',
-    title: 'Cashflow & P&L Saku',
-    category: 'finance',
-    tabId: 'cashflow-tab',
-    path: '/dashboard#cashflow-tab',
-    icon: '💰',
-    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'SUPER_ADMIN'],
-    allowedTiers: ['FREE', 'PREMIUM'],
-    badgeLabel: 'Laba Rugi 1-Klik'
-  },
-
-  // 3. Marketing (G-Maps, Web Builder, WA Loyalty, AI Promo)
-  {
-    id: 'gmaps_review',
-    title: 'Google Maps & AI Review',
-    category: 'marketing',
-    tabId: 'gmaps-tab',
-    path: '/dashboard#gmaps-tab',
-    icon: '📍',
-    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'FIELD_AGENT', 'SUPER_ADMIN'],
-    allowedTiers: ['FREE', 'PREMIUM']
-  },
-  {
-    id: 'landing_builder',
-    title: 'Builder Website Sementara',
-    category: 'marketing',
-    tabId: 'landing-tab',
-    path: '/dashboard#landing-tab',
-    icon: '🌐',
-    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'FIELD_AGENT', 'SUPER_ADMIN'],
-    allowedTiers: ['FREE', 'PREMIUM']
-  },
-  {
-    id: 'wa_loyalty',
-    title: 'Smart WA Broadcast & Loyalty',
-    category: 'marketing',
-    tabId: 'loyalty-tab',
-    path: '/dashboard#loyalty-tab',
-    icon: '📢',
-    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'SUPER_ADMIN'],
-    allowedTiers: ['FREE', 'PREMIUM']
-  },
-  {
-    id: 'ai_copywriting',
-    title: 'AI Promo Generator & Poster',
-    category: 'marketing',
-    tabId: 'copywriting-tab',
-    path: '/dashboard#copywriting-tab',
-    icon: '✍️',
-    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'SUPER_ADMIN'],
-    allowedTiers: ['FREE', 'PREMIUM']
-  },
-
-  // 4. Consulting & Field Ecosystem (Audit, Kit, Tickets, Marketplace)
+  // Core Hook 1: Lead Magnet, Google Maps & Website Toko Instan (V1)
   {
     id: 'audit_kit',
     title: 'Health Check & Action Kit',
-    category: 'consulting',
+    category: 'core_hook_1',
     tabId: 'audit-tab',
     path: '/dashboard#audit-tab',
     icon: '📊',
     allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'FIELD_AGENT', 'SUPER_ADMIN'],
     allowedTiers: ['FREE', 'PREMIUM'],
-    badgeLabel: 'Diagnosis 5 Menit'
+    badgeLabel: 'Diagnosis 5 Menit',
+    isCoreHook: true
+  },
+  {
+    id: 'gmaps_review',
+    title: 'Google Maps & Standee QR Review',
+    category: 'core_hook_1',
+    tabId: 'gmaps-tab',
+    path: '/dashboard#gmaps-tab',
+    icon: '📍',
+    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'FIELD_AGENT', 'SUPER_ADMIN'],
+    allowedTiers: ['FREE', 'PREMIUM'],
+    badgeLabel: 'Google Maps',
+    isCoreHook: true
+  },
+  {
+    id: 'landing_builder',
+    title: 'Website Toko Instan (/toko/:slug)',
+    category: 'core_hook_1',
+    tabId: 'landing-tab',
+    path: '/dashboard#landing-tab',
+    icon: '🌐',
+    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'FIELD_AGENT', 'SUPER_ADMIN'],
+    allowedTiers: ['FREE', 'PREMIUM'],
+    badgeLabel: 'Web Toko (V1)',
+    isCoreHook: true
+  },
+
+  // Core Hook 2: POS Instant, QRIS Dynamic & Staff Assignment (V1)
+  {
+    id: 'pos_instant',
+    title: 'Mesin Kasir & QRIS Kasir',
+    category: 'core_hook_2',
+    tabId: 'pos-tab',
+    path: '/dashboard#pos-tab',
+    icon: '📱',
+    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'CASHIER', 'SUPER_ADMIN'],
+    allowedTiers: ['FREE', 'PREMIUM'],
+    badgeLabel: 'Kasir & QRIS',
+    isCoreHook: true
+  },
+  {
+    id: 'staff_management',
+    title: 'Manajemen Staf Kasir Toko',
+    category: 'core_hook_2',
+    tabId: 'staff-tab',
+    path: '/dashboard#staff-tab',
+    icon: '👥',
+    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'SUPER_ADMIN'],
+    allowedTiers: ['FREE', 'PREMIUM'],
+    badgeLabel: 'Hak Akses Staf',
+    isCoreHook: true
+  },
+
+  // Core Hook 3: Cashflow, P&L Saku, Jasa Pendampingan & Rute Agen (V1)
+  {
+    id: 'cashflow_pnl',
+    title: 'Cashflow & P&L Saku',
+    category: 'core_hook_3',
+    tabId: 'cashflow-tab',
+    path: '/dashboard#cashflow-tab',
+    icon: '💰',
+    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'SUPER_ADMIN'],
+    allowedTiers: ['FREE', 'PREMIUM'],
+    badgeLabel: 'Laba Rugi 1-Klik',
+    isCoreHook: true
   },
   {
     id: 'consultation_services',
-    title: 'Jasa Pendampingan & Tiket',
-    category: 'consulting',
+    title: 'Jasa Pendampingan Lapangan',
+    category: 'core_hook_3',
     tabId: 'services-tab',
     path: '/dashboard#services-tab',
     icon: '🛠️',
     allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'FIELD_AGENT', 'SUPER_ADMIN'],
-    allowedTiers: ['FREE', 'PREMIUM']
+    allowedTiers: ['FREE', 'PREMIUM'],
+    badgeLabel: 'Jasa Field (V1)',
+    isCoreHook: true
   },
   {
     id: 'field_geotag_dispatch',
-    title: 'Smart Route & Geotag Agent',
-    category: 'consulting',
+    title: 'Pusat Rute Agen Lapangan',
+    category: 'core_hook_3',
     tabId: 'services-tab',
     path: '/dashboard#services-tab',
     icon: '🚴',
     allowedRoles: ['FIELD_AGENT', 'SUPER_ADMIN'],
     allowedTiers: ['FREE', 'PREMIUM'],
-    badgeLabel: 'Khusus Agen'
+    badgeLabel: 'Rute Agen (V1)',
+    isCoreHook: true
+  },
+
+  // Deferred Modules V2 (TUNDA UNTUK V2 - SUPER ADMIN ONLY)
+  {
+    id: 'wa_loyalty',
+    title: 'Smart WA Broadcast & Loyalty',
+    category: 'deferred_v2',
+    tabId: 'loyalty-tab',
+    path: '/dashboard#loyalty-tab',
+    icon: '📢',
+    allowedRoles: ['SUPER_ADMIN'],
+    allowedTiers: ['FREE', 'PREMIUM'],
+    badgeLabel: 'Ditunda v2.0',
+    is_deferred: true
+  },
+  {
+    id: 'ai_copywriting',
+    title: 'AI Promo & Poster Generator',
+    category: 'deferred_v2',
+    tabId: 'copywriting-tab',
+    path: '/dashboard#copywriting-tab',
+    icon: '✍️',
+    allowedRoles: ['SUPER_ADMIN'],
+    allowedTiers: ['FREE', 'PREMIUM'],
+    badgeLabel: 'Ditunda v2.0',
+    is_deferred: true
+  },
+  {
+    id: 'inventory_stok_bon',
+    title: 'Stok, Bon & Supplier Engine',
+    category: 'deferred_v2',
+    tabId: 'inventory-tab',
+    path: '/dashboard#inventory-tab',
+    icon: '📦',
+    allowedRoles: ['SUPER_ADMIN'],
+    allowedTiers: ['FREE', 'PREMIUM'],
+    badgeLabel: 'Ditunda v2.0',
+    is_deferred: true
   },
   {
     id: 'marketplace_community',
     title: 'Marketplace Usaha & Komunitas',
-    category: 'consulting',
+    category: 'deferred_v2',
     tabId: 'landing-tab',
     path: '/dashboard#landing-tab',
     icon: '🏪',
-    allowedRoles: ['UMKM_OWNER_FREE', 'UMKM_OWNER_PREMIUM', 'FIELD_AGENT', 'SUPER_ADMIN'],
-    allowedTiers: ['FREE', 'PREMIUM']
+    allowedRoles: ['SUPER_ADMIN'],
+    allowedTiers: ['FREE', 'PREMIUM'],
+    badgeLabel: 'Ditunda v2.0',
+    is_deferred: true
   },
 
-  // 5. Education & Admin (Courses, System Docs)
+  // Education & Admin (Support Modules)
   {
     id: 'micro_course',
     title: 'Video Micro-Course Edukasi',
@@ -205,17 +224,19 @@ function resolveNavigationMenu(userRole, userTier) {
     max_landing_pages: 1,
     video_access_tier: 'BASIC',
     can_access_cashflow_export: true,
-    can_generate_ai_poster: true
+    can_generate_ai_poster: false, // Deferred in MVP
+    supplier_engine_active: false // Deferred in MVP
   };
 
   if (role === 'UMKM_OWNER_PREMIUM') {
     metadata = {
-      staff_limit: 5, // Default Premium Quota: 5 Staff (Extra staff requires Add-On)
+      staff_limit: 5,
       qris_type: 'DYNAMIC',
-      max_landing_pages: -1, // Unlimited
+      max_landing_pages: -1,
       video_access_tier: 'ALL',
       can_access_cashflow_export: true,
-      can_generate_ai_poster: true
+      can_generate_ai_poster: false,
+      supplier_engine_active: false
     };
   } else if (role === 'SUPER_ADMIN') {
     metadata = {
@@ -224,7 +245,8 @@ function resolveNavigationMenu(userRole, userTier) {
       max_landing_pages: -1,
       video_access_tier: 'ALL',
       can_access_cashflow_export: true,
-      can_generate_ai_poster: true
+      can_generate_ai_poster: true,
+      supplier_engine_active: true
     };
   } else if (role === 'CASHIER') {
     metadata = {
@@ -233,7 +255,8 @@ function resolveNavigationMenu(userRole, userTier) {
       max_landing_pages: 0,
       video_access_tier: 'BASIC',
       can_access_cashflow_export: false,
-      can_generate_ai_poster: false
+      can_generate_ai_poster: false,
+      supplier_engine_active: false
     };
   } else if (role === 'FIELD_AGENT') {
     metadata = {
@@ -242,7 +265,8 @@ function resolveNavigationMenu(userRole, userTier) {
       max_landing_pages: 0,
       video_access_tier: 'ALL',
       can_access_cashflow_export: false,
-      can_generate_ai_poster: false
+      can_generate_ai_poster: false,
+      supplier_engine_active: false
     };
   }
 
